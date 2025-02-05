@@ -47,8 +47,8 @@ func main() {
 	})
 
 	for {
-		res := resp.NewResp(conn)
-		value, err := res.Read()
+		reader := resp.NewReader(conn)
+		value, err := reader.Read()
 		if err != nil {
 			log.Print(err)
 			return
