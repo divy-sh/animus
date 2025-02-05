@@ -1,36 +1,86 @@
 package main
 
 import (
-	"io"
 	"log"
 	"net"
-	"os"
+	"strings"
+
+	"github.com/divy-sh/animus/commands"
+	"github.com/divy-sh/animus/resp"
 )
 
 func main() {
-	log.Println("listening on port:6379")
-	listener, err := net.Listen("tcp", ":6379")
+	log.Print("Listening on port :6379")
+
+	// Create a new server
+	l, err := net.Listen("tcp", ":6379")
 	if err != nil {
-		log.Println(err)
+		log.Print(err)
 		return
 	}
-	conn, err := listener.Accept()
+
+	aof, err := NewAof("database.aof")
 	if err != nil {
-		log.Println(err)
+		log.Print(err)
 		return
 	}
+	defer aof.Close()
+
+	// Listen for connections
+	conn, err := l.Accept()
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
 	defer conn.Close()
 
-	for {
-		buf := make([]byte, 1024)
-		_, err := conn.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			log.Println(err)
-			os.Exit(1)
+	aof.Read(func(value resp.Value) {
+		command := strings.ToUpper(value.Array[0].Bulk)
+		args := value.Array[1:]
+
+		handler, ok := commands.Handlers[command]
+		if !ok {
+			log.Print("Invalid command: ", command)
 		}
-		conn.Write([]byte("+OK\r\n"))
+		handler(args)
+	})
+
+	for {
+		res := resp.NewResp(conn)
+		value, err := res.Read()
+		if err != nil {
+			log.Print(err)
+			return
+		}
+
+		if value.Typ != "array" {
+			log.Print("Invalid request, expected array")
+			continue
+		}
+
+		if len(value.Array) == 0 {
+			log.Print("Invalid request, expected array length > 0")
+			continue
+		}
+
+		command := strings.ToUpper(value.Array[0].Bulk)
+		args := value.Array[1:]
+
+		writer := resp.NewWriter(conn)
+
+		handler, ok := commands.Handlers[command]
+		if !ok {
+			log.Print("Invalid command: ", command)
+			writer.Write(resp.Value{Typ: "string", Str: ""})
+			continue
+		}
+
+		if command == "SET" || command == "HSET" {
+			aof.Write(value)
+		}
+
+		result := handler(args)
+		writer.Write(result)
 	}
 }
