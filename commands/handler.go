@@ -14,6 +14,7 @@ var Handlers = map[string]func([]resp.Value) resp.Value{
 	"DECR":   decr,
 	"DECRBY": decrby,
 	"GET":    get,
+	"GETDEL": getdel,
 	"SET":    set,
 
 	// hash commands
