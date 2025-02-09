@@ -87,6 +87,21 @@ func get(args []resp.Value) resp.Value {
 	return resp.Value{Typ: "bulk", Bulk: value}
 }
 
+func getdel(args []resp.Value) resp.Value {
+	if len(args) != 1 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'get' command"}
+	}
+	key := args[0].Bulk
+	SETsMu.RLock()
+	value, ok := SETs[key]
+	delete(SETs, key)
+	SETsMu.RUnlock()
+	if !ok {
+		return resp.Value{Typ: "null"}
+	}
+	return resp.Value{Typ: "bulk", Bulk: value}
+}
+
 func set(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
