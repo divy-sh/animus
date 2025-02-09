@@ -4,10 +4,19 @@ import (
 	"github.com/divy-sh/animus/resp"
 )
 
+/* All supported commands, grouped by command group, sorted alphabetically */
 var Handlers = map[string]func([]resp.Value) resp.Value{
+	// ping commands
 	"PING": ping,
-	"SET":  set,
-	"GET":  get,
+
+	// string commands
+	"APPEND": append,
+	"DECR":   decr,
+	"DECRBY": decrby,
+	"GET":    get,
+	"SET":    set,
+
+	// hash commands
 	"HSET": hset,
 	"HGET": hget,
 }
