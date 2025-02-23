@@ -1,29 +1,18 @@
 package commands
 
 import (
-	"sync"
-
 	"github.com/divy-sh/animus/resp"
+	"github.com/divy-sh/animus/types"
 )
 
-var HSETs = map[string]map[string]string{}
-var HSETsMu = sync.RWMutex{}
+var hashTypes = types.NewHashType()
 
 func hset(args []resp.Value) resp.Value {
 	if len(args) != 3 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'hset' command"}
 	}
 
-	hash := args[0].Bulk
-	key := args[1].Bulk
-	value := args[2].Bulk
-
-	HSETsMu.Lock()
-	if _, ok := HSETs[hash]; !ok {
-		HSETs[hash] = map[string]string{}
-	}
-	HSETs[hash][key] = value
-	HSETsMu.Unlock()
+	hashTypes.HSet(args[0].Bulk, args[1].Bulk, args[2].Bulk)
 	return resp.Value{Typ: "string", Str: "OK"}
 }
 
@@ -32,16 +21,9 @@ func hget(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'hget' command"}
 	}
 
-	hash := args[0].Bulk
-	key := args[1].Bulk
-
-	HSETsMu.RLock()
-	value, ok := HSETs[hash][key]
-	HSETsMu.RUnlock()
-
-	if !ok {
+	value, err := hashTypes.HGet(args[0].Bulk, args[1].Bulk)
+	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
-
 	return resp.Value{Typ: "bulk", Bulk: value}
 }
