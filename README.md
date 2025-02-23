@@ -6,13 +6,13 @@ I am actively working on the initial stages of this project.
 
 - PING
 
-- GET, SET
+- APPEND, DECR, DECRBY, GET, GETDEL, SET
 
 - HGET, HSET
 
 # Roadmap
 
-- Expiry mechanism (EXPIRE, TTL)
+- Expiry mechanism (EXPIRE, TTL), (implemented for string type)
 
 - Support for advanced data structures (Lists, Sets, Hashes)
 
