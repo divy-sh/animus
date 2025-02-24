@@ -2,6 +2,7 @@ package store
 
 import (
 	"container/list"
+	"fmt"
 	"sync"
 	"time"
 
@@ -54,6 +55,7 @@ func (s *Store) Get(key interface{}) (interface{}, bool) {
 		s.evictWithKey(key)
 		return nil, false
 	}
+	fmt.Println(node.Value.(*DataNode).ttl, time.Now())
 	s.queue.MoveToFront(node)
 	return node.Value.(*DataNode).data, true
 }
@@ -65,7 +67,9 @@ func (s *Store) Set(key interface{}, value interface{}, ttl time.Time) {
 	node, found := s.dict[key]
 	if found {
 		node.Value.(*DataNode).data = value
+		node.Value.(*DataNode).ttl = ttl
 		s.queue.MoveToFront(node)
+		s.expTree.Delete(&BTreeItem{ttl: node.Value.(*DataNode).ttl, key: key})
 		s.expTree.ReplaceOrInsert(&BTreeItem{ttl, key})
 		return
 	} else {

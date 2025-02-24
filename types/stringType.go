@@ -66,6 +66,19 @@ func (s *StringType) GetDel(key string) (string, error) {
 	return val.(string), nil
 }
 
+func (s *StringType) GetEx(key, exp string) (string, error) {
+	val, ok := s.strs.Get(key)
+	if !ok {
+		return "", errors.New("ERR key not found, or expired")
+	}
+	expSeconds, err := strconv.ParseInt(exp, 10, 64)
+	if err != nil {
+		return "", errors.New("ERR invalid expire time")
+	}
+	s.strs.Set(key, val, time.Now().Add(time.Duration(expSeconds)*time.Second))
+	return val.(string), nil
+}
+
 func (s *StringType) Set(key, value string) {
 	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
 }

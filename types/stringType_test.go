@@ -2,6 +2,7 @@ package types
 
 import (
 	"testing"
+	"time"
 )
 
 func TestSetAndGet(t *testing.T) {
@@ -34,6 +35,21 @@ func TestGetDel(t *testing.T) {
 		t.Errorf("Expected value1, got %v, err: %v", val, err)
 	}
 
+	_, err = strType.Get("key1")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestGetEx(t *testing.T) {
+	strType := NewStringType()
+	strType.Set("key1", "value1")
+
+	val, err := strType.GetEx("key1", "0")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected value1, got %v, err: %v", val, err)
+	}
+	time.Sleep(50 * time.Millisecond)
 	_, err = strType.Get("key1")
 	if err == nil {
 		t.Errorf("Expected error for deleted key, but got none")
