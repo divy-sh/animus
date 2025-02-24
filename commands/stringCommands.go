@@ -61,6 +61,17 @@ func getdel(args []resp.Value) resp.Value {
 	return resp.Value{Typ: "bulk", Bulk: value}
 }
 
+func getex(args []resp.Value) resp.Value {
+	if len(args) != 2 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getdel' command"}
+	}
+	value, err := stringType.GetEx(args[0].Bulk, args[1].Bulk)
+	if err != nil {
+		return resp.Value{Typ: "null"}
+	}
+	return resp.Value{Typ: "bulk", Bulk: value}
+}
+
 func set(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
