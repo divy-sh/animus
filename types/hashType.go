@@ -2,49 +2,38 @@ package types
 
 import (
 	"errors"
-	"sync"
+	"time"
+
+	"github.com/divy-sh/animus/store"
 )
 
 type HashType struct {
-	hashes  map[string]map[string]string
-	muLock  sync.RWMutex
-	expiry  Expiry
-	maxKeys int
+	hashes store.Store
 }
 
 func NewHashType() *HashType {
 	return &HashType{
-		hashes:  make(map[string]map[string]string),
-		muLock:  sync.RWMutex{},
-		expiry:  NewExpiry(),
-		maxKeys: 1000,
+		hashes: *store.NewStore(),
 	}
 }
 
 func (h *HashType) HGet(hash, key string) (string, error) {
-	h.muLock.RLock()
-	value, ok := h.hashes[hash][key]
+	value, ok := h.hashes.Get(hash)
 	if !ok {
 		return "", errors.New("ERR not found")
 	}
-	h.muLock.RUnlock()
-	h.muLock.Lock()
-	h.expiry.updateLRU(hash)
-	key, ok = h.expiry.lazyEvict()
-	if ok {
-		delete(h.hashes, key)
+	if val, ok := value.(map[interface{}]interface{})[key]; ok {
+		return val.(string), nil
 	}
-	h.muLock.Unlock()
-	return value, nil
+	return "", errors.New("ERR not found")
 }
 
 func (h *HashType) HSet(hash, key, value string) {
-	h.muLock.Lock()
-	h.hashes[hash][key] = value
-	h.expiry.updateLRU(key)
-	hash, ok := h.expiry.lazyEvict()
+	hashVal, ok := h.hashes.Get(key)
 	if ok {
-		delete(h.hashes, hash)
+		hashVal.(map[interface{}]interface{})[key] = value
+	} else {
+		hashVal = map[interface{}]interface{}{key: value}
 	}
-	h.muLock.Unlock()
+	h.hashes.Set(hash, hashVal, time.Now().AddDate(1000, 0, 0))
 }

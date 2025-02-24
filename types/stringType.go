@@ -4,111 +4,68 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"sync"
+	"time"
+
+	"github.com/divy-sh/animus/store"
 )
 
 type StringType struct {
-	strings map[string]string
-	muLock  sync.RWMutex
-	expiry  Expiry
+	strs store.Store
 }
 
 func NewStringType() *StringType {
 	return &StringType{
-		strings: make(map[string]string),
-		expiry:  NewExpiry(),
-		muLock:  sync.RWMutex{},
+		strs: *store.NewStore(),
 	}
-
 }
 
 // public functions
 func (s *StringType) Append(key, value string) {
-	s.muLock.Lock()
-	s.strings[key] += value
-	s.expiry.updateLRU(key)
-	s.muLock.Unlock()
+	val, ok := s.strs.Get(key)
+	if !ok {
+		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+	}
+	s.strs.Set(key, val.(string)+value, time.Now().AddDate(1000, 0, 0))
 }
 
 func (s *StringType) Decr(key string) error {
-	s.muLock.Lock()
-	if val, ok := s.strings[key]; ok {
-		val, err := strconv.ParseInt(val, 10, 32)
-		if err != nil {
-			return errors.New("ERR cannot decrement a non integer value")
-		}
-		s.strings[key] = fmt.Sprint(val - 1)
-		s.expiry.updateLRU(key)
-	} else {
-		s.strings[key] = "0"
-		s.expiry.updateLRU(key)
-	}
-	s.muLock.Unlock()
-	return nil
+	return s.DecrBy(key, "1")
 }
 
 func (s *StringType) DecrBy(key, value string) error {
-	decrVal, err := strconv.ParseInt(value, 10, 32)
+	val, ok := s.strs.Get(key)
+	if !ok {
+		s.strs.Set(key, "-1", time.Now().AddDate(1000, 0, 0))
+	}
+	decrVal, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return errors.New("ERR invalid decrement value")
 	}
-
-	s.muLock.Lock()
-	if val, ok := s.strings[key]; ok {
-		val, err := strconv.ParseInt(val, 10, 32)
-		if err != nil {
-			return errors.New("ERR cannot decrement a non integer value")
-		}
-		s.strings[key] = fmt.Sprint(val - decrVal)
-	} else {
-		s.strings[key] = "0"
+	intVal, err := strconv.ParseInt(val.(string), 10, 64)
+	if err != nil {
+		return errors.New("ERR value is not an integer or out of range")
 	}
-	s.expiry.updateLRU(key)
-	s.muLock.Unlock()
+	s.strs.Set(key, fmt.Sprint(intVal-decrVal), time.Now().AddDate(1000, 0, 0))
 	return nil
 }
 
 func (s *StringType) Get(key string) (string, error) {
-	s.muLock.RLock()
-	value, ok := s.strings[key]
-	s.muLock.RUnlock()
+	val, ok := s.strs.Get(key)
 	if !ok {
-		return "", errors.New("ERR not found")
+		return "", errors.New("ERR key not found, or expired")
 	}
-	s.muLock.Lock()
-	s.expiry.updateLRU(key)
-	key, ok = s.expiry.lazyEvict()
-	if ok {
-		delete(s.strings, key)
-	}
-	s.muLock.Unlock()
-	return value, nil
+	return val.(string), nil
 }
 
 func (s *StringType) GetDel(key string) (string, error) {
-	s.muLock.Lock()
-	value := s.strings[key]
-	delete(s.strings, key)
-	s.expiry.removeTTL(key)
-	s.expiry.removeLRU(key)
-	key, ok := s.expiry.lazyEvict()
-	if ok {
-		delete(s.strings, key)
-	}
-	s.muLock.Unlock()
+	val, ok := s.strs.Get(key)
 	if !ok {
-		return "", errors.New("ERR not found")
+		return "", errors.New("ERR key not found, or expired")
 	}
-	return value, nil
+	s.strs.DeleteWithKey(key)
+	return val.(string), nil
 }
 
 func (s *StringType) Set(key, value string) {
-	s.muLock.Lock()
-	s.strings[key] = value
-	s.expiry.updateLRU(key)
-	key, ok := s.expiry.lazyEvict()
-	if ok {
-		delete(s.strings, key)
-	}
-	s.muLock.Unlock()
+	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
 }

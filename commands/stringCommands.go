@@ -17,7 +17,7 @@ func append(args []resp.Value) resp.Value {
 
 func decr(args []resp.Value) resp.Value {
 	if len(args) != 1 {
-		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'get' command"}
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'decr' command"}
 	}
 	err := stringType.Decr(args[0].Bulk)
 	if err != nil {
@@ -52,7 +52,7 @@ func get(args []resp.Value) resp.Value {
 
 func getdel(args []resp.Value) resp.Value {
 	if len(args) != 1 {
-		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'get' command"}
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getdel' command"}
 	}
 	value, err := stringType.GetDel(args[0].Bulk)
 	if err != nil {
