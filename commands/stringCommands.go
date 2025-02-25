@@ -63,9 +63,20 @@ func getdel(args []resp.Value) resp.Value {
 
 func getex(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getdel' command"}
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getex' command"}
 	}
 	value, err := stringType.GetEx(args[0].Bulk, args[1].Bulk)
+	if err != nil {
+		return resp.Value{Typ: "null"}
+	}
+	return resp.Value{Typ: "bulk", Bulk: value}
+}
+
+func getrange(args []resp.Value) resp.Value {
+	if len(args) != 3 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getrange' command"}
+	}
+	value, err := stringType.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}

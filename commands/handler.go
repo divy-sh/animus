@@ -10,13 +10,14 @@ var Handlers = map[string]func([]resp.Value) resp.Value{
 	"PING": ping,
 
 	// string commands
-	"APPEND": append,
-	"DECR":   decr,
-	"DECRBY": decrby,
-	"GET":    get,
-	"GETDEL": getdel,
-	"GETEX":  getex,
-	"SET":    set,
+	"APPEND":   append,
+	"DECR":     decr,
+	"DECRBY":   decrby,
+	"GET":      get,
+	"GETDEL":   getdel,
+	"GETEX":    getex,
+	"GETRANGE": getrange,
+	"SET":      set,
 
 	// hash commands
 	"HSET": hset,
