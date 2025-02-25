@@ -6,7 +6,7 @@ I am actively working on the initial stages of this project.
 
 - PING
 
-- APPEND, DECR, DECRBY, GET, GETDEL, SET
+- APPEND, DECR, DECRBY, GET, GETDEL, GETEX, GETRANGE, SET
 
 - HGET, HSET
 
