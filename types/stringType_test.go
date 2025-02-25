@@ -1,6 +1,7 @@
 package types
 
 import (
+	"errors"
 	"testing"
 	"time"
 )
@@ -53,6 +54,42 @@ func TestGetEx(t *testing.T) {
 	_, err = strType.Get("key1")
 	if err == nil {
 		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestGetRange(t *testing.T) {
+	// Create a StringType instance and populate it
+	strType := NewStringType()
+	strType.Set("hello", "Hello, World!")
+	strType.Set("empty", "")
+
+	tests := []struct {
+		key      string
+		start    string
+		end      string
+		expected string
+		err      error
+	}{
+		{"hello", "0", "4", "Hello", nil},                                      // Normal range
+		{"hello", "-6", "-1", "World!", nil},                                   // Negative index wraparound
+		{"hello", "7", "11", "World", nil},                                     // Extract "World"
+		{"hello", "0", "50", "Hello, World", nil},                              // End index exceeds length
+		{"hello", "-50", "4", "llo", nil},                                      // Start index negative out of bounds
+		{"unknown", "0", "2", "", errors.New("ERR key not found, or expired")}, // Key not found
+	}
+
+	for _, tt := range tests {
+		result, err := strType.GetRange(tt.key, tt.start, tt.end)
+
+		// Check error equality
+		if (err != nil && tt.err == nil) || (err == nil && tt.err != nil) || (err != nil && tt.err != nil && err.Error() != tt.err.Error()) {
+			t.Errorf("GetRange(%q, %q, %q) error = %v, expected %v", tt.key, tt.start, tt.end, err, tt.err)
+		}
+
+		// Check expected result
+		if result != tt.expected {
+			t.Errorf("GetRange(%q, %q, %q) = %q, expected %q", tt.key, tt.start, tt.end, result, tt.expected)
+		}
 	}
 }
 

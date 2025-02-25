@@ -79,6 +79,38 @@ func (s *StringType) GetEx(key, exp string) (string, error) {
 	return val.(string), nil
 }
 
+func (s *StringType) GetRange(key, start, end string) (string, error) {
+	val, ok := s.strs.Get(key)
+	if !ok {
+		return "", errors.New("ERR key not found, or expired")
+	}
+	str, ok := val.(string)
+	if !ok {
+		return "", errors.New("ERR value is not a string")
+	}
+	startInd, err := strconv.ParseInt(start, 10, 64)
+	if err != nil {
+		return "", errors.New("ERR invalid start index")
+	}
+	endInd, err := strconv.ParseInt(end, 10, 64)
+	if err != nil {
+		return "", errors.New("ERR invalid end index")
+	}
+	length := int64(len(str))
+	if length == 0 {
+		return "", nil
+	}
+	startInd = (startInd%length + length) % length
+	endInd = (endInd%length + length) % length
+	if end == "50" {
+		fmt.Println(startInd, endInd)
+	}
+	if startInd > endInd {
+		return "", errors.New("ERR start index greater than end index")
+	}
+	return str[startInd : endInd+1], nil
+}
+
 func (s *StringType) Set(key, value string) {
 	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
 }

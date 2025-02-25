@@ -2,7 +2,6 @@ package store
 
 import (
 	"container/list"
-	"fmt"
 	"sync"
 	"time"
 
@@ -55,7 +54,6 @@ func (s *Store) Get(key interface{}) (interface{}, bool) {
 		s.evictWithKey(key)
 		return nil, false
 	}
-	fmt.Println(node.Value.(*DataNode).ttl, time.Now())
 	s.queue.MoveToFront(node)
 	return node.Value.(*DataNode).data, true
 }
