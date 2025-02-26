@@ -24,6 +24,7 @@ func (s *StringType) Append(key, value string) {
 	val, ok := s.strs.Get(key)
 	if !ok {
 		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		return
 	}
 	s.strs.Set(key, val.(string)+value, time.Now().AddDate(1000, 0, 0))
 }
@@ -33,13 +34,14 @@ func (s *StringType) Decr(key string) error {
 }
 
 func (s *StringType) DecrBy(key, value string) error {
-	val, ok := s.strs.Get(key)
-	if !ok {
-		s.strs.Set(key, "-1", time.Now().AddDate(1000, 0, 0))
-	}
 	decrVal, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return errors.New("ERR invalid decrement value")
+	}
+	val, ok := s.strs.Get(key)
+	if !ok {
+		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		return nil
 	}
 	intVal, err := strconv.ParseInt(val.(string), 10, 64)
 	if err != nil {

@@ -1,0 +1,920 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>animus: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/divy-sh/animus/aof.go (0.0%)</option>
+				
+				<option value="file1">github.com/divy-sh/animus/commands/hashCommands.go (0.0%)</option>
+				
+				<option value="file2">github.com/divy-sh/animus/commands/pingCommands.go (0.0%)</option>
+				
+				<option value="file3">github.com/divy-sh/animus/commands/stringCommands.go (0.0%)</option>
+				
+				<option value="file4">github.com/divy-sh/animus/main.go (0.0%)</option>
+				
+				<option value="file5">github.com/divy-sh/animus/resp/reader.go (0.0%)</option>
+				
+				<option value="file6">github.com/divy-sh/animus/resp/writer.go (0.0%)</option>
+				
+				<option value="file7">github.com/divy-sh/animus/store/store.go (81.1%)</option>
+				
+				<option value="file8">github.com/divy-sh/animus/types/hashType.go (83.3%)</option>
+				
+				<option value="file9">github.com/divy-sh/animus/types/stringType.go (86.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "bufio"
+        "io"
+        "os"
+        "sync"
+        "time"
+
+        "github.com/divy-sh/animus/resp"
+)
+
+type Aof struct {
+        file *os.File
+        rd   *bufio.Reader
+        mu   sync.Mutex
+}
+
+func NewAof(path string) (*Aof, error) <span class="cov0" title="0">{
+        f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0666)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">aof := &amp;Aof{
+                file: f,
+                rd:   bufio.NewReader(f),
+        }
+
+        // Start a goroutine to sync AOF to disk every 1 second
+        go func() </span><span class="cov0" title="0">{
+                for </span><span class="cov0" title="0">{
+                        aof.mu.Lock()
+
+                        aof.file.Sync()
+
+                        aof.mu.Unlock()
+
+                        time.Sleep(time.Second * 30)
+                }</span>
+        }()
+
+        <span class="cov0" title="0">return aof, nil</span>
+}
+
+func (aof *Aof) Close() error <span class="cov0" title="0">{
+        aof.mu.Lock()
+        defer aof.mu.Unlock()
+
+        return aof.file.Close()
+}</span>
+
+func (aof *Aof) Write(value resp.Value) error <span class="cov0" title="0">{
+        aof.mu.Lock()
+        defer aof.mu.Unlock()
+
+        _, err := aof.file.Write(value.Marshal())
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (aof *Aof) Read(callback func(value resp.Value)) error <span class="cov0" title="0">{
+        aof.mu.Lock()
+        defer aof.mu.Unlock()
+
+        reader := resp.NewReader(aof.file)
+
+        for </span><span class="cov0" title="0">{
+                value, err := reader.Read()
+                if err != nil </span><span class="cov0" title="0">{
+                        if err == io.EOF </span><span class="cov0" title="0">{
+                                break</span>
+                        }
+                        <span class="cov0" title="0">return err</span>
+                }
+                <span class="cov0" title="0">callback(value)</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package commands
+
+import (
+        "github.com/divy-sh/animus/resp"
+        "github.com/divy-sh/animus/types"
+)
+
+var hashTypes = types.NewHashType()
+
+func hset(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 3 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'hset' command"}
+        }</span>
+
+        <span class="cov0" title="0">hashTypes.HSet(args[0].Bulk, args[1].Bulk, args[2].Bulk)
+        return resp.Value{Typ: "string", Str: "OK"}</span>
+}
+
+func hget(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 2 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'hget' command"}
+        }</span>
+
+        <span class="cov0" title="0">value, err := hashTypes.HGet(args[0].Bulk, args[1].Bulk)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "null"}
+        }</span>
+        <span class="cov0" title="0">return resp.Value{Typ: "bulk", Bulk: value}</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package commands
+
+import "github.com/divy-sh/animus/resp"
+
+func ping(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) == 0 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "string", Str: "PONG"}
+        }</span>
+
+        <span class="cov0" title="0">return resp.Value{Typ: "string", Str: args[0].Bulk}</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package commands
+
+import (
+        "github.com/divy-sh/animus/resp"
+        "github.com/divy-sh/animus/types"
+)
+
+var stringType = types.NewStringType()
+
+func append(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 2 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'append' command"}
+        }</span>
+        <span class="cov0" title="0">stringType.Append(args[0].Bulk, args[1].Bulk)
+        return resp.Value{Typ: "string", Str: "OK"}</span>
+}
+
+func decr(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 1 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'decr' command"}
+        }</span>
+        <span class="cov0" title="0">err := stringType.Decr(args[0].Bulk)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: err.Error()}
+        }</span>
+        <span class="cov0" title="0">return resp.Value{Typ: "string", Str: "OK"}</span>
+}
+
+func decrby(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 2 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
+        }</span>
+
+        <span class="cov0" title="0">err := stringType.DecrBy(args[0].Bulk, args[1].Bulk)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: err.Error()}
+        }</span>
+
+        <span class="cov0" title="0">return resp.Value{Typ: "string", Str: "OK"}</span>
+}
+
+func get(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 1 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'get' command"}
+        }</span>
+        <span class="cov0" title="0">value, err := stringType.Get(args[0].Bulk)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "null"}
+        }</span>
+        <span class="cov0" title="0">return resp.Value{Typ: "bulk", Bulk: value}</span>
+}
+
+func getdel(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 1 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getdel' command"}
+        }</span>
+        <span class="cov0" title="0">value, err := stringType.GetDel(args[0].Bulk)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "null"}
+        }</span>
+        <span class="cov0" title="0">return resp.Value{Typ: "bulk", Bulk: value}</span>
+}
+
+func getex(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 2 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getex' command"}
+        }</span>
+        <span class="cov0" title="0">value, err := stringType.GetEx(args[0].Bulk, args[1].Bulk)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "null"}
+        }</span>
+        <span class="cov0" title="0">return resp.Value{Typ: "bulk", Bulk: value}</span>
+}
+
+func getrange(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 3 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getrange' command"}
+        }</span>
+        <span class="cov0" title="0">value, err := stringType.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
+        if err != nil </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "null"}
+        }</span>
+        <span class="cov0" title="0">return resp.Value{Typ: "bulk", Bulk: value}</span>
+}
+
+func set(args []resp.Value) resp.Value <span class="cov0" title="0">{
+        if len(args) != 2 </span><span class="cov0" title="0">{
+                return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
+        }</span>
+
+        <span class="cov0" title="0">stringType.Set(args[0].Bulk, args[1].Bulk)
+        return resp.Value{Typ: "string", Str: "OK"}</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package main
+
+import (
+        "log"
+        "net"
+        "strings"
+
+        "github.com/divy-sh/animus/commands"
+        "github.com/divy-sh/animus/resp"
+)
+
+func main() <span class="cov0" title="0">{
+        log.Print("Listening on port :6379")
+
+        // Create a new server
+        l, err := net.Listen("tcp", ":6379")
+        if err != nil </span><span class="cov0" title="0">{
+                log.Print(err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">aof, err := NewAof("database.aof")
+        if err != nil </span><span class="cov0" title="0">{
+                log.Print(err)
+                return
+        }</span>
+        <span class="cov0" title="0">defer aof.Close()
+
+        // Listen for connections
+        conn, err := l.Accept()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Print(err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">defer conn.Close()
+
+        aof.Read(func(value resp.Value) </span><span class="cov0" title="0">{
+                command := strings.ToUpper(value.Array[0].Bulk)
+                args := value.Array[1:]
+
+                handler, ok := commands.Handlers[command]
+                if !ok </span><span class="cov0" title="0">{
+                        log.Print("Invalid command: ", command)
+                }</span>
+                <span class="cov0" title="0">handler(args)</span>
+        })
+
+        <span class="cov0" title="0">for </span><span class="cov0" title="0">{
+                reader := resp.NewReader(conn)
+                value, err := reader.Read()
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Print(err)
+                        return
+                }</span>
+
+                <span class="cov0" title="0">if value.Typ != "array" </span><span class="cov0" title="0">{
+                        log.Print("Invalid request, expected array")
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if len(value.Array) == 0 </span><span class="cov0" title="0">{
+                        log.Print("Invalid request, expected array length &gt; 0")
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">command := strings.ToUpper(value.Array[0].Bulk)
+                args := value.Array[1:]
+
+                writer := resp.NewWriter(conn)
+
+                handler, ok := commands.Handlers[command]
+                if !ok </span><span class="cov0" title="0">{
+                        log.Print("Invalid command: ", command)
+                        writer.Write(resp.Value{Typ: "string", Str: ""})
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if command == "SET" || command == "HSET" </span><span class="cov0" title="0">{
+                        aof.Write(value)
+                }</span>
+
+                <span class="cov0" title="0">result := handler(args)
+                writer.Write(result)</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package resp
+
+import (
+        "bufio"
+        "io"
+        "log"
+        "strconv"
+)
+
+type Reader struct {
+        reader *bufio.Reader
+}
+
+func NewReader(rd io.Reader) *Reader <span class="cov0" title="0">{
+        return &amp;Reader{reader: bufio.NewReader(rd)}
+}</span>
+
+func (r *Reader) Read() (Value, error) <span class="cov0" title="0">{
+        valType, err := r.reader.ReadByte()
+        if err != nil </span><span class="cov0" title="0">{
+                return Value{}, err
+        }</span>
+        <span class="cov0" title="0">switch valType </span>{
+        case ARRAY:<span class="cov0" title="0">
+                return r.readArray()</span>
+        case BULK:<span class="cov0" title="0">
+                return r.readBulk()</span>
+        default:<span class="cov0" title="0">
+                log.Printf("Unknown type: %v", valType)
+                return Value{}, nil</span>
+        }
+}
+
+func (r *Reader) readArray() (Value, error) <span class="cov0" title="0">{
+        len, err := r.readInt()
+        if err != nil </span><span class="cov0" title="0">{
+                return Value{}, err
+        }</span>
+        <span class="cov0" title="0">v := Value{
+                Typ:   "array",
+                Array: make([]Value, len),
+        }
+        for i := 0; i &lt; len; i++ </span><span class="cov0" title="0">{
+                val, err := r.Read()
+                if err != nil </span><span class="cov0" title="0">{
+                        return v, err
+                }</span>
+                <span class="cov0" title="0">v.Array[i] = val</span>
+        }
+        <span class="cov0" title="0">return v, nil</span>
+}
+
+func (r *Reader) readBulk() (Value, error) <span class="cov0" title="0">{
+        len, err := r.readInt()
+        if err != nil </span><span class="cov0" title="0">{
+                return Value{}, err
+        }</span>
+        <span class="cov0" title="0">bulk := make([]byte, len)
+        r.reader.Read(bulk)
+        r.readLine()
+        return Value{
+                Typ:  "bulk",
+                Bulk: string(bulk),
+        }, nil</span>
+}
+
+func (r *Reader) readInt() (val int, err error) <span class="cov0" title="0">{
+        line, _, err := r.readLine()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+        <span class="cov0" title="0">i64, err := strconv.ParseInt(string(line), 10, 64)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+        <span class="cov0" title="0">return int(i64), nil</span>
+}
+
+func (r *Reader) readLine() (line []byte, n int, err error) <span class="cov0" title="0">{
+        for </span><span class="cov0" title="0">{
+                b, err := r.reader.ReadByte()
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, 0, err
+                }</span>
+                <span class="cov0" title="0">line = append(line, b)
+                if len(line) &gt; 1 &amp;&amp; line[len(line)-1] == '\n' &amp;&amp; line[len(line)-2] == '\r' </span><span class="cov0" title="0">{
+                        break</span>
+                }
+        }
+        <span class="cov0" title="0">return line[:len(line)-2], len(line), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package resp
+
+import (
+        "io"
+        "strconv"
+)
+
+type Writer struct {
+        writer io.Writer
+}
+
+func NewWriter(w io.Writer) *Writer <span class="cov0" title="0">{
+        return &amp;Writer{writer: w}
+}</span>
+
+func (v Value) Marshal() []byte <span class="cov0" title="0">{
+        switch v.Typ </span>{
+        case "array":<span class="cov0" title="0">
+                return v.marshalArray()</span>
+        case "bulk":<span class="cov0" title="0">
+                return v.marshalBulk()</span>
+        case "integer":<span class="cov0" title="0">
+                return v.marshalInt()</span>
+        case "string":<span class="cov0" title="0">
+                return v.marshalString()</span>
+        case "null":<span class="cov0" title="0">
+                return v.marshallNull()</span>
+        case "error":<span class="cov0" title="0">
+                return v.marshallError()</span>
+        default:<span class="cov0" title="0">
+                return []byte{}</span>
+        }
+}
+
+func (v Value) marshalInt() []byte <span class="cov0" title="0">{
+        var bytes []byte
+        bytes = append(bytes, INTEGER)
+        bytes = append(bytes, byte(v.Num))
+        bytes = append(bytes, '\r', '\n')
+
+        return bytes
+}</span>
+
+func (v Value) marshalString() []byte <span class="cov0" title="0">{
+        var bytes []byte
+        bytes = append(bytes, STRING)
+        bytes = append(bytes, v.Str...)
+        bytes = append(bytes, '\r', '\n')
+
+        return bytes
+}</span>
+
+func (v Value) marshalBulk() []byte <span class="cov0" title="0">{
+        var bytes []byte
+        bytes = append(bytes, BULK)
+        bytes = append(bytes, strconv.Itoa(len(v.Bulk))...)
+        bytes = append(bytes, '\r', '\n')
+        bytes = append(bytes, v.Bulk...)
+        bytes = append(bytes, '\r', '\n')
+
+        return bytes
+}</span>
+
+func (v Value) marshalArray() []byte <span class="cov0" title="0">{
+        len := len(v.Array)
+        var bytes []byte
+        bytes = append(bytes, ARRAY)
+        bytes = append(bytes, strconv.Itoa(len)...)
+        bytes = append(bytes, '\r', '\n')
+
+        for i := 0; i &lt; len; i++ </span><span class="cov0" title="0">{
+                bytes = append(bytes, v.Array[i].Marshal()...)
+        }</span>
+
+        <span class="cov0" title="0">return bytes</span>
+}
+
+func (v Value) marshallError() []byte <span class="cov0" title="0">{
+        var bytes []byte
+        bytes = append(bytes, ERROR)
+        bytes = append(bytes, v.Str...)
+        bytes = append(bytes, '\r', '\n')
+
+        return bytes
+}</span>
+
+func (v Value) marshallNull() []byte <span class="cov0" title="0">{
+        return []byte("$-1\r\n")
+}</span>
+
+func (w *Writer) Write(v Value) error <span class="cov0" title="0">{
+        var bytes = v.Marshal()
+        _, err := w.writer.Write(bytes)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package store
+
+import (
+        "container/list"
+        "sync"
+        "time"
+
+        "github.com/google/btree"
+)
+
+/* Types */
+
+type Store struct {
+        dict    map[interface{}]*list.Element
+        queue   *list.List
+        expTree *btree.BTree
+        maxSize int
+        lock    sync.RWMutex
+}
+
+type DataNode struct {
+        key  interface{}
+        data interface{}
+        ttl  time.Time
+}
+
+type BTreeItem struct {
+        ttl time.Time
+        key interface{}
+}
+
+func (a BTreeItem) Less(b btree.Item) bool <span class="cov0" title="0">{
+        return a.ttl.Before(b.(*BTreeItem).ttl)
+}</span>
+
+/* Public functions */
+
+func NewStore() *Store <span class="cov8" title="1">{
+        return &amp;Store{
+                dict:    make(map[interface{}]*list.Element),
+                queue:   list.New(),
+                expTree: btree.New(2),
+                maxSize: 100_000,
+        }
+}</span>
+
+func (s *Store) Get(key interface{}) (interface{}, bool) <span class="cov8" title="1">{
+        s.lock.Lock()
+        defer s.lock.Unlock()
+        node, found := s.dict[key]
+        if !found </span><span class="cov8" title="1">{
+                return nil, false
+        }</span> else<span class="cov8" title="1"> if node.Value.(*DataNode).ttl.Before(time.Now()) </span><span class="cov8" title="1">{
+                s.evictWithKey(key)
+                return nil, false
+        }</span>
+        <span class="cov8" title="1">s.queue.MoveToFront(node)
+        return node.Value.(*DataNode).data, true</span>
+}
+
+func (s *Store) Set(key interface{}, value interface{}, ttl time.Time) <span class="cov8" title="1">{
+        s.lock.Lock()
+        defer s.lock.Unlock()
+
+        node, found := s.dict[key]
+        if found </span><span class="cov8" title="1">{
+                node.Value.(*DataNode).data = value
+                node.Value.(*DataNode).ttl = ttl
+                s.queue.MoveToFront(node)
+                s.expTree.Delete(&amp;BTreeItem{ttl: node.Value.(*DataNode).ttl, key: key})
+                s.expTree.ReplaceOrInsert(&amp;BTreeItem{ttl, key})
+                return
+        }</span> else<span class="cov8" title="1"> {
+                storeItem := &amp;DataNode{
+                        key:  key,
+                        data: value,
+                        ttl:  ttl,
+                }
+                queueItem := s.queue.PushFront(storeItem)
+                s.dict[key] = queueItem
+                s.lazyEvict()
+        }</span>
+}
+
+func (s *Store) DeleteWithKey(key interface{}) bool <span class="cov0" title="0">{
+        s.lock.Lock()
+        defer s.lock.Unlock()
+
+        s.evictWithKey(key)
+        return true
+}</span>
+
+/* private functions */
+
+func (s *Store) lazyEvict() <span class="cov8" title="1">{
+        if len(s.dict) &lt;= s.maxSize </span><span class="cov8" title="1">{
+                return
+        }</span>
+        <span class="cov8" title="1">if !s.evictTtlExpired() </span><span class="cov8" title="1">{
+                s.evictLru()
+        }</span>
+}
+
+func (s *Store) evictTtlExpired() bool <span class="cov8" title="1">{
+        item := s.expTree.Min()
+        if item != nil &amp;&amp; item.(*BTreeItem).ttl.Before(time.Now()) </span><span class="cov0" title="0">{
+                key := s.expTree.Delete(item).(*BTreeItem).key
+                s.queue.Remove(s.dict[key])
+                delete(s.dict, key)
+                return true
+        }</span>
+        <span class="cov8" title="1">return false</span>
+}
+
+func (s *Store) evictLru() bool <span class="cov8" title="1">{
+        lruItem := s.queue.Back()
+        if lruItem != nil </span><span class="cov8" title="1">{
+                dataNode := lruItem.Value.(*DataNode)
+                s.expTree.Delete(&amp;BTreeItem{ttl: dataNode.ttl, key: dataNode.key})
+                s.queue.Remove(lruItem)
+                delete(s.dict, dataNode.key)
+                return true
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+func (s *Store) evictWithKey(key interface{}) bool <span class="cov8" title="1">{
+        s.expTree.Delete(&amp;BTreeItem{ttl: s.dict[key].Value.(*DataNode).ttl, key: key})
+        s.queue.Remove(s.dict[key])
+        delete(s.dict, key)
+        return true
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package types
+
+import (
+        "errors"
+        "time"
+
+        "github.com/divy-sh/animus/store"
+)
+
+type HashType struct {
+        hashes store.Store
+}
+
+func NewHashType() *HashType <span class="cov8" title="1">{
+        return &amp;HashType{
+                hashes: *store.NewStore(),
+        }
+}</span>
+
+func (h *HashType) HGet(hash, key string) (string, error) <span class="cov8" title="1">{
+        value, ok := h.hashes.Get(hash)
+        if !ok </span><span class="cov8" title="1">{
+                return "", errors.New("ERR not found")
+        }</span>
+        <span class="cov8" title="1">if val, ok := value.(map[interface{}]interface{})[key]; ok </span><span class="cov8" title="1">{
+                return val.(string), nil
+        }</span>
+        <span class="cov0" title="0">return "", errors.New("ERR not found")</span>
+}
+
+func (h *HashType) HSet(hash, key, value string) <span class="cov8" title="1">{
+        hashVal, ok := h.hashes.Get(key)
+        if ok </span><span class="cov0" title="0">{
+                hashVal.(map[interface{}]interface{})[key] = value
+        }</span> else<span class="cov8" title="1"> {
+                hashVal = map[interface{}]interface{}{key: value}
+        }</span>
+        <span class="cov8" title="1">h.hashes.Set(hash, hashVal, time.Now().AddDate(1000, 0, 0))</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package types
+
+import (
+        "errors"
+        "fmt"
+        "strconv"
+        "time"
+
+        "github.com/divy-sh/animus/store"
+)
+
+type StringType struct {
+        strs store.Store
+}
+
+func NewStringType() *StringType <span class="cov8" title="1">{
+        return &amp;StringType{
+                strs: *store.NewStore(),
+        }
+}</span>
+
+// public functions
+func (s *StringType) Append(key, value string) <span class="cov8" title="1">{
+        val, ok := s.strs.Get(key)
+        if !ok </span><span class="cov8" title="1">{
+                s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+                return
+        }</span>
+        <span class="cov8" title="1">s.strs.Set(key, val.(string)+value, time.Now().AddDate(1000, 0, 0))</span>
+}
+
+func (s *StringType) Decr(key string) error <span class="cov8" title="1">{
+        return s.DecrBy(key, "1")
+}</span>
+
+func (s *StringType) DecrBy(key, value string) error <span class="cov8" title="1">{
+        decrVal, err := strconv.ParseInt(value, 10, 64)
+        if err != nil </span><span class="cov8" title="1">{
+                return errors.New("ERR invalid decrement value")
+        }</span>
+        <span class="cov8" title="1">val, ok := s.strs.Get(key)
+        if !ok </span><span class="cov8" title="1">{
+                s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+                return nil
+        }</span>
+        <span class="cov8" title="1">intVal, err := strconv.ParseInt(val.(string), 10, 64)
+        if err != nil </span><span class="cov8" title="1">{
+                return errors.New("ERR value is not an integer or out of range")
+        }</span>
+        <span class="cov8" title="1">s.strs.Set(key, fmt.Sprint(intVal-decrVal), time.Now().AddDate(1000, 0, 0))
+        return nil</span>
+}
+
+func (s *StringType) Get(key string) (string, error) <span class="cov8" title="1">{
+        val, ok := s.strs.Get(key)
+        if !ok </span><span class="cov8" title="1">{
+                return "", errors.New("ERR key not found, or expired")
+        }</span>
+        <span class="cov8" title="1">return val.(string), nil</span>
+}
+
+func (s *StringType) GetDel(key string) (string, error) <span class="cov8" title="1">{
+        val, ok := s.strs.Get(key)
+        if !ok </span><span class="cov0" title="0">{
+                return "", errors.New("ERR key not found, or expired")
+        }</span>
+        <span class="cov8" title="1">s.strs.DeleteWithKey(key)
+        return val.(string), nil</span>
+}
+
+func (s *StringType) GetEx(key, exp string) (string, error) <span class="cov8" title="1">{
+        val, ok := s.strs.Get(key)
+        if !ok </span><span class="cov0" title="0">{
+                return "", errors.New("ERR key not found, or expired")
+        }</span>
+        <span class="cov8" title="1">expSeconds, err := strconv.ParseInt(exp, 10, 64)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", errors.New("ERR invalid expire time")
+        }</span>
+        <span class="cov8" title="1">s.strs.Set(key, val, time.Now().Add(time.Duration(expSeconds)*time.Second))
+        return val.(string), nil</span>
+}
+
+func (s *StringType) GetRange(key, start, end string) (string, error) <span class="cov8" title="1">{
+        val, ok := s.strs.Get(key)
+        if !ok </span><span class="cov8" title="1">{
+                return "", errors.New("ERR key not found, or expired")
+        }</span>
+        <span class="cov8" title="1">str, ok := val.(string)
+        if !ok </span><span class="cov0" title="0">{
+                return "", errors.New("ERR value is not a string")
+        }</span>
+        <span class="cov8" title="1">startInd, err := strconv.ParseInt(start, 10, 64)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", errors.New("ERR invalid start index")
+        }</span>
+        <span class="cov8" title="1">endInd, err := strconv.ParseInt(end, 10, 64)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", errors.New("ERR invalid end index")
+        }</span>
+        <span class="cov8" title="1">length := int64(len(str))
+        if length == 0 </span><span class="cov0" title="0">{
+                return "", nil
+        }</span>
+        <span class="cov8" title="1">startInd = (startInd%length + length) % length
+        endInd = (endInd%length + length) % length
+        if end == "50" </span><span class="cov8" title="1">{
+                fmt.Println(startInd, endInd)
+        }</span>
+        <span class="cov8" title="1">if startInd &gt; endInd </span><span class="cov0" title="0">{
+                return "", errors.New("ERR start index greater than end index")
+        }</span>
+        <span class="cov8" title="1">return str[startInd : endInd+1], nil</span>
+}
+
+func (s *StringType) Set(key, value string) <span class="cov8" title="1">{
+        s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

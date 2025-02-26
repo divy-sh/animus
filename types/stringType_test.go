@@ -27,6 +27,16 @@ func TestAppend(t *testing.T) {
 	}
 }
 
+func TestAppendNewKey(t *testing.T) {
+	strType := NewStringType()
+	strType.Append("key1", "appended")
+
+	val, err := strType.Get("key1")
+	if err != nil || val != "appended" {
+		t.Errorf("Expected appended, got %v, err: %v", val, err)
+	}
+}
+
 func TestGetDel(t *testing.T) {
 	strType := NewStringType()
 	strType.Set("key1", "value1")
@@ -120,6 +130,30 @@ func TestDecrBy(t *testing.T) {
 	val, _ := strType.Get("num")
 	if val != "7" {
 		t.Errorf("Expected 7, got %v", val)
+	}
+}
+
+func TestDecrByNewKey(t *testing.T) {
+	strType := NewStringType()
+
+	err := strType.DecrBy("num", "3")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, _ := strType.Get("num")
+	if val != "3" {
+		t.Errorf("Expected 3, got %v", val)
+	}
+}
+
+func TestDecrByInvalidValue(t *testing.T) {
+	strType := NewStringType()
+	strType.Set("num", "Z")
+
+	err := strType.DecrBy("num", "3")
+	if err == nil {
+		t.Errorf("Expected error for invalid value, got: %v", err)
 	}
 }
 
