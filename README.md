@@ -26,9 +26,9 @@ I am actively working on the initial stages of this project.
 
 # Test Coverage
 
-- Test coverage is included in the file coverage.html
+- Test coverage can be verified by generating cover.html file
 
-- To generate the coverage.html file locally, run these commands
+- To generate the cover.html file, run these commands:
 ```bash
 go test -v -coverprofile cover.out ./...
 ```
