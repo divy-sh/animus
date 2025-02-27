@@ -40,15 +40,15 @@ func TestHsetAndHget(t *testing.T) {
 	}
 }
 
-func TestHgeteithoutHset(t *testing.T) {
+func TestHgetWithoutHset(t *testing.T) {
 	result := hget([]resp.Value{
 		{
 			Typ:  "bulk",
-			Bulk: "hash",
+			Bulk: "not_set",
 		},
 		{
 			Typ:  "bulk",
-			Bulk: "key",
+			Bulk: "not_set",
 		},
 	})
 	if result.Typ != "null" || result.Bulk != "" {
