@@ -1,11 +1,13 @@
-package types
+package types_test
 
 import (
 	"testing"
+
+	"github.com/divy-sh/animus/types"
 )
 
 func TestHashType_HSetAndHGet(t *testing.T) {
-	hashType := NewHashType()
+	hashType := types.NewHashType()
 	hash := "test_hash"
 	key := "test_key"
 	value := "test_value"
@@ -24,7 +26,7 @@ func TestHashType_HSetAndHGet(t *testing.T) {
 }
 
 func TestHashType_HGet_NotFound(t *testing.T) {
-	hashType := NewHashType()
+	hashType := types.NewHashType()
 
 	// Try to get a non-existent key
 	_, err := hashType.HGet("non_existent_hash", "non_existent_key")

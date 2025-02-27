@@ -104,9 +104,6 @@ func (s *StringType) GetRange(key, start, end string) (string, error) {
 	}
 	startInd = (startInd%length + length) % length
 	endInd = (endInd%length + length) % length
-	if end == "50" {
-		fmt.Println(startInd, endInd)
-	}
 	if startInd > endInd {
 		return "", errors.New("ERR start index greater than end index")
 	}

@@ -23,3 +23,15 @@ I am actively working on the initial stages of this project.
 - Optimize event loop for performance
 
 - Clustering and sharding for scalability
+
+# Test Coverage
+
+- Test coverage is included in file coverage.html
+
+- To generate the coverage.html file locally, run these commands
+```bash
+go test -v -coverprofile cover.out ./...
+```
+```bash
+go tool cover -html cover.out -o cover.html
+```

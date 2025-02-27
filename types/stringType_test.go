@@ -1,13 +1,15 @@
-package types
+package types_test
 
 import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/divy-sh/animus/types"
 )
 
 func TestSetAndGet(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("key1", "value1")
 
 	val, err := strType.Get("key1")
@@ -17,7 +19,7 @@ func TestSetAndGet(t *testing.T) {
 }
 
 func TestAppend(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("key1", "value1")
 	strType.Append("key1", "_appended")
 
@@ -28,7 +30,7 @@ func TestAppend(t *testing.T) {
 }
 
 func TestAppendNewKey(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Append("key1", "appended")
 
 	val, err := strType.Get("key1")
@@ -38,7 +40,7 @@ func TestAppendNewKey(t *testing.T) {
 }
 
 func TestGetDel(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("key1", "value1")
 
 	val, err := strType.GetDel("key1")
@@ -53,7 +55,7 @@ func TestGetDel(t *testing.T) {
 }
 
 func TestGetEx(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("key1", "value1")
 
 	val, err := strType.GetEx("key1", "0")
@@ -69,7 +71,7 @@ func TestGetEx(t *testing.T) {
 
 func TestGetRange(t *testing.T) {
 	// Create a StringType instance and populate it
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("hello", "Hello, World!")
 	strType.Set("empty", "")
 
@@ -92,7 +94,8 @@ func TestGetRange(t *testing.T) {
 		result, err := strType.GetRange(tt.key, tt.start, tt.end)
 
 		// Check error equality
-		if (err != nil && tt.err == nil) || (err == nil && tt.err != nil) || (err != nil && tt.err != nil && err.Error() != tt.err.Error()) {
+		if (err != nil && tt.err == nil) || (err == nil && tt.err != nil) ||
+			(err != nil && tt.err != nil && err.Error() != tt.err.Error()) {
 			t.Errorf("GetRange(%q, %q, %q) error = %v, expected %v", tt.key, tt.start, tt.end, err, tt.err)
 		}
 
@@ -104,7 +107,7 @@ func TestGetRange(t *testing.T) {
 }
 
 func TestDecr(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("num", "10")
 
 	err := strType.Decr("num")
@@ -119,7 +122,7 @@ func TestDecr(t *testing.T) {
 }
 
 func TestDecrBy(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("num", "10")
 
 	err := strType.DecrBy("num", "3")
@@ -134,7 +137,7 @@ func TestDecrBy(t *testing.T) {
 }
 
 func TestDecrByNewKey(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 
 	err := strType.DecrBy("num", "3")
 	if err != nil {
@@ -148,7 +151,7 @@ func TestDecrByNewKey(t *testing.T) {
 }
 
 func TestDecrByInvalidValue(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("num", "Z")
 
 	err := strType.DecrBy("num", "3")
@@ -158,7 +161,7 @@ func TestDecrByInvalidValue(t *testing.T) {
 }
 
 func TestDecrByInvalid(t *testing.T) {
-	strType := NewStringType()
+	strType := types.NewStringType()
 	strType.Set("num", "10")
 
 	err := strType.DecrBy("num", "invalid")
