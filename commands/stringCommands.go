@@ -28,7 +28,7 @@ func decr(args []resp.Value) resp.Value {
 
 func decrby(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'decrby' command"}
 	}
 
 	err := stringType.DecrBy(args[0].Bulk, args[1].Bulk)
