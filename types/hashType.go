@@ -8,12 +8,12 @@ import (
 )
 
 type HashType struct {
-	hashes store.Store
+	hashes store.Store[string, map[string]string]
 }
 
 func NewHashType() *HashType {
 	return &HashType{
-		hashes: *store.NewStore(),
+		hashes: *store.NewStore[string, map[string]string](),
 	}
 }
 
@@ -22,8 +22,8 @@ func (h *HashType) HGet(hash, key string) (string, error) {
 	if !ok {
 		return "", errors.New("ERR not found")
 	}
-	if val, ok := value.(map[interface{}]interface{})[key]; ok {
-		return val.(string), nil
+	if val, ok := value[key]; ok {
+		return val, nil
 	}
 	return "", errors.New("ERR not found")
 }
@@ -31,9 +31,9 @@ func (h *HashType) HGet(hash, key string) (string, error) {
 func (h *HashType) HSet(hash, key, value string) {
 	hashVal, ok := h.hashes.Get(key)
 	if ok {
-		hashVal.(map[interface{}]interface{})[key] = value
+		hashVal[key] = value
 	} else {
-		hashVal = map[interface{}]interface{}{key: value}
+		hashVal = map[string]string{key: value}
 	}
 	h.hashes.Set(hash, hashVal, time.Now().AddDate(1000, 0, 0))
 }

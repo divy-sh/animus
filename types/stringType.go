@@ -10,12 +10,12 @@ import (
 )
 
 type StringType struct {
-	strs store.Store
+	strs store.Store[string, string]
 }
 
 func NewStringType() *StringType {
 	return &StringType{
-		strs: *store.NewStore(),
+		strs: *store.NewStore[string, string](),
 	}
 }
 
@@ -26,7 +26,7 @@ func (s *StringType) Append(key, value string) {
 		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
 		return
 	}
-	s.strs.Set(key, val.(string)+value, time.Now().AddDate(1000, 0, 0))
+	s.strs.Set(key, val+value, time.Now().AddDate(1000, 0, 0))
 }
 
 func (s *StringType) Decr(key string) error {
@@ -43,7 +43,7 @@ func (s *StringType) DecrBy(key, value string) error {
 		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
 		return nil
 	}
-	intVal, err := strconv.ParseInt(val.(string), 10, 64)
+	intVal, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
 		return errors.New("ERR value is not an integer or out of range")
 	}
@@ -56,7 +56,7 @@ func (s *StringType) Get(key string) (string, error) {
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
 	}
-	return val.(string), nil
+	return val, nil
 }
 
 func (s *StringType) GetDel(key string) (string, error) {
@@ -65,7 +65,7 @@ func (s *StringType) GetDel(key string) (string, error) {
 		return "", errors.New("ERR key not found, or expired")
 	}
 	s.strs.DeleteWithKey(key)
-	return val.(string), nil
+	return val, nil
 }
 
 func (s *StringType) GetEx(key, exp string) (string, error) {
@@ -78,17 +78,13 @@ func (s *StringType) GetEx(key, exp string) (string, error) {
 		return "", errors.New("ERR invalid expire time")
 	}
 	s.strs.Set(key, val, time.Now().Add(time.Duration(expSeconds)*time.Second))
-	return val.(string), nil
+	return val, nil
 }
 
 func (s *StringType) GetRange(key, start, end string) (string, error) {
 	val, ok := s.strs.Get(key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
-	}
-	str, ok := val.(string)
-	if !ok {
-		return "", errors.New("ERR value is not a string")
 	}
 	startInd, err := strconv.ParseInt(start, 10, 64)
 	if err != nil {
@@ -98,7 +94,7 @@ func (s *StringType) GetRange(key, start, end string) (string, error) {
 	if err != nil {
 		return "", errors.New("ERR invalid end index")
 	}
-	length := int64(len(str))
+	length := int64(len(val))
 	if length == 0 {
 		return "", nil
 	}
@@ -107,7 +103,7 @@ func (s *StringType) GetRange(key, start, end string) (string, error) {
 	if startInd > endInd {
 		return "", errors.New("ERR start index greater than end index")
 	}
-	return str[startInd : endInd+1], nil
+	return val[startInd : endInd+1], nil
 }
 
 func (s *StringType) Set(key, value string) {
