@@ -26,7 +26,7 @@ I am actively working on the initial stages of this project.
 
 # Test Coverage
 
-- Test coverage is included in file coverage.html
+- Test coverage is included in the file coverage.html
 
 - To generate the coverage.html file locally, run these commands
 ```bash
