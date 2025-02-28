@@ -42,13 +42,39 @@ func TestStore_OverwriteKey(t *testing.T) {
 	}
 }
 
-func TestStore_TTLExpiration(t *testing.T) {
+func TestStore_TTLExpirationOnGet(t *testing.T) {
 	s := NewStore[string, string]()
-	key, value := "expiringKey", "value"
-	s.Set(key, value, time.Now().Add(50*time.Millisecond))
+	s.maxSize = 1
+	s.Set("expiringKey", "value", time.Now().Add(50*time.Millisecond))
 	time.Sleep(100 * time.Millisecond) // Allow time for expiration
+	s.Get("expiringKey")
+	_, found := s.Get("expiringKey")
+	if found {
+		t.Errorf("Expected key to expire, but it was found")
+	}
+}
 
-	_, found := s.Get(key)
+func TestStore_TTLExpirationOnSet(t *testing.T) {
+	s := NewStore[string, string]()
+	s.maxSize = 1
+	s.Set("expiringKey", "value", time.Now().Add(50*time.Millisecond))
+	time.Sleep(100 * time.Millisecond) // Allow time for expiration
+	s.Set("newKey", "value", time.Now().AddDate(99, 0, 0))
+	_, found := s.Get("expiringKey")
+	if found {
+		t.Errorf("Expected key to expire, but it was found")
+	}
+}
+
+func TestStore_DeleteWithKey(t *testing.T) {
+	s := NewStore[string, string]()
+	s.Set("expiringKey", "value", time.Now().AddDate(99, 0, 0))
+	_, found := s.Get("expiringKey")
+	if !found {
+		t.Errorf("Expected key to be found but was not found")
+	}
+	s.DeleteWithKey("expiringKey")
+	_, found = s.Get("expiringKey")
 	if found {
 		t.Errorf("Expected key to expire, but it was found")
 	}

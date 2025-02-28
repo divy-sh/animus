@@ -83,6 +83,7 @@ func (s *Store[K, V]) Set(key K, value V, ttl time.Time) {
 	}
 	queueItem := s.queue.PushFront(storeItem)
 	s.dict[key] = queueItem
+	s.expTree.ReplaceOrInsert(BTreeItem[K]{ttl: ttl, key: key})
 	s.lazyEvict()
 }
 

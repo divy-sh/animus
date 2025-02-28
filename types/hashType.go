@@ -29,7 +29,7 @@ func (h *HashType) HGet(hash, key string) (string, error) {
 }
 
 func (h *HashType) HSet(hash, key, value string) {
-	hashVal, ok := h.hashes.Get(key)
+	hashVal, ok := h.hashes.Get(hash)
 	if ok {
 		hashVal[key] = value
 	} else {
