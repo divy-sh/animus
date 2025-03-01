@@ -25,8 +25,6 @@ I am actively working on the initial stages of this project.
 - Clustering and sharding for scalability
 
 # Test Coverage
-- 89.4% of statements covered with tests
-
 - Test coverage can be verified by generating cover.html file
 
 - To generate the cover.html file, run these commands:

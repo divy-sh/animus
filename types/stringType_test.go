@@ -164,6 +164,16 @@ func TestGetRangeStartIndexLargerThanEndIndex(t *testing.T) {
 	}
 }
 
+func TestGetRangeEmptyVal(t *testing.T) {
+	strType := types.NewStringType()
+	strType.Set("hello", "")
+	val, err := strType.GetRange("hello", "0", "20")
+	expected := ""
+	if err != nil || val != expected {
+		t.Errorf("Expected value: %v, got error: %v", expected, err)
+	}
+}
+
 func TestDecr(t *testing.T) {
 	strType := types.NewStringType()
 	strType.Set("num", "10")
