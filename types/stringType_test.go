@@ -54,6 +54,15 @@ func TestGetDel(t *testing.T) {
 	}
 }
 
+func TestGetDelInvalidKey(t *testing.T) {
+	strType := types.NewStringType()
+
+	_, err := strType.GetDel("invalid_key")
+	if err == nil || err.Error() != "ERR key not found, or expired" {
+		t.Errorf("Expected error: %v, got: %v", "ERR key not found, or expired", err)
+	}
+}
+
 func TestGetEx(t *testing.T) {
 	strType := types.NewStringType()
 	strType.Set("key1", "value1")
@@ -66,6 +75,25 @@ func TestGetEx(t *testing.T) {
 	_, err = strType.Get("key1")
 	if err == nil {
 		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestGetExInvalidKey(t *testing.T) {
+	strType := types.NewStringType()
+
+	_, err := strType.GetEx("invalid_key", "1")
+	if err == nil || err.Error() != "ERR key not found, or expired" {
+		t.Errorf("Expected error: %v, got: %v", "ERR key not found, or expired", err)
+	}
+}
+
+func TestGetExInvalidTime(t *testing.T) {
+	strType := types.NewStringType()
+	strType.Set("key1", "value1")
+
+	_, err := strType.GetEx("key1", "invalid")
+	if err == nil || err.Error() != "ERR invalid expire time" {
+		t.Errorf("Expected error: %v, got: %v", "ERR invalid expire time", err)
 	}
 }
 
@@ -103,6 +131,36 @@ func TestGetRange(t *testing.T) {
 		if result != tt.expected {
 			t.Errorf("GetRange(%q, %q, %q) = %q, expected %q", tt.key, tt.start, tt.end, result, tt.expected)
 		}
+	}
+}
+
+func TestGetRangeInvalidStartIndex(t *testing.T) {
+	strType := types.NewStringType()
+	strType.Set("hello", "Hello, World!")
+	_, err := strType.GetRange("hello", "invalid_start_index", "20")
+	expected := "ERR invalid start index"
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected error: %v, got: %v", expected, err)
+	}
+}
+
+func TestGetRangeInvalidEndIndex(t *testing.T) {
+	strType := types.NewStringType()
+	strType.Set("hello", "Hello, World!")
+	_, err := strType.GetRange("hello", "0", "invalid_end_index")
+	expected := "ERR invalid end index"
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected error: %v, got: %v", expected, err)
+	}
+}
+
+func TestGetRangeStartIndexLargerThanEndIndex(t *testing.T) {
+	strType := types.NewStringType()
+	strType.Set("hello", "Hello, World!")
+	_, err := strType.GetRange("hello", "6", "5")
+	expected := "ERR start index greater than end index"
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected error: %v, got: %v", expected, err)
 	}
 }
 
