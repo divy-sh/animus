@@ -1,20 +1,22 @@
-package resp
+package resp_test
 
 import (
 	"bytes"
 	"reflect"
 	"testing"
+
+	"github.com/divy-sh/animus/resp"
 )
 
 func TestReadBulkString(t *testing.T) {
 	input := "$5\r\nhello\r\n"
-	r := NewReader(bytes.NewBufferString(input))
+	r := resp.NewReader(bytes.NewBufferString(input))
 	val, err := r.Read()
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	expected := Value{Typ: "bulk", Bulk: "hello"}
+	expected := resp.Value{Typ: "bulk", Bulk: "hello"}
 	if !reflect.DeepEqual(val, expected) {
 		t.Errorf("Expected %v, got %v", expected, val)
 	}
@@ -22,15 +24,15 @@ func TestReadBulkString(t *testing.T) {
 
 func TestReadArray(t *testing.T) {
 	input := "*2\r\n$5\r\nhello\r\n$5\r\nworld\r\n"
-	r := NewReader(bytes.NewBufferString(input))
+	r := resp.NewReader(bytes.NewBufferString(input))
 	val, err := r.Read()
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	expected := Value{
+	expected := resp.Value{
 		Typ:   "array",
-		Array: []Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "world"}},
+		Array: []resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "world"}},
 	}
 
 	if !reflect.DeepEqual(val, expected) {
@@ -40,15 +42,15 @@ func TestReadArray(t *testing.T) {
 
 func TestReadEmptyArray(t *testing.T) {
 	input := "*0\r\n"
-	r := NewReader(bytes.NewBufferString(input))
+	r := resp.NewReader(bytes.NewBufferString(input))
 	val, err := r.Read()
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	expected := Value{
+	expected := resp.Value{
 		Typ:   "array",
-		Array: []Value{},
+		Array: []resp.Value{},
 	}
 
 	if !reflect.DeepEqual(val, expected) {
@@ -58,9 +60,9 @@ func TestReadEmptyArray(t *testing.T) {
 
 func TestReadInvalidType(t *testing.T) {
 	input := "?"
-	r := NewReader(bytes.NewBufferString(input))
+	r := resp.NewReader(bytes.NewBufferString(input))
 	val, _ := r.Read()
-	expected := Value{}
+	expected := resp.Value{}
 	if !reflect.DeepEqual(val, expected) {
 		t.Errorf("expected %v, but got %v", expected, val)
 	}
