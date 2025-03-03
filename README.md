@@ -10,9 +10,9 @@ I am actively working on the initial stages of this project.
 
 - HGET, HSET
 
-# Roadmap
+- Expiry mechanism (LRU, TTL)
 
-- Expiry mechanism (EXPIRE, TTL), (implemented for string type)
+# Roadmap
 
 - Support for advanced data structures (Lists, Sets, Hashes)
 
