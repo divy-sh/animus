@@ -6,9 +6,11 @@ I am actively working on the initial stages of this project.
 
 - PING
 
-- APPEND, DECR, DECRBY, GET, GETDEL, GETEX, GETRANGE, SET
+- String Type - APPEND, DECR, DECRBY, GET, GETDEL, GETEX, GETRANGE, SET
 
-- HGET, HSET
+- Hash Type - HGET, HSET
+
+- List Type - RPush, RPop
 
 - Expiry mechanism (LRU, TTL)
 
