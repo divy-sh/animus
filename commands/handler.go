@@ -22,4 +22,8 @@ var Handlers = map[string]func([]resp.Value) resp.Value{
 	// hash commands
 	"HSET": hset,
 	"HGET": hget,
+
+	//list commands
+	"RPOP":  rpop,
+	"RPUSH": rpush,
 }
