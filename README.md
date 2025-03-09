@@ -36,3 +36,12 @@ go test -v -coverprofile cover.out ./...
 ```bash
 go tool cover -html cover.out -o cover.html
 ```
+
+## Release Notes
+
+### v0.0.1
+
+- First package release. Can be found here - https://pkg.go.dev/github.com/divy-sh/animus@v0.0.1
+
+### v0.0.2
+- Refactor packages to have better names so that there are no potential naming conflicts - https://pkg.go.dev/github.com/divy-sh/animus
