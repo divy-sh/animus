@@ -43,7 +43,7 @@ func main() {
 		if !ok {
 			log.Print("Invalid command: ", command)
 		}
-		handler(args)
+		handler.Func(args)
 	})
 
 	for {
@@ -80,7 +80,7 @@ func main() {
 			aof.Write(value)
 		}
 
-		result := handler(args)
+		result := handler.Func(args)
 		writer.Write(result)
 	}
 }
