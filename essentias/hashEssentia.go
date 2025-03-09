@@ -1,4 +1,4 @@
-package types
+package essentias
 
 import (
 	"errors"
@@ -7,17 +7,17 @@ import (
 	"github.com/divy-sh/animus/store"
 )
 
-type HashType struct {
+type HashEssentia struct {
 	hashes store.Store[string, map[string]string]
 }
 
-func NewHashType() *HashType {
-	return &HashType{
+func NewHashEssentia() *HashEssentia {
+	return &HashEssentia{
 		hashes: *store.NewStore[string, map[string]string](),
 	}
 }
 
-func (h *HashType) HGet(hash, key string) (string, error) {
+func (h *HashEssentia) HGet(hash, key string) (string, error) {
 	value, ok := h.hashes.Get(hash)
 	if !ok {
 		return "", errors.New("ERR not found")
@@ -28,7 +28,7 @@ func (h *HashType) HGet(hash, key string) (string, error) {
 	return "", errors.New("ERR not found")
 }
 
-func (h *HashType) HSet(hash, key, value string) {
+func (h *HashEssentia) HSet(hash, key, value string) {
 	hashVal, ok := h.hashes.Get(hash)
 	if ok {
 		hashVal[key] = value

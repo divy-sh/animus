@@ -16,17 +16,17 @@ func NewReader(rd io.Reader) *Reader {
 }
 
 func (r *Reader) Read() (Value, error) {
-	valType, err := r.reader.ReadByte()
+	valEssentia, err := r.reader.ReadByte()
 	if err != nil {
 		return Value{}, err
 	}
-	switch valType {
+	switch valEssentia {
 	case ARRAY:
 		return r.readArray()
 	case BULK:
 		return r.readBulk()
 	default:
-		log.Printf("Unknown type: %v", valType)
+		log.Printf("Unknown type: %v", valEssentia)
 		return Value{}, nil
 	}
 }

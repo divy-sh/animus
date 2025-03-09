@@ -1,13 +1,13 @@
-package types_test
+package essentias_test
 
 import (
 	"testing"
 
-	"github.com/divy-sh/animus/types"
+	"github.com/divy-sh/animus/essentias"
 )
 
 func TestRPush(t *testing.T) {
-	lt := types.NewListType()
+	lt := essentias.NewListEssentia()
 	key := "testList"
 	values := []string{"a", "b", "c", "d"}
 	lt.RPush(key, &values)
@@ -22,7 +22,7 @@ func TestRPush(t *testing.T) {
 }
 
 func TestRPopValid(t *testing.T) {
-	lt := types.NewListType()
+	lt := essentias.NewListEssentia()
 	key := "testList"
 	values := []string{"a", "b", "c", "d"}
 	lt.RPush(key, &values)
@@ -38,7 +38,7 @@ func TestRPopValid(t *testing.T) {
 }
 
 func TestRPopInvalidCountHigh(t *testing.T) {
-	lt := types.NewListType()
+	lt := essentias.NewListEssentia()
 	key := "testList"
 	values := []string{"a", "b", "c", "d"}
 	lt.RPush(key, &values)
@@ -50,7 +50,7 @@ func TestRPopInvalidCountHigh(t *testing.T) {
 }
 
 func TestRPopInvalidCountNegative(t *testing.T) {
-	lt := types.NewListType()
+	lt := essentias.NewListEssentia()
 	key := "testList"
 	values := []string{"a", "b", "c", "d"}
 	lt.RPush(key, &values)
@@ -62,7 +62,7 @@ func TestRPopInvalidCountNegative(t *testing.T) {
 }
 
 func TestRPopNonExistentKey(t *testing.T) {
-	lt := types.NewListType()
+	lt := essentias.NewListEssentia()
 	_, err := lt.RPop("nonExistentKey", "1")
 	if err == nil {
 		t.Errorf("Expected error for non-existent key")

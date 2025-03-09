@@ -58,7 +58,7 @@ func TestReadEmptyArray(t *testing.T) {
 	}
 }
 
-func TestReadInvalidType(t *testing.T) {
+func TestReadInvalidEssentia(t *testing.T) {
 	input := "?"
 	r := resp.NewReader(bytes.NewBufferString(input))
 	val, _ := r.Read()

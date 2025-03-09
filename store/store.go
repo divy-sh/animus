@@ -8,7 +8,7 @@ import (
 	"github.com/google/btree"
 )
 
-/* Types */
+/* Essentias */
 
 type Store[K comparable, V any] struct {
 	dict    map[K]*list.Element

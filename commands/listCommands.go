@@ -1,11 +1,11 @@
 package commands
 
 import (
+	"github.com/divy-sh/animus/essentias"
 	"github.com/divy-sh/animus/resp"
-	"github.com/divy-sh/animus/types"
 )
 
-var listTypes = types.NewListType()
+var listEssentias = essentias.NewListEssentia()
 
 func rpop(args []resp.Value) resp.Value {
 	if len(args) < 1 {
@@ -14,9 +14,9 @@ func rpop(args []resp.Value) resp.Value {
 	var values []string
 	var err error
 	if len(args) == 1 {
-		values, err = listTypes.RPop(args[0].Bulk, "1")
+		values, err = listEssentias.RPop(args[0].Bulk, "1")
 	} else {
-		values, err = listTypes.RPop(args[0].Bulk, args[1].Bulk)
+		values, err = listEssentias.RPop(args[0].Bulk, args[1].Bulk)
 	}
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
@@ -36,6 +36,6 @@ func rpush(args []resp.Value) resp.Value {
 	for i, val := range args[1:] {
 		values[i] = val.Bulk
 	}
-	listTypes.RPush(args[0].Bulk, &values)
+	listEssentias.RPush(args[0].Bulk, &values)
 	return resp.Value{Typ: "string", Str: "OK"}
 }

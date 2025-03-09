@@ -1,17 +1,17 @@
 package commands
 
 import (
+	"github.com/divy-sh/animus/essentias"
 	"github.com/divy-sh/animus/resp"
-	"github.com/divy-sh/animus/types"
 )
 
-var stringType = types.NewStringType()
+var stringEssentia = essentias.NewStringEssentia()
 
 func append(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'append' command"}
 	}
-	stringType.Append(args[0].Bulk, args[1].Bulk)
+	stringEssentia.Append(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: "string", Str: "OK"}
 }
 
@@ -19,7 +19,7 @@ func decr(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'decr' command"}
 	}
-	err := stringType.Decr(args[0].Bulk)
+	err := stringEssentia.Decr(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -31,7 +31,7 @@ func decrby(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'decrby' command"}
 	}
 
-	err := stringType.DecrBy(args[0].Bulk, args[1].Bulk)
+	err := stringEssentia.DecrBy(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -43,7 +43,7 @@ func get(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'get' command"}
 	}
-	value, err := stringType.Get(args[0].Bulk)
+	value, err := stringEssentia.Get(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
@@ -54,7 +54,7 @@ func getdel(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getdel' command"}
 	}
-	value, err := stringType.GetDel(args[0].Bulk)
+	value, err := stringEssentia.GetDel(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
@@ -65,7 +65,7 @@ func getex(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getex' command"}
 	}
-	value, err := stringType.GetEx(args[0].Bulk, args[1].Bulk)
+	value, err := stringEssentia.GetEx(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
@@ -76,7 +76,7 @@ func getrange(args []resp.Value) resp.Value {
 	if len(args) != 3 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getrange' command"}
 	}
-	value, err := stringType.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
+	value, err := stringEssentia.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
@@ -88,6 +88,6 @@ func set(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
 	}
 
-	stringType.Set(args[0].Bulk, args[1].Bulk)
+	stringEssentia.Set(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: "string", Str: "OK"}
 }

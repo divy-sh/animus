@@ -6,11 +6,11 @@ I am actively working on the initial stages of this project.
 
 - PING
 
-- String Type - APPEND, DECR, DECRBY, GET, GETDEL, GETEX, GETRANGE, SET
+- String Essentia - APPEND, DECR, DECRBY, GET, GETDEL, GETEX, GETRANGE, SET
 
-- Hash Type - HGET, HSET
+- Hash Essentia - HGET, HSET
 
-- List Type - RPush, RPop
+- List Essentia - RPush, RPop
 
 - Expiry mechanism (LRU, TTL)
 

@@ -1,4 +1,4 @@
-package types
+package essentias
 
 import (
 	"errors"
@@ -9,18 +9,18 @@ import (
 	"github.com/divy-sh/animus/store"
 )
 
-type StringType struct {
+type StringEssentia struct {
 	strs store.Store[string, string]
 }
 
-func NewStringType() *StringType {
-	return &StringType{
+func NewStringEssentia() *StringEssentia {
+	return &StringEssentia{
 		strs: *store.NewStore[string, string](),
 	}
 }
 
 // public functions
-func (s *StringType) Append(key, value string) {
+func (s *StringEssentia) Append(key, value string) {
 	val, ok := s.strs.Get(key)
 	if !ok {
 		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
@@ -29,11 +29,11 @@ func (s *StringType) Append(key, value string) {
 	s.strs.Set(key, val+value, time.Now().AddDate(1000, 0, 0))
 }
 
-func (s *StringType) Decr(key string) error {
+func (s *StringEssentia) Decr(key string) error {
 	return s.DecrBy(key, "1")
 }
 
-func (s *StringType) DecrBy(key, value string) error {
+func (s *StringEssentia) DecrBy(key, value string) error {
 	decrVal, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return errors.New("ERR invalid decrement value")
@@ -51,7 +51,7 @@ func (s *StringType) DecrBy(key, value string) error {
 	return nil
 }
 
-func (s *StringType) Get(key string) (string, error) {
+func (s *StringEssentia) Get(key string) (string, error) {
 	val, ok := s.strs.Get(key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
@@ -59,7 +59,7 @@ func (s *StringType) Get(key string) (string, error) {
 	return val, nil
 }
 
-func (s *StringType) GetDel(key string) (string, error) {
+func (s *StringEssentia) GetDel(key string) (string, error) {
 	val, ok := s.strs.Get(key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
@@ -68,7 +68,7 @@ func (s *StringType) GetDel(key string) (string, error) {
 	return val, nil
 }
 
-func (s *StringType) GetEx(key, exp string) (string, error) {
+func (s *StringEssentia) GetEx(key, exp string) (string, error) {
 	val, ok := s.strs.Get(key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
@@ -81,7 +81,7 @@ func (s *StringType) GetEx(key, exp string) (string, error) {
 	return val, nil
 }
 
-func (s *StringType) GetRange(key, start, end string) (string, error) {
+func (s *StringEssentia) GetRange(key, start, end string) (string, error) {
 	val, ok := s.strs.Get(key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
@@ -106,6 +106,6 @@ func (s *StringType) GetRange(key, start, end string) (string, error) {
 	return val[startInd : endInd+1], nil
 }
 
-func (s *StringType) Set(key, value string) {
+func (s *StringEssentia) Set(key, value string) {
 	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
 }

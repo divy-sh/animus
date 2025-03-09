@@ -38,7 +38,7 @@ func TestDecrInvalidArgumentCount(t *testing.T) {
 	}
 }
 
-func TestDecrInvalidValueType(t *testing.T) {
+func TestDecrInvalidValueEssentia(t *testing.T) {
 	set([]resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "world"}})
 	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}}
 	result := decr(args)
@@ -63,7 +63,7 @@ func TestDecrByInvalidArgumentCount(t *testing.T) {
 	}
 }
 
-func TestDecrByInvalidValueType(t *testing.T) {
+func TestDecrByInvalidValueEssentia(t *testing.T) {
 	set([]resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "world"}})
 	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "hello"}}
 	result := decrby(args)

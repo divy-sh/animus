@@ -1,4 +1,4 @@
-package types
+package essentias
 
 import (
 	"errors"
@@ -8,17 +8,17 @@ import (
 	"github.com/divy-sh/animus/store"
 )
 
-type ListType struct {
+type ListEssentia struct {
 	lists store.Store[string, []string]
 }
 
-func NewListType() *ListType {
-	return &ListType{
+func NewListEssentia() *ListEssentia {
+	return &ListEssentia{
 		lists: *store.NewStore[string, []string](),
 	}
 }
 
-func (l *ListType) RPop(key string, count string) ([]string, error) {
+func (l *ListEssentia) RPop(key string, count string) ([]string, error) {
 	vals, ok := l.lists.Get(key)
 	if !ok {
 		return nil, errors.New("ERR list does not exist")
@@ -30,7 +30,7 @@ func (l *ListType) RPop(key string, count string) ([]string, error) {
 	return vals[len(vals)-int(cnt):], nil
 }
 
-func (l *ListType) RPush(key string, values *[]string) {
+func (l *ListEssentia) RPush(key string, values *[]string) {
 	vals, ok := l.lists.Get(key)
 	if !ok {
 		vals = *values
