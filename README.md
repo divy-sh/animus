@@ -2,6 +2,7 @@
 [![Build and Test](https://github.com/divy-sh/animus/actions/workflows/go.yml/badge.svg)](https://github.com/divy-sh/animus/actions/workflows/go.yml)
 [![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/divy-sh/animus)
 [![License](https://img.shields.io/badge/License-GNU20GPL-blue?style=flat-square)](https://raw.githubusercontent.com/divy-sh/animus/master/LICENSE)
+
 Animus is an in-memory database (like redis) written in go. 
 I am actively working on the initial stages of this project.
 
