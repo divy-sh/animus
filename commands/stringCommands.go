@@ -97,6 +97,9 @@ func getset(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getset' command"}
 	}
 
-	stringEssentia.GetSet(args[0].Bulk, args[1].Bulk)
-	return resp.Value{Typ: "string", Str: "OK"}
+	val, err := stringEssentia.GetSet(args[0].Bulk, args[1].Bulk)
+	if err != nil {
+		return resp.Value{Typ: "error", Str: err.Error()}
+	}
+	return resp.Value{Typ: "bulk", Bulk: val}
 }

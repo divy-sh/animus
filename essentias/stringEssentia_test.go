@@ -237,3 +237,28 @@ func TestDecrByInvalid(t *testing.T) {
 		t.Errorf("Expected error for invalid decrement, got: %v", err)
 	}
 }
+
+func TestGetSet(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("key1", "value1")
+
+	val, err := strEssentia.GetSet("key1", "value2")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected value1, got %v, err: %v", val, err)
+	}
+
+	val, err = strEssentia.Get("key1")
+	if err != nil || val != "value2" {
+		t.Errorf("Expected val: value2, got val: %v, error: %v", val, err)
+	}
+
+}
+
+func TestGetSetInvalidKey(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	val, err := strEssentia.GetSet("invalid", "value1")
+	expected := "ERR key not found, or expired"
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected error: %s, got val: %v, error: %v", expected, val, err)
+	}
+}

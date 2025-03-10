@@ -10,7 +10,7 @@ I am actively working on the initial stages of this project.
 
 - PING
 
-- String Essentia - APPEND, DECR, DECRBY, GET, GETDEL, GETEX, GETRANGE, SET
+- String Essentia - APPEND, DECR, DECRBY, GET, GETDEL, GETEX, GETRANGE, GETSET, SET
 
 - Hash Essentia - HGET, HSET
 

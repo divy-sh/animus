@@ -170,6 +170,37 @@ func TestGetRangeError(t *testing.T) {
 	}
 }
 
+func TestGetSet(t *testing.T) {
+	set([]resp.Value{{Typ: "bulk", Bulk: "key"}, {Typ: "bulk", Bulk: "val"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "key"}, {Typ: "bulk", Bulk: "val1"}}
+	result := getset(args)
+	if result.Typ != "bulk" || result.Bulk != "val" {
+		t.Errorf("Expected val: val, got %v", result)
+	}
+	result = get([]resp.Value{{Typ: "bulk", Bulk: "key"}})
+	if result.Typ != "bulk" || result.Bulk != "val1" {
+		t.Errorf("Expected val: val1, got %v", result)
+	}
+}
+
+func TestGetSetNonExistingKey(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "non_existing"}, {Typ: "bulk", Bulk: "val"}}
+	expected := "ERR key not found, or expired"
+	result := getset(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected error: %s, got %v", expected, result)
+	}
+}
+
+func TestGetSetInvalidArgsCount(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "key"}}
+	expected := "ERR wrong number of arguments for 'getset' command"
+	result := getset(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected error %s, got %v", expected, result)
+	}
+}
+
 func TestSet(t *testing.T) {
 	args := []resp.Value{{Typ: "bulk", Bulk: "key"}, {Typ: "bulk", Bulk: "value"}}
 	result := set(args)
