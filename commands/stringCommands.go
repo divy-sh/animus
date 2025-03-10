@@ -91,3 +91,12 @@ func set(args []resp.Value) resp.Value {
 	stringEssentia.Set(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: "string", Str: "OK"}
 }
+
+func getset(args []resp.Value) resp.Value {
+	if len(args) != 2 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getset' command"}
+	}
+
+	stringEssentia.GetSet(args[0].Bulk, args[1].Bulk)
+	return resp.Value{Typ: "string", Str: "OK"}
+}

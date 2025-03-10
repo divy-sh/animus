@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/divy-sh/animus/store"
@@ -11,6 +12,7 @@ import (
 
 type StringEssentia struct {
 	strs store.Store[string, string]
+	lock sync.RWMutex
 }
 
 func NewStringEssentia() *StringEssentia {
@@ -21,6 +23,8 @@ func NewStringEssentia() *StringEssentia {
 
 // public functions
 func (s *StringEssentia) Append(key, value string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	val, ok := s.strs.Get(key)
 	if !ok {
 		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
@@ -34,6 +38,8 @@ func (s *StringEssentia) Decr(key string) error {
 }
 
 func (s *StringEssentia) DecrBy(key, value string) error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	decrVal, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return errors.New("ERR invalid decrement value")
@@ -60,6 +66,8 @@ func (s *StringEssentia) Get(key string) (string, error) {
 }
 
 func (s *StringEssentia) GetDel(key string) (string, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	val, ok := s.strs.Get(key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
@@ -69,6 +77,8 @@ func (s *StringEssentia) GetDel(key string) (string, error) {
 }
 
 func (s *StringEssentia) GetEx(key, exp string) (string, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	val, ok := s.strs.Get(key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
@@ -104,6 +114,17 @@ func (s *StringEssentia) GetRange(key, start, end string) (string, error) {
 		return "", errors.New("ERR start index greater than end index")
 	}
 	return val[startInd : endInd+1], nil
+}
+
+func (s *StringEssentia) GetSet(key, value string) (string, error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	val, ok := s.strs.Get(key)
+	if !ok {
+		return "", errors.New("ERR key not found, or expired")
+	}
+	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+	return val, nil
 }
 
 func (s *StringEssentia) Set(key, value string) {

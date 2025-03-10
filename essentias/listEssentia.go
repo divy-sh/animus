@@ -3,6 +3,7 @@ package essentias
 import (
 	"errors"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/divy-sh/animus/store"
@@ -10,6 +11,7 @@ import (
 
 type ListEssentia struct {
 	lists store.Store[string, []string]
+	lock  sync.RWMutex
 }
 
 func NewListEssentia() *ListEssentia {
@@ -31,6 +33,8 @@ func (l *ListEssentia) RPop(key string, count string) ([]string, error) {
 }
 
 func (l *ListEssentia) RPush(key string, values *[]string) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
 	vals, ok := l.lists.Get(key)
 	if !ok {
 		vals = *values

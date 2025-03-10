@@ -2,6 +2,7 @@ package essentias
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/divy-sh/animus/store"
@@ -9,6 +10,7 @@ import (
 
 type HashEssentia struct {
 	hashes store.Store[string, map[string]string]
+	lock   sync.RWMutex
 }
 
 func NewHashEssentia() *HashEssentia {
@@ -29,6 +31,8 @@ func (h *HashEssentia) HGet(hash, key string) (string, error) {
 }
 
 func (h *HashEssentia) HSet(hash, key, value string) {
+	h.lock.Lock()
+	defer h.lock.Unlock()
 	hashVal, ok := h.hashes.Get(hash)
 	if ok {
 		hashVal[key] = value

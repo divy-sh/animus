@@ -47,6 +47,10 @@ var Handlers = map[string]Command{
 		Func:          getrange,
 		Documentation: "GETRANGE key start end - Gets a substring of the string stored at a key.",
 	},
+	"GETSET": {
+		Func:          getset,
+		Documentation: "GETSET key value - Gets the previous key value and then sets it to the passed value",
+	},
 	"SET": {
 		Func:          set,
 		Documentation: "SET key value [EX seconds|PX milliseconds|KEEPTTL] - Sets the value of a key with optional expiration.",
