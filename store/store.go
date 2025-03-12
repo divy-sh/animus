@@ -52,7 +52,7 @@ func (s *Store[K, V]) getLock(key K) *sync.RWMutex {
 func (s *Store[K, V]) Get(key K) (V, bool) {
 	lock := s.getLock(key)
 	lock.RLock()
-	defer lock.Unlock()
+	defer lock.RUnlock()
 
 	node, found := s.dict[key]
 	if !found {
