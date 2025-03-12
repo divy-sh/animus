@@ -20,6 +20,8 @@ I am actively working on the initial stages of this project.
 
 # Roadmap
 
+- Add pools for lock keys to curb high memory usage, also add key based locking to essentias
+
 - Support for advanced data structures (Lists, Sets, Hashes)
 
 - Master-Slave replication
