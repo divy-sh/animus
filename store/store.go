@@ -15,7 +15,7 @@ type Store[K comparable, V any] struct {
 	queue   *list.List
 	expTree *btree.BTree
 	maxSize int
-	lock    sync.RWMutex
+	locks   sync.Map
 }
 
 type DataNode[K comparable, V any] struct {
@@ -44,9 +44,15 @@ func NewStore[K comparable, V any]() *Store[K, V] {
 	}
 }
 
+func (s *Store[K, V]) getLock(key K) *sync.RWMutex {
+	actual, _ := s.locks.LoadOrStore(key, &sync.RWMutex{})
+	return actual.(*sync.RWMutex)
+}
+
 func (s *Store[K, V]) Get(key K) (V, bool) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	lock := s.getLock(key)
+	lock.RLock()
+	defer lock.Unlock()
 
 	node, found := s.dict[key]
 	if !found {
@@ -63,8 +69,9 @@ func (s *Store[K, V]) Get(key K) (V, bool) {
 }
 
 func (s *Store[K, V]) Set(key K, value V, ttl time.Time) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	lock := s.getLock(key)
+	lock.Lock()
+	defer lock.Unlock()
 
 	node, found := s.dict[key]
 	if found {
@@ -88,8 +95,9 @@ func (s *Store[K, V]) Set(key K, value V, ttl time.Time) {
 }
 
 func (s *Store[K, V]) DeleteWithKey(key K) bool {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	lock := s.getLock(key)
+	lock.Lock()
+	defer lock.Unlock()
 
 	s.evictWithKey(key)
 	return true
