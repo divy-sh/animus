@@ -51,6 +51,14 @@ var Handlers = map[string]Command{
 		Func:          getset,
 		Documentation: "GETSET key value - Gets the previous key value and then sets it to the passed value",
 	},
+	"INCR": {
+		Func:          incr,
+		Documentation: "INCR key - Increments the integer value of a key by one.",
+	},
+	"INCRBY": {
+		Func:          incrby,
+		Documentation: "INCRBY key decrement - Increments the integer value of a key by the given amount.",
+	},
 	"SET": {
 		Func:          set,
 		Documentation: "SET key value [EX seconds|PX milliseconds|KEEPTTL] - Sets the value of a key with optional expiration.",

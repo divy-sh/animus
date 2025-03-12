@@ -103,3 +103,27 @@ func getset(args []resp.Value) resp.Value {
 	}
 	return resp.Value{Typ: "bulk", Bulk: val}
 }
+
+func incr(args []resp.Value) resp.Value {
+	if len(args) != 1 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'incr' command"}
+	}
+	err := stringEssentia.Incr(args[0].Bulk)
+	if err != nil {
+		return resp.Value{Typ: "error", Str: err.Error()}
+	}
+	return resp.Value{Typ: "string", Str: "OK"}
+}
+
+func incrby(args []resp.Value) resp.Value {
+	if len(args) != 2 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'incrby' command"}
+	}
+
+	err := stringEssentia.IncrBy(args[0].Bulk, args[1].Bulk)
+	if err != nil {
+		return resp.Value{Typ: "error", Str: err.Error()}
+	}
+
+	return resp.Value{Typ: "string", Str: "OK"}
+}

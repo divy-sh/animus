@@ -46,7 +46,7 @@ func (s *StringEssentia) DecrBy(key, value string) error {
 	}
 	val, ok := s.strs.Get(key)
 	if !ok {
-		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		s.strs.Set(key, fmt.Sprint(-decrVal), time.Now().AddDate(1000, 0, 0))
 		return nil
 	}
 	intVal, err := strconv.ParseInt(val, 10, 64)
@@ -129,4 +129,28 @@ func (s *StringEssentia) GetSet(key, value string) (string, error) {
 
 func (s *StringEssentia) Set(key, value string) {
 	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+}
+
+func (s *StringEssentia) Incr(key string) error {
+	return s.IncrBy(key, "1")
+}
+
+func (s *StringEssentia) IncrBy(key, value string) error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	incrVal, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return errors.New("ERR invalid increment value")
+	}
+	val, ok := s.strs.Get(key)
+	if !ok {
+		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		return nil
+	}
+	intVal, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		return errors.New("ERR value is not an integer or out of range")
+	}
+	s.strs.Set(key, fmt.Sprint(intVal+incrVal), time.Now().AddDate(1000, 0, 0))
+	return nil
 }

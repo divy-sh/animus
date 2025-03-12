@@ -213,8 +213,8 @@ func TestDecrByNewKey(t *testing.T) {
 	}
 
 	val, _ := strEssentia.Get("num")
-	if val != "3" {
-		t.Errorf("Expected 3, got %v", val)
+	if val != "-3" {
+		t.Errorf("Expected -3, got %v", val)
 	}
 }
 
@@ -260,5 +260,69 @@ func TestGetSetInvalidKey(t *testing.T) {
 	expected := "ERR key not found, or expired"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error: %s, got val: %v, error: %v", expected, val, err)
+	}
+}
+
+func TestIncr(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("num", "10")
+
+	err := strEssentia.Incr("num")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, _ := strEssentia.Get("num")
+	if val != "11" {
+		t.Errorf("Expected 11, got %v", val)
+	}
+}
+
+func TestIncrBy(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("num", "10")
+
+	err := strEssentia.IncrBy("num", "3")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, _ := strEssentia.Get("num")
+	if val != "13" {
+		t.Errorf("Expected 13, got %v", val)
+	}
+}
+
+func TestIncrByNewKey(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+
+	err := strEssentia.IncrBy("num", "3")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, _ := strEssentia.Get("num")
+	if val != "3" {
+		t.Errorf("Expected 3, got %v", val)
+	}
+}
+
+func TestIncrByInvalidValue(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("num", "Z")
+
+	err := strEssentia.IncrBy("num", "3")
+	if err == nil {
+		t.Errorf("Expected error for invalid value, got: %v", err)
+	}
+}
+
+func TestIncrByInvalid(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("num", "10")
+
+	err := strEssentia.IncrBy("num", "invalid")
+	if err == nil || err.Error() != "ERR invalid increment value" {
+		t.Errorf("Expected error for invalid increment, got: %v", err)
 	}
 }

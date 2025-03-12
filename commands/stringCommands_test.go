@@ -216,3 +216,55 @@ func TestSetInvalidArgsCount(t *testing.T) {
 		t.Errorf("Expected ERR wrong number of arguments for 'set' command, got %v", result)
 	}
 }
+
+func TestIncr(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "counter"}}
+	result := incr(args)
+	if result.Typ != "string" || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+}
+
+func TestIncrInvalidArgumentCount(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: " world"}}
+	result := incr(args)
+	if result.Typ != "error" || result.Str != "ERR wrong number of arguments for 'incr' command" {
+		t.Errorf("Expected ERR wrong number of arguments for 'decr' command, got %v", result)
+	}
+}
+
+func TestIncrInvalidValueEssentia(t *testing.T) {
+	set([]resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "world"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}}
+	result := incr(args)
+	if result.Typ != "error" || result.Str != "ERR value is not an integer or out of range" {
+		t.Errorf("Expected ERR value is not an integer or out of range, got %v", result)
+	}
+}
+
+func TestIncrBy(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "counter"}, {Typ: "bulk", Bulk: "5"}}
+	result := incrby(args)
+	if result.Typ != "string" || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+}
+
+func TestIncrByInvalidArgumentCount(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}}
+	expected := "ERR wrong number of arguments for 'incrby' command"
+	result := incrby(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected ERR %s, got %v", expected, result)
+	}
+}
+
+func TestIncrByInvalidValueEssentia(t *testing.T) {
+	set([]resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "world"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "hello"}}
+	expected := "ERR invalid increment value"
+	result := incrby(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected error %s, got %v", expected, result)
+	}
+}
