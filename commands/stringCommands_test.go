@@ -268,3 +268,30 @@ func TestIncrByInvalidValueEssentia(t *testing.T) {
 		t.Errorf("Expected error %s, got %v", expected, result)
 	}
 }
+
+func TestIncrByFloat(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "counter"}, {Typ: "bulk", Bulk: "5"}}
+	result := incrbyfloat(args)
+	if result.Typ != "string" || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+}
+
+func TestIncrByInvalidArgumentCountFloat(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}}
+	expected := "ERR wrong number of arguments for 'incrby' command"
+	result := incrbyfloat(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected ERR %s, got %v", expected, result)
+	}
+}
+
+func TestIncrByInvalidValueEssentiaFloat(t *testing.T) {
+	set([]resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "world"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "hello"}}
+	expected := "ERR invalid increment value"
+	result := incrbyfloat(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected error %s, got %v", expected, result)
+	}
+}

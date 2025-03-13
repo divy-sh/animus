@@ -2,11 +2,19 @@ package essentias_test
 
 import (
 	"errors"
+	"math"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/divy-sh/animus/essentias"
 )
+
+const float64EqualityThreshold = 1e-9
+
+func floatsAlmostEqual(a, b float64) bool {
+	return math.Abs(a-b) <= float64EqualityThreshold
+}
 
 func TestSetAndGet(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
@@ -322,6 +330,70 @@ func TestIncrByInvalid(t *testing.T) {
 	strEssentia.Set("num", "10")
 
 	err := strEssentia.IncrBy("num", "invalid")
+	if err == nil || err.Error() != "ERR invalid increment value" {
+		t.Errorf("Expected error for invalid increment, got: %v", err)
+	}
+}
+
+func TestIncrByFloat(t *testing.T) {
+	tests := []struct {
+		key      string
+		val      string
+		incr     string
+		expected float64
+		err      error
+	}{
+		{"hello", "19", "4", 23, nil},
+		{"hello", "19", "4.4", 23.4, nil},
+		{"hello", "19.4", "4", 23.4, nil},
+		{"hello", "19.4", "4.4", 23.8, nil},
+	}
+	for _, tt := range tests {
+		strEssentia := essentias.NewStringEssentia()
+		strEssentia.Set(tt.key, tt.val)
+
+		err := strEssentia.IncrByFloat(tt.key, tt.incr)
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+
+		val, _ := strEssentia.Get(tt.key)
+		floatVal, _ := strconv.ParseFloat(val, 64)
+		if !floatsAlmostEqual(floatVal, tt.expected) {
+			t.Errorf("Expected %f, got %v", tt.expected, val)
+		}
+	}
+}
+
+func TestIncrByNewKeyFloat(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+
+	err := strEssentia.IncrByFloat("num", "3")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, _ := strEssentia.Get("num")
+	if val != "3" {
+		t.Errorf("Expected 3, got %v", val)
+	}
+}
+
+func TestIncrByInvalidValueFloat(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("num", "Z")
+
+	err := strEssentia.IncrByFloat("num", "3")
+	if err == nil {
+		t.Errorf("Expected error for invalid value, got: %v", err)
+	}
+}
+
+func TestIncrByInvalidFloat(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("num", "10")
+
+	err := strEssentia.IncrByFloat("num", "invalid")
 	if err == nil || err.Error() != "ERR invalid increment value" {
 		t.Errorf("Expected error for invalid increment, got: %v", err)
 	}

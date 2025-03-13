@@ -83,15 +83,6 @@ func getrange(args []resp.Value) resp.Value {
 	return resp.Value{Typ: "bulk", Bulk: value}
 }
 
-func set(args []resp.Value) resp.Value {
-	if len(args) != 2 {
-		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
-	}
-
-	stringEssentia.Set(args[0].Bulk, args[1].Bulk)
-	return resp.Value{Typ: "string", Str: "OK"}
-}
-
 func getset(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getset' command"}
@@ -125,5 +116,27 @@ func incrby(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
 
+	return resp.Value{Typ: "string", Str: "OK"}
+}
+
+func incrbyfloat(args []resp.Value) resp.Value {
+	if len(args) != 2 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'incrby' command"}
+	}
+
+	err := stringEssentia.IncrByFloat(args[0].Bulk, args[1].Bulk)
+	if err != nil {
+		return resp.Value{Typ: "error", Str: err.Error()}
+	}
+
+	return resp.Value{Typ: "string", Str: "OK"}
+}
+
+func set(args []resp.Value) resp.Value {
+	if len(args) != 2 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
+	}
+
+	stringEssentia.Set(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: "string", Str: "OK"}
 }

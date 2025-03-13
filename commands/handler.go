@@ -57,7 +57,11 @@ var Handlers = map[string]Command{
 	},
 	"INCRBY": {
 		Func:          incrby,
-		Documentation: "INCRBY key decrement - Increments the integer value of a key by the given amount.",
+		Documentation: "INCRBY key increment - Increments the integer value of a key by the given amount.",
+	},
+	"INCRBYFLOAT": {
+		Func:          incrbyfloat,
+		Documentation: "INCRBYFLOAT key increment - Increments the float value of a key by the given amount.",
 	},
 	"SET": {
 		Func:          set,
