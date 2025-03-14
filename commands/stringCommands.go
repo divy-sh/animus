@@ -142,5 +142,16 @@ func set(args []resp.Value) resp.Value {
 }
 
 func lcs(args []resp.Value) resp.Value {
-	panic("yet to implement")
+	if len(args) < 2 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'lcs' command"}
+	}
+	commands := []string{}
+	for _, arg := range args[2:] {
+		commands = append(commands, arg.Bulk)
+	}
+	val, err := stringEssentia.Lcs(args[0].Bulk, args[1].Bulk, commands)
+	if err != nil {
+		return resp.Value{Typ: "error", Str: err.Error()}
+	}
+	return resp.Value{Typ: "bulk", Bulk: val}
 }

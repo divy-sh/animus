@@ -195,3 +195,7 @@ func (s *StringEssentia) Set(key, value string) {
 	defer lock.Unlock()
 	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
 }
+
+func (s *StringEssentia) Lcs(bulk string, param2 string, commands []string) (string, error) {
+	panic("unimplemented")
+}
