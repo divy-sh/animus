@@ -121,7 +121,15 @@ go tool cover -html cover.out -o cover.html
 - First package release. Can be found here - https://pkg.go.dev/github.com/divy-sh/animus@v0.0.1
 
 ### v0.0.2
+
 - Refactor packages to have better names so that there are no potential naming conflicts - https://pkg.go.dev/github.com/divy-sh/animus
+
+### v0.0.3
+
+- Add these functions
+    - GETSET, INCR, INCRBY, INCRBYFLOAT
+
+- Added key based locking instead of locking the store globally, leading to huge increase in concurrency.
 
 # License
 
