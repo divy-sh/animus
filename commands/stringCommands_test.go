@@ -8,7 +8,7 @@ import (
 
 func TestAppend(t *testing.T) {
 	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: " world"}}
-	result := append(args)
+	result := appendCmd(args)
 	if result.Typ != "string" || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
@@ -16,7 +16,7 @@ func TestAppend(t *testing.T) {
 
 func TestAppendInvalidArgumentCount(t *testing.T) {
 	args := []resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: " world"}, {Typ: "bulk", Bulk: " world"}}
-	result := append(args)
+	result := appendCmd(args)
 	if result.Typ != "error" || result.Str != "ERR wrong number of arguments for 'append' command" {
 		t.Errorf("Expected ERR wrong number of arguments for 'append' command, got %v", result)
 	}

@@ -1,90 +1,90 @@
 package commands
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/divy-sh/animus/resp"
 )
 
+// Command represents a command with an associated function and documentation.
 type Command struct {
-	Func          func([]resp.Value) resp.Value
-	Documentation string
+	Func func([]resp.Value) resp.Value
+	Doc  string
 }
 
-/* All supported commands, grouped by command group, sorted alphabetically */
-var Handlers = map[string]Command{
+// Handlers maps command names to their implementations.
+var Handlers = map[string]Command{}
 
-	// ping commands
-	"PING": {
-		Func:          ping,
-		Documentation: "PING - No arguments. Returns PONG to test server responsiveness.",
-	},
+// RegisterCommand registers a command function with its documentation.
+func RegisterCommand(name string, fn func([]resp.Value) resp.Value, doc string) {
+	Handlers[name] = Command{Func: fn, Doc: doc}
+}
 
-	// string commands
-	"APPEND": {
-		Func:          append,
-		Documentation: "APPEND key value - Appends a value to a key and returns the new length of the string.",
-	},
-	"DECR": {
-		Func:          decr,
-		Documentation: "DECR key - Decrements the integer value of a key by one.",
-	},
-	"DECRBY": {
-		Func:          decrby,
-		Documentation: "DECRBY key decrement - Decrements the integer value of a key by the given amount.",
-	},
-	"GET": {
-		Func:          get,
-		Documentation: "GET key - Gets the value of a key.",
-	},
-	"GETDEL": {
-		Func:          getdel,
-		Documentation: "GETDEL key - Gets the value of a key and deletes it.",
-	},
-	"GETEX": {
-		Func:          getex,
-		Documentation: "GETEX key [expiration] - Gets the value of a key and sets an expiration.",
-	},
-	"GETRANGE": {
-		Func:          getrange,
-		Documentation: "GETRANGE key start end - Gets a substring of the string stored at a key.",
-	},
-	"GETSET": {
-		Func:          getset,
-		Documentation: "GETSET key value - Gets the previous key value and then sets it to the passed value",
-	},
-	"INCR": {
-		Func:          incr,
-		Documentation: "INCR key - Increments the integer value of a key by one.",
-	},
-	"INCRBY": {
-		Func:          incrby,
-		Documentation: "INCRBY key increment - Increments the integer value of a key by the given amount.",
-	},
-	"INCRBYFLOAT": {
-		Func:          incrbyfloat,
-		Documentation: "INCRBYFLOAT key increment - Increments the float value of a key by the given amount.",
-	},
-	"SET": {
-		Func:          set,
-		Documentation: "SET key value [EX seconds|PX milliseconds|KEEPTTL] - Sets the value of a key with optional expiration.",
-	},
+// Help command: Displays documentation for all or a specific command.
+func Help(args []resp.Value) resp.Value {
+	if len(args) == 0 {
+		var docs []string
+		for cmd, handler := range Handlers {
+			docs = append(docs, fmt.Sprintf("%s - %s", cmd, handler.Doc))
+		}
+		return resp.Value{Typ: "bulk", Bulk: strings.Join(docs, "\n")}
+	}
 
-	// hash commands
-	"HSET": {
-		Func:          hset,
-		Documentation: "HSET key field value - Sets a field in the hash stored at key to a value.",
-	},
-	"HGET": {
-		Func:          hget,
-		Documentation: "HGET key field - Gets the value of a field in the hash stored at key.",
-	},
+	cmd := strings.ToUpper(args[0].Bulk)
+	if handler, exists := Handlers[cmd]; exists {
+		return resp.Value{Typ: "bulk", Bulk: fmt.Sprintf("%s - %s", cmd, handler.Doc)}
+	}
+	return resp.Value{Typ: "error", Str: "Unknown command: " + cmd}
+}
 
-	// list commands
-	"RPOP": {
-		Func:          rpop,
-		Documentation: "RPOP key [count] - Removes and returns the last element(s) of the list stored at key.",
-	},
-	"RPUSH": {
-		Func:          rpush,
-		Documentation: "RPUSH key value [value ...] - Inserts one or more elements at the end of the list stored at key.",
-	},
+// Initialize commands with their documentation
+func init() {
+	// Connection
+	RegisterCommand("PING", ping, `PING [ARGUMENT]
+	Returns PONG to test server responsiveness.`)
+
+	// Strings
+	RegisterCommand("APPEND", appendCmd, `APPEND [KEY] [VALUE]
+	Appends a value to a key and returns the new length of the string.`)
+	RegisterCommand("DECR", decr, `DECR [KEY]
+	Decrements the integer value of a key by one.`)
+	RegisterCommand("DECRBY", decrby, `DECRBY [KEY] [DECREMENT]
+	Decrements the integer value of a key by the given amount.`)
+	RegisterCommand("GET", get, `GET [KEY]
+	Gets the value of a key.`)
+	RegisterCommand("GETDEL", getdel, `GETDEL [KEY]
+	Gets the value of a key and deletes it.`)
+	RegisterCommand("GETEX", getex, `GETEX [KEY] [EXPIRATION]
+	Gets the value of a key and sets an expiration.`)
+	RegisterCommand("GETRANGE", getrange, `GETRANGE [KEY] [START] [END]
+	Gets a substring of the string stored at a key.`)
+	RegisterCommand("GETSET", getset, `GETSET [KEY] [VALUE]
+	Gets the previous key value and then sets it to the passed value.`)
+	RegisterCommand("INCR", incr, `INCR [KEY]
+	Increments the integer value of a key by one.`)
+	RegisterCommand("INCRBY", incrby, `INCRBY [KEY] [INCREMENT]
+	Increments the integer value of a key by the given amount.`)
+	RegisterCommand("INCRBYFLOAT", incrbyfloat, `INCRBYFLOAT [KEY] [INCREMENT]
+	Increments the float value of a key by the given amount.`)
+	RegisterCommand("LCS", lcs, `LCS [KEY1] [KEY2] [LEN] [IDX] [MINMATCHLEN MIN-MATCH-LEN] [WITHMATCHLEN]
+	Finds the Longest Common Subsequence between the value of two keys.`)
+	RegisterCommand("SET", set, `SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
+	Sets the value of a key with optional expiration.`)
+
+	// Hashes
+	RegisterCommand("HSET", hset, `HSET [KEY] [FIELD] [VALUE]
+	Sets a field in the hash stored at key to a value.`)
+	RegisterCommand("HGET", hget, `HGET [KEY] [FIELD]
+	Gets the value of a field in the hash stored at key.`)
+
+	// Lists
+	RegisterCommand("RPOP", rpop, `RPOP [KEY] [COUNT]
+	Removes and returns the last element(s) of the list stored at key.`)
+	RegisterCommand("RPUSH", rpush, `RPUSH [KEY] [VALUE] [VALUE ...]
+	Inserts one or more elements at the end of the list stored at key.`)
+
+	// Help
+	RegisterCommand("HELP", Help, `HELP [COMMAND]
+	Shows documentation for available commands.`)
 }

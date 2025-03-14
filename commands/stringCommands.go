@@ -7,7 +7,7 @@ import (
 
 var stringEssentia = essentias.NewStringEssentia()
 
-func append(args []resp.Value) resp.Value {
+func appendCmd(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'append' command"}
 	}
@@ -139,4 +139,8 @@ func set(args []resp.Value) resp.Value {
 
 	stringEssentia.Set(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: "string", Str: "OK"}
+}
+
+func lcs(args []resp.Value) resp.Value {
+	panic("yet to implement")
 }
