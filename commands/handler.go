@@ -67,7 +67,7 @@ func init() {
 	Increments the integer value of a key by the given amount.`)
 	RegisterCommand("INCRBYFLOAT", incrbyfloat, `INCRBYFLOAT [KEY] [INCREMENT]
 	Increments the float value of a key by the given amount.`)
-	RegisterCommand("LCS", lcs, `LCS [KEY1] [KEY2] [LEN] [IDX] [MINMATCHLEN MIN-MATCH-LEN] [WITHMATCHLEN]
+	RegisterCommand("LCS", lcs, `LCS [KEY1] [KEY2] LEN
 	Finds the Longest Common Subsequence between the value of two keys.`)
 	RegisterCommand("SET", set, `SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
 	Sets the value of a key with optional expiration.`)

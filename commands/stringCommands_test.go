@@ -295,3 +295,50 @@ func TestIncrByInvalidValueEssentiaFloat(t *testing.T) {
 		t.Errorf("Expected error %s, got %v", expected, result)
 	}
 }
+
+func TestLcs(t *testing.T) {
+	set([]resp.Value{{Typ: "bulk", Bulk: "key1"}, {Typ: "bulk", Bulk: "lasagna"}})
+	set([]resp.Value{{Typ: "bulk", Bulk: "key2"}, {Typ: "bulk", Bulk: "baigan"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "key1"}, {Typ: "bulk", Bulk: "key2"}}
+	result := lcs(args)
+	if result.Typ == "error" || result.Bulk != "aga" {
+		t.Errorf("Expected value: aga, got %v", result)
+	}
+}
+
+func TestLcsLen(t *testing.T) {
+	set([]resp.Value{{Typ: "bulk", Bulk: "key1"}, {Typ: "bulk", Bulk: "lasagna"}})
+	set([]resp.Value{{Typ: "bulk", Bulk: "key2"}, {Typ: "bulk", Bulk: "baigan"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "key1"}, {Typ: "bulk", Bulk: "key2"}, {Typ: "bulk", Bulk: "len"}}
+	result := lcs(args)
+	if result.Typ == "error" || result.Bulk != "3" {
+		t.Errorf("Expected value: 3, got %v", result)
+	}
+}
+
+func TestLcsInvalidFirstKey(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "invalid"}, {Typ: "bulk", Bulk: "key2"}}
+	expected := "ERR key not found, or expired"
+	result := lcs(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected error: %s, got %v", expected, result)
+	}
+}
+
+func TestLcsInvalidSecondtKey(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "key1"}, {Typ: "bulk", Bulk: "invalid"}}
+	expected := "ERR key not found, or expired"
+	result := lcs(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected error: %s, got %v", expected, result)
+	}
+}
+
+func TestLcsInvalidArguments(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "key1"}}
+	expected := "ERR wrong number of arguments for 'lcs' command"
+	result := lcs(args)
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected error: %s, got %v", expected, result)
+	}
+}

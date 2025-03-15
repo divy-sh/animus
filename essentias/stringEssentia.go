@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -196,6 +197,64 @@ func (s *StringEssentia) Set(key, value string) {
 	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
 }
 
-func (s *StringEssentia) Lcs(bulk string, param2 string, commands []string) (string, error) {
-	panic("unimplemented")
+func (s *StringEssentia) Lcs(key1 string, key2 string, commands []string) (string, error) {
+	lock := s.getLock(key1)
+	lock.RLock()
+	lock2 := s.getLock(key2)
+	lock2.RLock()
+	defer lock.RUnlock()
+	defer lock2.RUnlock()
+
+	val1, ok := s.strs.Get(key1)
+	if !ok {
+		return "", errors.New("ERR key not found, or expired")
+	}
+	val2, ok := s.strs.Get(key2)
+	if !ok {
+		return "", errors.New("ERR key not found, or expired")
+	}
+	lcs, lcsLen := findLcs(val1, val2)
+	if len(commands) == 1 && strings.ToUpper(commands[0]) == "LEN" {
+		return fmt.Sprint(lcsLen), nil
+	}
+	return lcs, nil
+}
+func findLcs(str1, str2 string) (string, int) {
+	m, n := len(str1), len(str2)
+	if m < n {
+		str1, str2 = str2, str1
+		m, n = n, m
+	}
+
+	prev := make([]int, n+1)
+	curr := make([]int, n+1)
+
+	for i := range m {
+		for j := range n {
+			if str1[i] == str2[j] {
+				curr[j+1] = prev[j] + 1
+			} else {
+				curr[j+1] = max(curr[j], prev[j+1])
+			}
+		}
+		prev, curr = curr, prev
+	}
+
+	lcsLen := prev[n]
+	lcs := make([]byte, lcsLen)
+	i, j, k := m, n, lcsLen
+
+	for i > 0 && j > 0 {
+		if str1[i-1] == str2[j-1] {
+			k--
+			lcs[k] = str1[i-1]
+			i--
+			j--
+		} else if prev[j] > prev[j-1] {
+			i--
+		} else {
+			j--
+		}
+	}
+	return string(lcs), lcsLen
 }

@@ -398,3 +398,52 @@ func TestIncrByInvalidFloat(t *testing.T) {
 		t.Errorf("Expected error for invalid increment, got: %v", err)
 	}
 }
+
+func TestLcs(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("key1", "lasagna")
+	strEssentia.Set("key2", "baigan")
+	lcs, err := strEssentia.Lcs("key1", "key2", []string{})
+	if err != nil || lcs != "aga" {
+		t.Errorf("Expected value for lcs, got: %v", err)
+	}
+}
+
+func TestLcsLen(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("key1", "lasagna")
+	strEssentia.Set("key2", "baigan")
+	lcsLen, err := strEssentia.Lcs("key1", "key2", []string{"len"})
+	if err != nil || lcsLen != "3" {
+		t.Errorf("Expected value for lcs, got: %v", err)
+	}
+}
+
+func TestLcsLen2(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("key1", "lasagna")
+	strEssentia.Set("key2", "baigan")
+	lcsLen, err := strEssentia.Lcs("key2", "key1", []string{"len"})
+	if err != nil || lcsLen != "3" {
+		t.Errorf("Expected value for lcs, got: %v", err)
+	}
+}
+
+func TestLcsInvalidFirstKey(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	_, err := strEssentia.Lcs("key1", "key2", []string{})
+	expected := "ERR key not found, or expired"
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected error for lcs: %s, got: %v", expected, err)
+	}
+}
+
+func TestLcsInvalidSecondKey(t *testing.T) {
+	strEssentia := essentias.NewStringEssentia()
+	strEssentia.Set("key1", "lasagna")
+	_, err := strEssentia.Lcs("key1", "key2", []string{})
+	expected := "ERR key not found, or expired"
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected error for lcs: %s, got: %v", expected, err)
+	}
+}

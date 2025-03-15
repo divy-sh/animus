@@ -19,9 +19,9 @@ INCR - INCR [KEY]
 ```
 Increments the integer value of a key by one.
 ```bash
-LCS - LCS [KEY1] [KEY2] [LEN] [IDX] [MINMATCHLEN MIN-MATCH-LEN] [WITHMATCHLEN]
+LCS - LCS [KEY1] [KEY2] LEN
 ```
-Finds the Longest Common Subsequence between the value of two keys.
+Finds the Longest Common Subsequence between the value of two keys. 
 ```bash
 INCRBYFLOAT - INCRBYFLOAT [KEY] [INCREMENT]
 ```
