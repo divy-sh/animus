@@ -219,6 +219,7 @@ func (s *StringEssentia) Lcs(key1 string, key2 string, commands []string) (strin
 	}
 	return lcs, nil
 }
+
 func findLcs(str1, str2 string) (string, int) {
 	m, n := len(str1), len(str2)
 	if m < n {
