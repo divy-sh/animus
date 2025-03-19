@@ -132,15 +132,6 @@ func incrbyfloat(args []resp.Value) resp.Value {
 	return resp.Value{Typ: "string", Str: "OK"}
 }
 
-func set(args []resp.Value) resp.Value {
-	if len(args) != 2 {
-		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
-	}
-
-	stringEssentia.Set(args[0].Bulk, args[1].Bulk)
-	return resp.Value{Typ: "string", Str: "OK"}
-}
-
 func lcs(args []resp.Value) resp.Value {
 	if len(args) < 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'lcs' command"}
@@ -154,4 +145,33 @@ func lcs(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
 	return resp.Value{Typ: "bulk", Bulk: val}
+}
+
+func mget(args []resp.Value) resp.Value {
+	if len(args) < 1 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'mget' command"}
+	}
+	keys := []string{}
+	for _, arg := range args {
+		keys = append(keys, arg.Bulk)
+	}
+	values := stringEssentia.MGet(&keys)
+	response := make([]resp.Value, len(keys))
+	for i, val := range *values {
+		if val == "" {
+			response[i] = resp.Value{Typ: "null"}
+		} else {
+			response[i] = resp.Value{Typ: "bulk", Bulk: val}
+		}
+	}
+	return resp.Value{Typ: "array", Array: response}
+}
+
+func set(args []resp.Value) resp.Value {
+	if len(args) != 2 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
+	}
+
+	stringEssentia.Set(args[0].Bulk, args[1].Bulk)
+	return resp.Value{Typ: "string", Str: "OK"}
 }

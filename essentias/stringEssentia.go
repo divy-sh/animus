@@ -220,6 +220,24 @@ func (s *StringEssentia) Lcs(key1 string, key2 string, commands []string) (strin
 	return lcs, nil
 }
 
+func (s *StringEssentia) MGet(keys *[]string) *[]string {
+	values := make([]string, len(*keys))
+	for i, key := range *keys {
+		lock := s.getLock(key)
+		lock.Lock()
+		val, ok := s.strs.Get(key)
+		if !ok {
+			values[i] = ""
+		} else {
+			values[i] = val
+		}
+		lock.Unlock()
+	}
+	return &values
+}
+
+/* PRIVATE FUNCTIONS */
+
 func findLcs(str1, str2 string) (string, int) {
 	m, n := len(str1), len(str2)
 	if m < n {

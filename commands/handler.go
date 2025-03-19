@@ -70,6 +70,9 @@ func init() {
 	RegisterCommand("LCS", lcs, `LCS [KEY1] [KEY2] LEN
 	Finds the Longest Common Subsequence between the value of two keys.
 	Send the optional LEN argument to get just the length`)
+	RegisterCommand("MGET", mget, `MGET key [key ...]
+	Returns the values for all the keys.
+	Returns nil for a non-existing key.`)
 	RegisterCommand("SET", set, `SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
 	Sets the value of a key with optional expiration.`)
 

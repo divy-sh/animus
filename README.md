@@ -23,6 +23,10 @@ LCS - LCS [KEY1] [KEY2] LEN
 ```
 Finds the Longest Common Subsequence between the value of two keys. 
 ```bash
+MGET key [keys ...]
+```
+Returns the values for all the keys, nil for a non-existing key.
+```bash
 INCRBYFLOAT - INCRBYFLOAT [KEY] [INCREMENT]
 ```
 Increments the float value of a key by the given amount.
