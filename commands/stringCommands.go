@@ -167,6 +167,18 @@ func mget(args []resp.Value) resp.Value {
 	return resp.Value{Typ: "array", Array: response}
 }
 
+func mset(args []resp.Value) resp.Value {
+	if len(args) < 2 || len(args)&1 == 1 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'mget' command"}
+	}
+	kvPairs := map[string]string{}
+	for i := 0; i < len(args); i += 2 {
+		kvPairs[args[i].Bulk] = args[i+1].Bulk
+	}
+	stringEssentia.MSet(&kvPairs)
+	return resp.Value{Typ: "string", Str: "OK"}
+}
+
 func set(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}

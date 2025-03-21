@@ -73,6 +73,8 @@ func init() {
 	RegisterCommand("MGET", mget, `MGET key [key ...]
 	Returns the values for all the keys.
 	Returns nil for a non-existing key.`)
+	RegisterCommand("MSET", mset, `MSET key value [key1 value1 ...]
+	Sets the values for all the keys value pair.`)
 	RegisterCommand("SET", set, `SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
 	Sets the value of a key with optional expiration.`)
 

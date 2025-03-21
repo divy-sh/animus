@@ -27,6 +27,10 @@ MGET key [keys ...]
 ```
 Returns the values for all the keys, nil for a non-existing key.
 ```bash
+MSET key value [keys values ...]
+```
+Sets the values for all the key - value pairs.
+```bash
 INCRBYFLOAT - INCRBYFLOAT [KEY] [INCREMENT]
 ```
 Increments the float value of a key by the given amount.

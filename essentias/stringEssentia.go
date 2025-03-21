@@ -236,6 +236,15 @@ func (s *StringEssentia) MGet(keys *[]string) *[]string {
 	return &values
 }
 
+func (s *StringEssentia) MSet(kvPairs *map[string]string) {
+	for key, val := range *kvPairs {
+		lock := s.getLock(key)
+		lock.Lock()
+		s.strs.Set(key, val, time.Now().AddDate(1000, 0, 0))
+		lock.Unlock()
+	}
+}
+
 /* PRIVATE FUNCTIONS */
 
 func findLcs(str1, str2 string) (string, int) {

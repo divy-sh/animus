@@ -448,11 +448,13 @@ func TestLcsInvalidSecondKey(t *testing.T) {
 	}
 }
 
-func TestMGet(t *testing.T) {
+func TestMGetAndMSet(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
-	strEssentia.Set("key1", "value1")
-	strEssentia.Set("key2", "value2")
-	strEssentia.Set("key3", "value3")
+	strEssentia.MSet(&map[string]string{
+		"key1": "value1",
+		"key2": "value2",
+		"key3": "value3",
+	})
 
 	values := strEssentia.MGet(&[]string{"key1", "key2", "key3", "invalid"})
 	expected := []string{"value1", "value2", "value3", ""}

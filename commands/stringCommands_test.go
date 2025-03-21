@@ -343,9 +343,12 @@ func TestLcsInvalidArguments(t *testing.T) {
 	}
 }
 
-func TestMGet(t *testing.T) {
-	set([]resp.Value{{Typ: "bulk", Bulk: "key"}, {Typ: "bulk", Bulk: "value"}})
-	set([]resp.Value{{Typ: "bulk", Bulk: "key2"}, {Typ: "bulk", Bulk: "value2"}})
+func TestMGetAndMSet(t *testing.T) {
+	mset([]resp.Value{
+		{Typ: "bulk", Bulk: "key2"},
+		{Typ: "bulk", Bulk: "value2"},
+		{Typ: "bulk", Bulk: "key"},
+		{Typ: "bulk", Bulk: "value"}})
 
 	args := []resp.Value{{Typ: "bulk", Bulk: "key"}, {Typ: "bulk", Bulk: "key2"}, {Typ: "bulk", Bulk: "invalid"}}
 	expected := []string{"value", "value2", ""}
@@ -362,6 +365,22 @@ func TestMGet(t *testing.T) {
 func TestMGetInvalidCommands(t *testing.T) {
 	args := []resp.Value{}
 	result := mget(args)
+	if result.Typ != "error" {
+		t.Errorf("Expected error got %v", result)
+	}
+}
+
+func TestMSetInvalidCommands(t *testing.T) {
+	args := []resp.Value{}
+	result := mset(args)
+	if result.Typ != "error" {
+		t.Errorf("Expected error got %v", result)
+	}
+}
+
+func TestMSetInvalidCommands2(t *testing.T) {
+	args := []resp.Value{{Typ: "bulk", Bulk: "key"}}
+	result := mset(args)
 	if result.Typ != "error" {
 		t.Errorf("Expected error got %v", result)
 	}
