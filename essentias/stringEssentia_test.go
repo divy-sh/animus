@@ -39,9 +39,9 @@ func TestAppend(t *testing.T) {
 
 func TestAppendNewKey(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
-	strEssentia.Append("key1", "appended")
+	strEssentia.Append("TestAppendNewKey", "appended")
 
-	val, err := strEssentia.Get("key1")
+	val, err := strEssentia.Get("TestAppendNewKey")
 	if err != nil || val != "appended" {
 		t.Errorf("Expected appended, got %v, err: %v", val, err)
 	}
@@ -215,12 +215,12 @@ func TestDecrBy(t *testing.T) {
 func TestDecrByNewKey(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
 
-	err := strEssentia.DecrBy("num", "3")
+	err := strEssentia.DecrBy("TestDecrByNewKey", "3")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := strEssentia.Get("num")
+	val, _ := strEssentia.Get("TestDecrByNewKey")
 	if val != "-3" {
 		t.Errorf("Expected -3, got %v", val)
 	}
@@ -304,12 +304,12 @@ func TestIncrBy(t *testing.T) {
 func TestIncrByNewKey(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
 
-	err := strEssentia.IncrBy("num", "3")
+	err := strEssentia.IncrBy("TestIncrByNewKey", "3")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := strEssentia.Get("num")
+	val, _ := strEssentia.Get("TestIncrByNewKey")
 	if val != "3" {
 		t.Errorf("Expected 3, got %v", val)
 	}
@@ -368,12 +368,12 @@ func TestIncrByFloat(t *testing.T) {
 func TestIncrByNewKeyFloat(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
 
-	err := strEssentia.IncrByFloat("num", "3")
+	err := strEssentia.IncrByFloat("TestIncrByNewKeyFloat", "3")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := strEssentia.Get("num")
+	val, _ := strEssentia.Get("TestIncrByNewKeyFloat")
 	if val != "3" {
 		t.Errorf("Expected 3, got %v", val)
 	}
@@ -381,9 +381,9 @@ func TestIncrByNewKeyFloat(t *testing.T) {
 
 func TestIncrByInvalidValueFloat(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
-	strEssentia.Set("num", "Z")
+	strEssentia.Set("TestIncrByInvalidValueFloat", "Z")
 
-	err := strEssentia.IncrByFloat("num", "3")
+	err := strEssentia.IncrByFloat("TestIncrByInvalidValueFloat", "3")
 	if err == nil {
 		t.Errorf("Expected error for invalid value, got: %v", err)
 	}
@@ -431,7 +431,7 @@ func TestLcsLen2(t *testing.T) {
 
 func TestLcsInvalidFirstKey(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
-	_, err := strEssentia.Lcs("key1", "key2", []string{})
+	_, err := strEssentia.Lcs("TestLcsInvalidFirstKey", "key2", []string{})
 	expected := "ERR key not found, or expired"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error for lcs: %s, got: %v", expected, err)
@@ -441,7 +441,7 @@ func TestLcsInvalidFirstKey(t *testing.T) {
 func TestLcsInvalidSecondKey(t *testing.T) {
 	strEssentia := essentias.NewStringEssentia()
 	strEssentia.Set("key1", "lasagna")
-	_, err := strEssentia.Lcs("key1", "key2", []string{})
+	_, err := strEssentia.Lcs("key1", "TestLcsInvalidSecondKey", []string{})
 	expected := "ERR key not found, or expired"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error for lcs: %s, got: %v", expected, err)

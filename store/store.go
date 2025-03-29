@@ -10,102 +10,121 @@ import (
 
 /* Essentias */
 
-type Store[K comparable, V any] struct {
-	dict    map[K]*list.Element
+type Store struct {
+	dict    map[any]*list.Element
 	queue   *list.List
 	expTree *btree.BTree
 	maxSize int
 	locks   sync.Map
 }
 
-type DataNode[K comparable, V any] struct {
-	key  K
-	data V
+type DataNode struct {
+	key  any
+	data any
 	ttl  time.Time
 }
 
-type BTreeItem[K comparable] struct {
+type BTreeItem struct {
 	ttl time.Time
-	key K
+	key any
 }
 
-func (a BTreeItem[K]) Less(b btree.Item) bool {
-	return a.ttl.Before(b.(BTreeItem[K]).ttl)
+func (a BTreeItem) Less(b btree.Item) bool {
+	return a.ttl.Before(b.(BTreeItem).ttl)
+}
+
+/* Singleton instance */
+var (
+	sharedInstance *Store
+	once           sync.Once
+	storeConfig    = StoreConfig{MaxSize: 100_000} // Default config
+)
+
+/* Singleton Getter */
+
+// GetSharedStore ensures a single global store instance
+func GetSharedStore() *Store {
+	if sharedInstance == nil {
+		NewStoreBuilder().Build() // Fallback to default config if not explicitly built
+	}
+	return sharedInstance
 }
 
 /* Public functions */
 
-func NewStore[K comparable, V any]() *Store[K, V] {
-	return &Store[K, V]{
-		dict:    make(map[K]*list.Element),
-		queue:   list.New(),
-		expTree: btree.New(2),
-		maxSize: 100_000,
-	}
-}
-
-func (s *Store[K, V]) getLock(key K) *sync.RWMutex {
+func (s *Store) getLock(key any) *sync.RWMutex {
 	actual, _ := s.locks.LoadOrStore(key, &sync.RWMutex{})
 	return actual.(*sync.RWMutex)
 }
 
-func (s *Store[K, V]) Get(key K) (V, bool) {
-	lock := s.getLock(key)
+// Get retrieves a value with type inference
+func Get[K comparable, V any](key K) (V, bool) {
+	store := GetSharedStore()
+	lock := store.getLock(key)
 	lock.RLock()
 	defer lock.RUnlock()
 
-	node, found := s.dict[key]
+	node, found := store.dict[key]
 	if !found {
 		var zero V
 		return zero, false
-	} else if node.Value.(*DataNode[K, V]).ttl.Before(time.Now()) {
-		s.evictWithKey(key)
+	} else if node.Value.(*DataNode).ttl.Before(time.Now()) {
+		store.evictWithKey(key)
 		var zero V
 		return zero, false
 	}
 
-	s.queue.MoveToFront(node)
-	return node.Value.(*DataNode[K, V]).data, true
+	store.queue.MoveToFront(node)
+	value, ok := node.Value.(*DataNode).data.(V)
+	if !ok {
+		var zero V
+		return zero, false
+	}
+	return value, true
 }
 
-func (s *Store[K, V]) Set(key K, value V, ttl time.Time) {
-	lock := s.getLock(key)
+// Set stores a value with TTL
+func Set[K comparable, V any](key K, value V, ttl time.Time) {
+	store := GetSharedStore()
+	lock := store.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 
-	node, found := s.dict[key]
+	node, found := store.dict[key]
 	if found {
-		node.Value.(*DataNode[K, V]).data = value
-		node.Value.(*DataNode[K, V]).ttl = ttl
-		s.queue.MoveToFront(node)
-		s.expTree.Delete(BTreeItem[K]{ttl: node.Value.(*DataNode[K, V]).ttl, key: key})
-		s.expTree.ReplaceOrInsert(BTreeItem[K]{ttl: ttl, key: key})
+		node.Value.(*DataNode).data = value
+		node.Value.(*DataNode).ttl = ttl
+		store.queue.MoveToFront(node)
+		store.expTree.Delete(BTreeItem{ttl: node.Value.(*DataNode).ttl, key: key})
+		store.expTree.ReplaceOrInsert(BTreeItem{ttl: ttl, key: key})
 		return
 	}
 
-	storeItem := &DataNode[K, V]{
+	storeItem := &DataNode{
 		key:  key,
 		data: value,
 		ttl:  ttl,
 	}
-	queueItem := s.queue.PushFront(storeItem)
-	s.dict[key] = queueItem
-	s.expTree.ReplaceOrInsert(BTreeItem[K]{ttl: ttl, key: key})
-	s.lazyEvict()
+	queueItem := store.queue.PushFront(storeItem)
+	store.dict[key] = queueItem
+	store.expTree.ReplaceOrInsert(BTreeItem{ttl: ttl, key: key})
+	store.lazyEvict()
 }
 
-func (s *Store[K, V]) DeleteWithKey(key K) bool {
-	lock := s.getLock(key)
+// DeleteWithKey removes a key
+func DeleteWithKey[K comparable](key K) bool {
+	store := GetSharedStore()
+	lock := store.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 
-	s.evictWithKey(key)
+	store.evictWithKey(key)
 	return true
 }
 
-/* private functions */
+/* Private functions */
 
-func (s *Store[K, V]) lazyEvict() {
+func (s *Store) lazyEvict() {
 	if len(s.dict) <= s.maxSize {
 		return
 	}
@@ -114,10 +133,10 @@ func (s *Store[K, V]) lazyEvict() {
 	}
 }
 
-func (s *Store[K, V]) evictTtlExpired() bool {
+func (s *Store) evictTtlExpired() bool {
 	item := s.expTree.Min()
-	if item != nil && item.(BTreeItem[K]).ttl.Before(time.Now()) {
-		key := s.expTree.Delete(item).(BTreeItem[K]).key
+	if item != nil && item.(BTreeItem).ttl.Before(time.Now()) {
+		key := s.expTree.Delete(item).(BTreeItem).key
 		s.queue.Remove(s.dict[key])
 		delete(s.dict, key)
 		return true
@@ -125,11 +144,11 @@ func (s *Store[K, V]) evictTtlExpired() bool {
 	return false
 }
 
-func (s *Store[K, V]) evictLru() bool {
+func (s *Store) evictLru() bool {
 	lruItem := s.queue.Back()
 	if lruItem != nil {
-		dataNode := lruItem.Value.(*DataNode[K, V])
-		s.expTree.Delete(BTreeItem[K]{ttl: dataNode.ttl, key: dataNode.key})
+		dataNode := lruItem.Value.(*DataNode)
+		s.expTree.Delete(BTreeItem{ttl: dataNode.ttl, key: dataNode.key})
 		s.queue.Remove(lruItem)
 		delete(s.dict, dataNode.key)
 		return true
@@ -137,8 +156,8 @@ func (s *Store[K, V]) evictLru() bool {
 	return false
 }
 
-func (s *Store[K, V]) evictWithKey(key K) bool {
-	s.expTree.Delete(BTreeItem[K]{ttl: s.dict[key].Value.(*DataNode[K, V]).ttl, key: key})
+func (s *Store) evictWithKey(key any) bool {
+	s.expTree.Delete(BTreeItem{ttl: s.dict[key].Value.(*DataNode).ttl, key: key})
 	s.queue.Remove(s.dict[key])
 	delete(s.dict, key)
 	return true

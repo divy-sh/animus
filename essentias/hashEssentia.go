@@ -9,14 +9,11 @@ import (
 )
 
 type HashEssentia struct {
-	hashes store.Store[string, map[string]string]
-	locks  sync.Map
+	locks sync.Map
 }
 
 func NewHashEssentia() *HashEssentia {
-	return &HashEssentia{
-		hashes: *store.NewStore[string, map[string]string](),
-	}
+	return &HashEssentia{}
 }
 
 func (h *HashEssentia) getLock(key string) *sync.RWMutex {
@@ -28,7 +25,7 @@ func (h *HashEssentia) HGet(hash, key string) (string, error) {
 	lock := h.getLock(key)
 	lock.RLock()
 	defer lock.RUnlock()
-	value, ok := h.hashes.Get(hash)
+	value, ok := store.Get[string, map[string]string](hash)
 	if !ok {
 		return "", errors.New("ERR not found")
 	}
@@ -42,11 +39,11 @@ func (h *HashEssentia) HSet(hash, key, value string) {
 	lock := h.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	hashVal, ok := h.hashes.Get(hash)
+	hashVal, ok := store.Get[string, map[string]string](hash)
 	if ok {
 		hashVal[key] = value
 	} else {
 		hashVal = map[string]string{key: value}
 	}
-	h.hashes.Set(hash, hashVal, time.Now().AddDate(1000, 0, 0))
+	store.Set(hash, hashVal, time.Now().AddDate(1000, 0, 0))
 }

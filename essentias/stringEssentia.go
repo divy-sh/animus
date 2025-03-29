@@ -12,14 +12,11 @@ import (
 )
 
 type StringEssentia struct {
-	strs  store.Store[string, string]
 	locks sync.Map
 }
 
 func NewStringEssentia() *StringEssentia {
-	return &StringEssentia{
-		strs: *store.NewStore[string, string](),
-	}
+	return &StringEssentia{}
 }
 
 func (s *StringEssentia) getLock(key string) *sync.RWMutex {
@@ -32,12 +29,12 @@ func (s *StringEssentia) Append(key, value string) {
 	lock := s.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
-		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		store.Set(key, value, time.Now().AddDate(1000, 0, 0))
 		return
 	}
-	s.strs.Set(key, val+value, time.Now().AddDate(1000, 0, 0))
+	store.Set(key, val+value, time.Now().AddDate(1000, 0, 0))
 }
 
 func (s *StringEssentia) Decr(key string) error {
@@ -52,16 +49,16 @@ func (s *StringEssentia) DecrBy(key, value string) error {
 	if err != nil {
 		return errors.New("ERR invalid decrement value")
 	}
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
-		s.strs.Set(key, fmt.Sprint(-decrVal), time.Now().AddDate(1000, 0, 0))
+		store.Set(key, fmt.Sprint(-decrVal), time.Now().AddDate(1000, 0, 0))
 		return nil
 	}
 	intVal, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
 		return errors.New("ERR value is not an integer or out of range")
 	}
-	s.strs.Set(key, fmt.Sprint(intVal-decrVal), time.Now().AddDate(1000, 0, 0))
+	store.Set(key, fmt.Sprint(intVal-decrVal), time.Now().AddDate(1000, 0, 0))
 	return nil
 }
 
@@ -69,7 +66,7 @@ func (s *StringEssentia) Get(key string) (string, error) {
 	lock := s.getLock(key)
 	lock.RLock()
 	defer lock.RUnlock()
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
 	}
@@ -80,11 +77,11 @@ func (s *StringEssentia) GetDel(key string) (string, error) {
 	lock := s.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
 	}
-	s.strs.DeleteWithKey(key)
+	store.DeleteWithKey(key)
 	return val, nil
 }
 
@@ -92,7 +89,7 @@ func (s *StringEssentia) GetEx(key, exp string) (string, error) {
 	lock := s.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
 	}
@@ -100,7 +97,7 @@ func (s *StringEssentia) GetEx(key, exp string) (string, error) {
 	if err != nil {
 		return "", errors.New("ERR invalid expire time")
 	}
-	s.strs.Set(key, val, time.Now().Add(time.Duration(expSeconds)*time.Second))
+	store.Set(key, val, time.Now().Add(time.Duration(expSeconds)*time.Second))
 	return val, nil
 }
 
@@ -108,7 +105,7 @@ func (s *StringEssentia) GetRange(key, start, end string) (string, error) {
 	lock := s.getLock(key)
 	lock.RLock()
 	defer lock.RUnlock()
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
 	}
@@ -136,11 +133,11 @@ func (s *StringEssentia) GetSet(key, value string) (string, error) {
 	lock := s.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
 	}
-	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+	store.Set(key, value, time.Now().AddDate(1000, 0, 0))
 	return val, nil
 }
 
@@ -156,16 +153,16 @@ func (s *StringEssentia) IncrBy(key, value string) error {
 	if err != nil {
 		return errors.New("ERR invalid increment value")
 	}
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
-		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		store.Set(key, value, time.Now().AddDate(1000, 0, 0))
 		return nil
 	}
 	intVal, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
 		return errors.New("ERR value is not an integer or out of range")
 	}
-	s.strs.Set(key, fmt.Sprint(intVal+incrVal), time.Now().AddDate(1000, 0, 0))
+	store.Set(key, fmt.Sprint(intVal+incrVal), time.Now().AddDate(1000, 0, 0))
 	return nil
 }
 
@@ -177,16 +174,16 @@ func (s *StringEssentia) IncrByFloat(key, value string) error {
 	if err != nil {
 		return errors.New("ERR invalid increment value")
 	}
-	val, ok := s.strs.Get(key)
+	val, ok := store.Get[string, string](key)
 	if !ok {
-		s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		store.Set(key, value, time.Now().AddDate(1000, 0, 0))
 		return nil
 	}
 	floatVal, err := strconv.ParseFloat(val, 64)
 	if err != nil {
 		return errors.New("ERR value is not a float or out of range")
 	}
-	s.strs.Set(key, fmt.Sprint(floatVal+incrVal), time.Now().AddDate(1000, 0, 0))
+	store.Set(key, fmt.Sprint(floatVal+incrVal), time.Now().AddDate(1000, 0, 0))
 	return nil
 }
 
@@ -194,7 +191,7 @@ func (s *StringEssentia) Set(key, value string) {
 	lock := s.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	s.strs.Set(key, value, time.Now().AddDate(1000, 0, 0))
+	store.Set(key, value, time.Now().AddDate(1000, 0, 0))
 }
 
 func (s *StringEssentia) Lcs(key1 string, key2 string, commands []string) (string, error) {
@@ -205,11 +202,11 @@ func (s *StringEssentia) Lcs(key1 string, key2 string, commands []string) (strin
 	defer lock.RUnlock()
 	defer lock2.RUnlock()
 
-	val1, ok := s.strs.Get(key1)
+	val1, ok := store.Get[string, string](key1)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
 	}
-	val2, ok := s.strs.Get(key2)
+	val2, ok := store.Get[string, string](key2)
 	if !ok {
 		return "", errors.New("ERR key not found, or expired")
 	}
@@ -225,7 +222,7 @@ func (s *StringEssentia) MGet(keys *[]string) *[]string {
 	for i, key := range *keys {
 		lock := s.getLock(key)
 		lock.Lock()
-		val, ok := s.strs.Get(key)
+		val, ok := store.Get[string, string](key)
 		if !ok {
 			values[i] = ""
 		} else {
@@ -240,7 +237,7 @@ func (s *StringEssentia) MSet(kvPairs *map[string]string) {
 	for key, val := range *kvPairs {
 		lock := s.getLock(key)
 		lock.Lock()
-		s.strs.Set(key, val, time.Now().AddDate(1000, 0, 0))
+		store.Set(key, val, time.Now().AddDate(1000, 0, 0))
 		lock.Unlock()
 	}
 }

@@ -10,14 +10,11 @@ import (
 )
 
 type ListEssentia struct {
-	lists store.Store[string, []string]
 	locks sync.Map
 }
 
 func NewListEssentia() *ListEssentia {
-	return &ListEssentia{
-		lists: *store.NewStore[string, []string](),
-	}
+	return &ListEssentia{}
 }
 
 func (l *ListEssentia) getLock(key string) *sync.RWMutex {
@@ -29,7 +26,7 @@ func (l *ListEssentia) RPop(key string, count string) ([]string, error) {
 	lock := l.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	vals, ok := l.lists.Get(key)
+	vals, ok := store.Get[string, []string](key)
 	if !ok {
 		return nil, errors.New("ERR list does not exist")
 	}
@@ -37,7 +34,7 @@ func (l *ListEssentia) RPop(key string, count string) ([]string, error) {
 	if err != nil || cnt <= 0 || cnt > int64(len(vals)) {
 		return nil, errors.New("ERR invalid count")
 	}
-	l.lists.Set(key, vals[len(vals)-int(cnt):], time.Now().AddDate(1000, 0, 0))
+	store.Set(key, vals[len(vals)-int(cnt):], time.Now().AddDate(1000, 0, 0))
 	return vals[len(vals)-int(cnt):], nil
 }
 
@@ -45,11 +42,11 @@ func (l *ListEssentia) RPush(key string, values *[]string) {
 	lock := l.getLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	vals, ok := l.lists.Get(key)
+	vals, ok := store.Get[string, []string](key)
 	if !ok {
 		vals = *values
 	} else {
 		vals = append(vals, *values...)
 	}
-	l.lists.Set(key, vals, time.Now().AddDate(1000, 0, 0))
+	store.Set(key, vals, time.Now().AddDate(1000, 0, 0))
 }
