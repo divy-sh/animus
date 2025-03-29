@@ -5,24 +5,50 @@ Animus supports various data types like strings, hashes, and lists, along with f
 such as expiration handling (TTL, LRU), and basic commands.
 
 Key Features:
-  - **String Commands**: APPEND, DECR, DECRBY, GET, GETDEL, GETEX, GETRANGE, SET
-  - **Hash Commands**: HGET, HSET
-  - **List Commands**: RPUSH, RPOP
-  - **Expiry Mechanism**: Supports TTL (Time-To-Live) and LRU (Least Recently Used) strategies for data expiration.
-
-Data Types and Commands:
-  - **Strings**: Basic key-value pairs supporting commands like SET, GET, APPEND, DECR, and DECRBY.
-  - **Hashes**: Maps between string fields and values, supporting HSET and HGET commands.
-  - **Lists**: Ordered collections of strings, supporting RPUSH and RPOP commands.
-
-Expiry Mechanism:
-  - **Time-To-Live (TTL)**: Set an expiration time for keys, after which they are automatically deleted.
-  - **Least Recently Used (LRU)**: Automatically evicts the least recently accessed keys when memory is full.
-
-Test Coverage:
-  - To generate a test coverage report:
-    1. Run `go test -v -coverprofile cover.out ./...` to execute tests and generate a coverage profile.
-    2. Run `go tool cover -html cover.out -o cover.html` to generate an HTML coverage report.
+  - **PING (String)**: PING [ARGUMENT]
+	Returns PONG to test server responsiveness.
+  - **APPEND (String)**: APPEND [KEY] [VALUE]
+	Appends a value to a key and returns the new length of the string.
+  - **DECR (String)**: DECR [KEY]
+	Decrements the integer value of a key by one.
+  - **DECRBY (String)**: DECRBY [KEY] [DECREMENT]
+	Decrements the integer value of a key by the given amount.
+  - **GET (String)**: GET [KEY]
+	Gets the value of a key.
+  - **GETDEL (String)**: GETDEL [KEY]
+	Gets the value of a key and deletes it.
+  - **GETEX (String)**: GETEX [KEY] [EXPIRATION]
+	Gets the value of a key and sets an expiration.
+  - **GETRANGE (String)**: GETRANGE [KEY] [START] [END]
+	Gets a substring of the string stored at a key.
+  - **GETSET (String)**: GETSET [KEY] [VALUE]
+	Gets the previous key value and then sets it to the passed value.
+  - **INCR (String)**: INCR [KEY]
+	Increments the integer value of a key by one.
+  - **INCRBY (String)**: INCRBY [KEY] [INCREMENT]
+	Increments the integer value of a key by the given amount.
+  - **INCRBYFLOAT (String)**: INCRBYFLOAT [KEY] [INCREMENT]
+	Increments the float value of a key by the given amount.
+  - **LCS (List)**: LCS [KEY1] [KEY2] LEN
+	Finds the Longest Common Subsequence between the value of two keys.
+	Send the optional LEN argument to get just the length
+  - **MGET (String)**: MGET key [key ...]
+	Returns the values for all the keys.
+	Returns nil for a non-existing key.
+  - **MSET (String)**: MSET key value [key1 value1 ...]
+	Sets the values for all the keys value pair.
+  - **SET (String)**: SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
+	Sets the value of a key with optional expiration.
+  - **HSET (Hash)**: HSET [KEY] [FIELD] [VALUE]
+	Sets a field in the hash stored at key to a value.
+  - **HGET (Hash)**: HGET [KEY] [FIELD]
+	Gets the value of a field in the hash stored at key.
+  - **RPOP (List)**: RPOP [KEY] [COUNT]
+	Removes and returns the last element(s) of the list stored at key.
+  - **RPUSH (List)**: RPUSH [KEY] [VALUE] [VALUE ...]
+	Inserts one or more elements at the end of the list stored at key.
+  - **HELP (Help)**: HELP [COMMAND]
+	Shows documentation for available commands.
 
 Roadmap:
   - Advanced data structures (Sets, Sorted Sets)
