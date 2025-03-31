@@ -7,12 +7,11 @@ import (
 )
 
 func TestRPush(t *testing.T) {
-	lt := essentias.NewListEssentia()
 	key := "testList"
 	values := []string{"a", "b", "c", "d"}
-	lt.RPush(key, &values)
+	essentias.RPush(key, &values)
 
-	popped, err := lt.RPop(key, "4")
+	popped, err := essentias.RPop(key, "4")
 	if err != nil {
 		t.Errorf("Expected no error for valid RPop")
 	}
@@ -22,12 +21,11 @@ func TestRPush(t *testing.T) {
 }
 
 func TestRPopValid(t *testing.T) {
-	lt := essentias.NewListEssentia()
 	key := "testList"
 	values := []string{"a", "b", "c", "d"}
-	lt.RPush(key, &values)
+	essentias.RPush(key, &values)
 
-	popped, err := lt.RPop(key, "2")
+	popped, err := essentias.RPop(key, "2")
 	if err != nil {
 		t.Errorf("Expected no error for valid RPop")
 	}
@@ -38,32 +36,29 @@ func TestRPopValid(t *testing.T) {
 }
 
 func TestRPopInvalidCountHigh(t *testing.T) {
-	lt := essentias.NewListEssentia()
 	key := "testList"
 	values := []string{"a", "b", "c", "d"}
-	lt.RPush(key, &values)
+	essentias.RPush(key, &values)
 
-	_, err := lt.RPop(key, "10")
+	_, err := essentias.RPop(key, "10")
 	if err == nil {
 		t.Errorf("Expected error for invalid count")
 	}
 }
 
 func TestRPopInvalidCountNegative(t *testing.T) {
-	lt := essentias.NewListEssentia()
 	key := "testList"
 	values := []string{"a", "b", "c", "d"}
-	lt.RPush(key, &values)
+	essentias.RPush(key, &values)
 
-	_, err := lt.RPop(key, "-1")
+	_, err := essentias.RPop(key, "-1")
 	if err == nil {
 		t.Errorf("Expected error for negative count")
 	}
 }
 
 func TestRPopNonExistentKey(t *testing.T) {
-	lt := essentias.NewListEssentia()
-	_, err := lt.RPop("nonExistentKey", "1")
+	_, err := essentias.RPop("nonExistentKey", "1")
 	if err == nil {
 		t.Errorf("Expected error for non-existent key")
 	}

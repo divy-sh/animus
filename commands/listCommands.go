@@ -5,8 +5,6 @@ import (
 	"github.com/divy-sh/animus/resp"
 )
 
-var listEssentias = essentias.NewListEssentia()
-
 func rpop(args []resp.Value) resp.Value {
 	if len(args) < 1 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'rpop' command"}
@@ -14,9 +12,9 @@ func rpop(args []resp.Value) resp.Value {
 	var values []string
 	var err error
 	if len(args) == 1 {
-		values, err = listEssentias.RPop(args[0].Bulk, "1")
+		values, err = essentias.RPop(args[0].Bulk, "1")
 	} else {
-		values, err = listEssentias.RPop(args[0].Bulk, args[1].Bulk)
+		values, err = essentias.RPop(args[0].Bulk, args[1].Bulk)
 	}
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
@@ -36,6 +34,6 @@ func rpush(args []resp.Value) resp.Value {
 	for i, val := range args[1:] {
 		values[i] = val.Bulk
 	}
-	listEssentias.RPush(args[0].Bulk, &values)
+	essentias.RPush(args[0].Bulk, &values)
 	return resp.Value{Typ: "string", Str: "OK"}
 }

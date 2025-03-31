@@ -5,13 +5,11 @@ import (
 	"github.com/divy-sh/animus/resp"
 )
 
-var stringEssentia = essentias.NewStringEssentia()
-
 func appendCmd(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'append' command"}
 	}
-	stringEssentia.Append(args[0].Bulk, args[1].Bulk)
+	essentias.Append(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: "string", Str: "OK"}
 }
 
@@ -19,7 +17,7 @@ func decr(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'decr' command"}
 	}
-	err := stringEssentia.Decr(args[0].Bulk)
+	err := essentias.Decr(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -31,7 +29,7 @@ func decrby(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'decrby' command"}
 	}
 
-	err := stringEssentia.DecrBy(args[0].Bulk, args[1].Bulk)
+	err := essentias.DecrBy(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -43,7 +41,7 @@ func get(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'get' command"}
 	}
-	value, err := stringEssentia.Get(args[0].Bulk)
+	value, err := essentias.Get(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
@@ -54,7 +52,7 @@ func getdel(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getdel' command"}
 	}
-	value, err := stringEssentia.GetDel(args[0].Bulk)
+	value, err := essentias.GetDel(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
@@ -65,7 +63,7 @@ func getex(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getex' command"}
 	}
-	value, err := stringEssentia.GetEx(args[0].Bulk, args[1].Bulk)
+	value, err := essentias.GetEx(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
@@ -76,7 +74,7 @@ func getrange(args []resp.Value) resp.Value {
 	if len(args) != 3 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getrange' command"}
 	}
-	value, err := stringEssentia.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
+	value, err := essentias.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "null"}
 	}
@@ -88,7 +86,7 @@ func getset(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'getset' command"}
 	}
 
-	val, err := stringEssentia.GetSet(args[0].Bulk, args[1].Bulk)
+	val, err := essentias.GetSet(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -99,7 +97,7 @@ func incr(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'incr' command"}
 	}
-	err := stringEssentia.Incr(args[0].Bulk)
+	err := essentias.Incr(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -111,7 +109,7 @@ func incrby(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'incrby' command"}
 	}
 
-	err := stringEssentia.IncrBy(args[0].Bulk, args[1].Bulk)
+	err := essentias.IncrBy(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -124,7 +122,7 @@ func incrbyfloat(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'incrby' command"}
 	}
 
-	err := stringEssentia.IncrByFloat(args[0].Bulk, args[1].Bulk)
+	err := essentias.IncrByFloat(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -140,7 +138,7 @@ func lcs(args []resp.Value) resp.Value {
 	for _, arg := range args[2:] {
 		commands = append(commands, arg.Bulk)
 	}
-	val, err := stringEssentia.Lcs(args[0].Bulk, args[1].Bulk, commands)
+	val, err := essentias.Lcs(args[0].Bulk, args[1].Bulk, commands)
 	if err != nil {
 		return resp.Value{Typ: "error", Str: err.Error()}
 	}
@@ -155,7 +153,7 @@ func mget(args []resp.Value) resp.Value {
 	for _, arg := range args {
 		keys = append(keys, arg.Bulk)
 	}
-	values := stringEssentia.MGet(&keys)
+	values := essentias.MGet(&keys)
 	response := make([]resp.Value, len(keys))
 	for i, val := range *values {
 		if val == "" {
@@ -175,7 +173,7 @@ func mset(args []resp.Value) resp.Value {
 	for i := 0; i < len(args); i += 2 {
 		kvPairs[args[i].Bulk] = args[i+1].Bulk
 	}
-	stringEssentia.MSet(&kvPairs)
+	essentias.MSet(&kvPairs)
 	return resp.Value{Typ: "string", Str: "OK"}
 }
 
@@ -184,6 +182,6 @@ func set(args []resp.Value) resp.Value {
 		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'set' command"}
 	}
 
-	stringEssentia.Set(args[0].Bulk, args[1].Bulk)
+	essentias.Set(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: "string", Str: "OK"}
 }

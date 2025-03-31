@@ -2,27 +2,13 @@ package essentias
 
 import (
 	"errors"
-	"sync"
 	"time"
 
 	"github.com/divy-sh/animus/store"
 )
 
-type HashEssentia struct {
-	locks sync.Map
-}
-
-func NewHashEssentia() *HashEssentia {
-	return &HashEssentia{}
-}
-
-func (h *HashEssentia) getLock(key string) *sync.RWMutex {
-	actual, _ := h.locks.LoadOrStore(key, &sync.RWMutex{})
-	return actual.(*sync.RWMutex)
-}
-
-func (h *HashEssentia) HGet(hash, key string) (string, error) {
-	lock := h.getLock(key)
+func HGet(hash, key string) (string, error) {
+	lock := store.GetLock(key)
 	lock.RLock()
 	defer lock.RUnlock()
 	value, ok := store.Get[string, map[string]string](hash)
@@ -35,8 +21,8 @@ func (h *HashEssentia) HGet(hash, key string) (string, error) {
 	return "", errors.New("ERR not found")
 }
 
-func (h *HashEssentia) HSet(hash, key, value string) {
-	lock := h.getLock(key)
+func HSet(hash, key, value string) {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	hashVal, ok := store.Get[string, map[string]string](hash)

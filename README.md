@@ -5,91 +5,7 @@
 
 Animus is an in-memory database (like Redis) written in Go. It offers a lightweight, high-performance storage solution with support for various commands and data structures.
 
-# Working Commands
-```bash
-GETEX - GETEX [KEY] [EXPIRATION]
-```
-Gets the value of a key and sets an expiration.
-```bash
-GETRANGE - GETRANGE [KEY] [START] [END]
-```
-Gets a substring of the string stored at a key.
-```bash
-INCR - INCR [KEY]
-```
-Increments the integer value of a key by one.
-```bash
-LCS - LCS [KEY1] [KEY2] LEN
-```
-Finds the Longest Common Subsequence between the value of two keys. 
-```bash
-MGET key [keys ...]
-```
-Returns the values for all the keys, nil for a non-existing key.
-```bash
-MSET key value [keys values ...]
-```
-Sets the values for all the key - value pairs.
-```bash
-INCRBYFLOAT - INCRBYFLOAT [KEY] [INCREMENT]
-```
-Increments the float value of a key by the given amount.
-```bash
-RPOP - RPOP [KEY] [COUNT]
-```
-Removes and returns the last element(s) of the list stored at key.
-```bash
-DECRBY - DECRBY [KEY] [DECREMENT]
-```
-Decrements the integer value of a key by the given amount.
-```bash
-GETDEL - GETDEL [KEY]
-```
-Gets the value of a key and deletes it.
-```bash
-SET - SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
-```
-Sets the value of a key with optional expiration.
-```bash
-GETSET - GETSET [KEY] [VALUE]
-```
-Gets the previous key value and then sets it to the passed value.
-```bash
-INCRBY - INCRBY [KEY] [INCREMENT]
-```
-Increments the integer value of a key by the given amount.
-```bash
-HSET - HSET [KEY] [FIELD] [VALUE]
-```
-Sets a field in the hash stored at key to a value.
-```bash
-HGET - HGET [KEY] [FIELD]
-```
-Gets the value of a field in the hash stored at key.
-```bash
-PING - PING [ARGUMENT]
-```
-Returns PONG to test server responsiveness.
-```bash
-APPEND - APPEND [KEY] [VALUE]
-```
-Appends a value to a key and returns the new length of the string.
-```bash
-DECR - DECR [KEY]
-```
-Decrements the integer value of a key by one.
-```bash
-GET - GET [KEY]
-```
-Gets the value of a key.
-```bash
-RPUSH - RPUSH [KEY] [VALUE] [VALUE ...]
-```
-Inserts one or more elements at the end of the list stored at key.
-```bash
-HELP - HELP [COMMAND]
-```
-Shows documentation for available commands.
+To see all the supported commands, go to doc.go file.
 
 # Features
 
@@ -139,6 +55,11 @@ go tool cover -html cover.out -o cover.html
 
 - Added key based locking instead of locking the store globally, leading to huge increase in concurrency.
 
+### v0.1.0
+
+- Finalize how to handle the store, and expose the store locks so that they can be used by other commands as required.
+
+- Add many other commands, details can be found in doc.go file.
 # License
 
 Animus is licensed under the GNU General Public License v3.0 (GPL-3.0). See the LICENSE file for more information.

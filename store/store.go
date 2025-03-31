@@ -52,17 +52,25 @@ func GetSharedStore() *Store {
 
 /* Public functions */
 
-func (s *Store) getLock(key any) *sync.RWMutex {
-	actual, _ := s.locks.LoadOrStore(key, &sync.RWMutex{})
+func GetLock(key any) *sync.RWMutex {
+	store := GetSharedStore()
+	actual, _ := store.locks.LoadOrStore(key, &sync.RWMutex{})
 	return actual.(*sync.RWMutex)
+}
+
+func getLocks(keys *[]any) []*sync.RWMutex {
+	store := GetSharedStore()
+	locks := []*sync.RWMutex{}
+	for _, key := range *keys {
+		actual, _ := store.locks.LoadOrStore(key, &sync.RWMutex{})
+		locks = append(locks, actual.(*sync.RWMutex))
+	}
+	return locks
 }
 
 // Get retrieves a value with type inference
 func Get[K comparable, V any](key K) (V, bool) {
 	store := GetSharedStore()
-	lock := store.getLock(key)
-	lock.RLock()
-	defer lock.RUnlock()
 
 	node, found := store.dict[key]
 	if !found {
@@ -86,9 +94,6 @@ func Get[K comparable, V any](key K) (V, bool) {
 // Set stores a value with TTL
 func Set[K comparable, V any](key K, value V, ttl time.Time) {
 	store := GetSharedStore()
-	lock := store.getLock(key)
-	lock.Lock()
-	defer lock.Unlock()
 
 	node, found := store.dict[key]
 	if found {
@@ -114,9 +119,6 @@ func Set[K comparable, V any](key K, value V, ttl time.Time) {
 // DeleteWithKey removes a key
 func DeleteWithKey[K comparable](key K) bool {
 	store := GetSharedStore()
-	lock := store.getLock(key)
-	lock.Lock()
-	defer lock.Unlock()
 
 	store.evictWithKey(key)
 	return true

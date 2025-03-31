@@ -93,4 +93,9 @@ func init() {
 	// Help
 	RegisterCommand("HELP", Help, `HELP [COMMAND]
 	Shows documentation for available commands.`)
+
+	// Generics
+	RegisterCommand("COPY", copy, `Copy [key1] [key2]
+	Copies value(s) of key1 into key2.
+	If key2 doesn't exist, creates key2 and sets its value.`)
 }

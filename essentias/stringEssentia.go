@@ -5,28 +5,14 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/divy-sh/animus/store"
 )
 
-type StringEssentia struct {
-	locks sync.Map
-}
-
-func NewStringEssentia() *StringEssentia {
-	return &StringEssentia{}
-}
-
-func (s *StringEssentia) getLock(key string) *sync.RWMutex {
-	actual, _ := s.locks.LoadOrStore(key, &sync.RWMutex{})
-	return actual.(*sync.RWMutex)
-}
-
 // public functions
-func (s *StringEssentia) Append(key, value string) {
-	lock := s.getLock(key)
+func Append(key, value string) {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
@@ -37,12 +23,12 @@ func (s *StringEssentia) Append(key, value string) {
 	store.Set(key, val+value, time.Now().AddDate(1000, 0, 0))
 }
 
-func (s *StringEssentia) Decr(key string) error {
-	return s.DecrBy(key, "1")
+func Decr(key string) error {
+	return DecrBy(key, "1")
 }
 
-func (s *StringEssentia) DecrBy(key, value string) error {
-	lock := s.getLock(key)
+func DecrBy(key, value string) error {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	decrVal, err := strconv.ParseInt(value, 10, 64)
@@ -62,8 +48,8 @@ func (s *StringEssentia) DecrBy(key, value string) error {
 	return nil
 }
 
-func (s *StringEssentia) Get(key string) (string, error) {
-	lock := s.getLock(key)
+func Get(key string) (string, error) {
+	lock := store.GetLock(key)
 	lock.RLock()
 	defer lock.RUnlock()
 	val, ok := store.Get[string, string](key)
@@ -73,8 +59,8 @@ func (s *StringEssentia) Get(key string) (string, error) {
 	return val, nil
 }
 
-func (s *StringEssentia) GetDel(key string) (string, error) {
-	lock := s.getLock(key)
+func GetDel(key string) (string, error) {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
@@ -85,8 +71,8 @@ func (s *StringEssentia) GetDel(key string) (string, error) {
 	return val, nil
 }
 
-func (s *StringEssentia) GetEx(key, exp string) (string, error) {
-	lock := s.getLock(key)
+func GetEx(key, exp string) (string, error) {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
@@ -101,8 +87,8 @@ func (s *StringEssentia) GetEx(key, exp string) (string, error) {
 	return val, nil
 }
 
-func (s *StringEssentia) GetRange(key, start, end string) (string, error) {
-	lock := s.getLock(key)
+func GetRange(key, start, end string) (string, error) {
+	lock := store.GetLock(key)
 	lock.RLock()
 	defer lock.RUnlock()
 	val, ok := store.Get[string, string](key)
@@ -129,8 +115,8 @@ func (s *StringEssentia) GetRange(key, start, end string) (string, error) {
 	return val[startInd : endInd+1], nil
 }
 
-func (s *StringEssentia) GetSet(key, value string) (string, error) {
-	lock := s.getLock(key)
+func GetSet(key, value string) (string, error) {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
@@ -141,12 +127,12 @@ func (s *StringEssentia) GetSet(key, value string) (string, error) {
 	return val, nil
 }
 
-func (s *StringEssentia) Incr(key string) error {
-	return s.IncrBy(key, "1")
+func Incr(key string) error {
+	return IncrBy(key, "1")
 }
 
-func (s *StringEssentia) IncrBy(key, value string) error {
-	lock := s.getLock(key)
+func IncrBy(key, value string) error {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	incrVal, err := strconv.ParseInt(value, 10, 64)
@@ -166,8 +152,8 @@ func (s *StringEssentia) IncrBy(key, value string) error {
 	return nil
 }
 
-func (s *StringEssentia) IncrByFloat(key, value string) error {
-	lock := s.getLock(key)
+func IncrByFloat(key, value string) error {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	incrVal, err := strconv.ParseFloat(value, 64)
@@ -187,17 +173,17 @@ func (s *StringEssentia) IncrByFloat(key, value string) error {
 	return nil
 }
 
-func (s *StringEssentia) Set(key, value string) {
-	lock := s.getLock(key)
+func Set(key, value string) {
+	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
 	store.Set(key, value, time.Now().AddDate(1000, 0, 0))
 }
 
-func (s *StringEssentia) Lcs(key1 string, key2 string, commands []string) (string, error) {
-	lock := s.getLock(key1)
+func Lcs(key1 string, key2 string, commands []string) (string, error) {
+	lock := store.GetLock(key1)
 	lock.RLock()
-	lock2 := s.getLock(key2)
+	lock2 := store.GetLock(key2)
 	lock2.RLock()
 	defer lock.RUnlock()
 	defer lock2.RUnlock()
@@ -217,10 +203,10 @@ func (s *StringEssentia) Lcs(key1 string, key2 string, commands []string) (strin
 	return lcs, nil
 }
 
-func (s *StringEssentia) MGet(keys *[]string) *[]string {
+func MGet(keys *[]string) *[]string {
 	values := make([]string, len(*keys))
 	for i, key := range *keys {
-		lock := s.getLock(key)
+		lock := store.GetLock(key)
 		lock.Lock()
 		val, ok := store.Get[string, string](key)
 		if !ok {
@@ -233,9 +219,9 @@ func (s *StringEssentia) MGet(keys *[]string) *[]string {
 	return &values
 }
 
-func (s *StringEssentia) MSet(kvPairs *map[string]string) {
+func MSet(kvPairs *map[string]string) {
 	for key, val := range *kvPairs {
-		lock := s.getLock(key)
+		lock := store.GetLock(key)
 		lock.Lock()
 		store.Set(key, val, time.Now().AddDate(1000, 0, 0))
 		lock.Unlock()
