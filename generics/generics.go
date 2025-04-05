@@ -2,7 +2,6 @@ package generics
 
 import (
 	"errors"
-	"time"
 
 	"github.com/divy-sh/animus/store"
 )
@@ -20,7 +19,7 @@ func Copy(source, destination string) (int, error) {
 	lock2 := store.GetLock(destination)
 	lock2.Lock()
 	defer lock2.Unlock()
-	store.Set(destination, value, time.Now().AddDate(1000, 0, 0))
+	store.Set(destination, value)
 	return 1, nil
 }
 

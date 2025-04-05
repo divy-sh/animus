@@ -2,7 +2,6 @@ package essentias
 
 import (
 	"errors"
-	"time"
 
 	"github.com/divy-sh/animus/store"
 )
@@ -31,5 +30,5 @@ func HSet(hash, key, value string) {
 	} else {
 		hashVal = map[string]string{key: value}
 	}
-	store.Set(hash, hashVal, time.Now().AddDate(1000, 0, 0))
+	store.Set(hash, hashVal)
 }

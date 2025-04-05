@@ -21,16 +21,16 @@ type Store struct {
 type DataNode struct {
 	key  any
 	data any
-	ttl  time.Time
+	ttl  int64
 }
 
 type BTreeItem struct {
-	ttl time.Time
+	ttl int64
 	key any
 }
 
 func (a BTreeItem) Less(b btree.Item) bool {
-	return a.ttl.Before(b.(BTreeItem).ttl)
+	return a.ttl >= 0 && time.Unix(a.ttl, 0).Before(time.Unix(b.(BTreeItem).ttl, 0))
 }
 
 /* Singleton instance */
@@ -76,7 +76,7 @@ func Get[K comparable, V any](key K) (V, bool) {
 	if !found {
 		var zero V
 		return zero, false
-	} else if node.Value.(*DataNode).ttl.Before(time.Now()) {
+	} else if node.Value.(*DataNode).ttl >= 0 && time.Unix(node.Value.(*DataNode).ttl, 0).Before(time.Now()) {
 		store.evictWithKey(key)
 		var zero V
 		return zero, false
@@ -92,7 +92,31 @@ func Get[K comparable, V any](key K) (V, bool) {
 }
 
 // Set stores a value with TTL
-func Set[K comparable, V any](key K, value V, ttl time.Time) {
+func Set[K comparable, V any](key K, value V) {
+	store := GetSharedStore()
+	ttl := int64(-1)
+	node, found := store.dict[key]
+	if found {
+		node.Value.(*DataNode).data = value
+		node.Value.(*DataNode).ttl = ttl
+		store.queue.MoveToFront(node)
+		store.expTree.Delete(BTreeItem{ttl: node.Value.(*DataNode).ttl, key: key})
+		store.expTree.ReplaceOrInsert(BTreeItem{ttl: ttl, key: key})
+		return
+	}
+
+	storeItem := &DataNode{
+		key:  key,
+		data: value,
+		ttl:  ttl,
+	}
+	queueItem := store.queue.PushFront(storeItem)
+	store.dict[key] = queueItem
+	store.expTree.ReplaceOrInsert(BTreeItem{ttl: ttl, key: key})
+	store.lazyEvict()
+}
+
+func SetWithTTL[K comparable, V any](key K, value V, ttl int64) {
 	store := GetSharedStore()
 
 	node, found := store.dict[key]
@@ -137,7 +161,7 @@ func (s *Store) lazyEvict() {
 
 func (s *Store) evictTtlExpired() bool {
 	item := s.expTree.Min()
-	if item != nil && item.(BTreeItem).ttl.Before(time.Now()) {
+	if item != nil && time.Unix(item.(BTreeItem).ttl, 0).Before(time.Now()) {
 		key := s.expTree.Delete(item).(BTreeItem).key
 		s.queue.Remove(s.dict[key])
 		delete(s.dict, key)

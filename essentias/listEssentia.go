@@ -3,7 +3,6 @@ package essentias
 import (
 	"errors"
 	"strconv"
-	"time"
 
 	"github.com/divy-sh/animus/store"
 )
@@ -20,7 +19,7 @@ func RPop(key string, count string) ([]string, error) {
 	if err != nil || cnt <= 0 || cnt > int64(len(vals)) {
 		return nil, errors.New("ERR invalid count")
 	}
-	store.Set(key, vals[len(vals)-int(cnt):], time.Now().AddDate(1000, 0, 0))
+	store.Set(key, vals[len(vals)-int(cnt):])
 	return vals[len(vals)-int(cnt):], nil
 }
 
@@ -34,5 +33,5 @@ func RPush(key string, values *[]string) {
 	} else {
 		vals = append(vals, *values...)
 	}
-	store.Set(key, vals, time.Now().AddDate(1000, 0, 0))
+	store.Set(key, vals)
 }

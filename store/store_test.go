@@ -7,7 +7,7 @@ import (
 
 func TestStore_SetAndGet(t *testing.T) {
 	key, value := "testKey", "testValue"
-	Set(key, value, time.Now().Add(time.Minute))
+	SetWithTTL(key, value, time.Now().Add(time.Minute).Unix())
 	storedValue, found := Get[string, string](key)
 
 	if !found {
@@ -30,8 +30,8 @@ func TestStore_OverwriteKey(t *testing.T) {
 	key := "testKey"
 	firstValue, secondValue := "firstValue", "secondValue"
 
-	Set(key, firstValue, time.Now().Add(time.Minute))
-	Set(key, secondValue, time.Now().Add(time.Minute))
+	SetWithTTL(key, firstValue, time.Now().Add(time.Minute).Unix())
+	SetWithTTL(key, secondValue, time.Now().Add(time.Minute).Unix())
 
 	storedValue, _ := Get[string, string](key)
 	if storedValue != secondValue {
@@ -40,7 +40,7 @@ func TestStore_OverwriteKey(t *testing.T) {
 }
 
 func TestStore_TTLExpirationOnGet(t *testing.T) {
-	Set("expiringKey", "value", time.Now().Add(50*time.Millisecond))
+	SetWithTTL("expiringKey", "value", time.Now().Add(50*time.Millisecond).Unix())
 	time.Sleep(100 * time.Millisecond) // Allow time for expiration
 	Get[string, string]("expiringKey")
 	_, found := Get[string, string]("expiringKey")
@@ -50,9 +50,9 @@ func TestStore_TTLExpirationOnGet(t *testing.T) {
 }
 
 func TestStore_TTLExpirationOnSet(t *testing.T) {
-	Set("expiringKey", "value", time.Now().Add(50*time.Millisecond))
+	SetWithTTL("expiringKey", "value", time.Now().Add(50*time.Millisecond).Unix())
 	time.Sleep(100 * time.Millisecond) // Allow time for expiration
-	Set("newKey", "value", time.Now().AddDate(99, 0, 0))
+	Set("newKey", "value")
 	_, found := Get[string, string]("expiringKey")
 	if found {
 		t.Errorf("Expected key to expire, but it was found")
@@ -60,7 +60,7 @@ func TestStore_TTLExpirationOnSet(t *testing.T) {
 }
 
 func TestStore_DeleteWithKey(t *testing.T) {
-	Set("expiringKey", "value", time.Now().AddDate(99, 0, 0))
+	Set("expiringKey", "value")
 	_, found := Get[string, string]("expiringKey")
 	if !found {
 		t.Errorf("Expected key to be found but was not found")
@@ -72,7 +72,7 @@ func TestStore_DeleteWithKey(t *testing.T) {
 	}
 }
 
-// Need to come up with a way to mock a store creation with limited size to tes this.
+// Need to come up with a way to mock a store creation with limited size to test this.
 // func TestStore_LRU_Eviction(t *testing.T) {
 // 	Set("key1", "value1", time.Now().Add(time.Minute))
 // 	Set("key2", "value2", time.Now().Add(time.Minute))

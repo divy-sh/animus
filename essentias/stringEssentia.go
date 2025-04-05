@@ -17,10 +17,10 @@ func Append(key, value string) {
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		store.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		store.Set(key, value)
 		return
 	}
-	store.Set(key, val+value, time.Now().AddDate(1000, 0, 0))
+	store.Set(key, val+value)
 }
 
 func Decr(key string) error {
@@ -37,14 +37,14 @@ func DecrBy(key, value string) error {
 	}
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		store.Set(key, fmt.Sprint(-decrVal), time.Now().AddDate(1000, 0, 0))
+		store.Set(key, fmt.Sprint(-decrVal))
 		return nil
 	}
 	intVal, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
 		return errors.New("ERR value is not an integer or out of range")
 	}
-	store.Set(key, fmt.Sprint(intVal-decrVal), time.Now().AddDate(1000, 0, 0))
+	store.Set(key, fmt.Sprint(intVal-decrVal))
 	return nil
 }
 
@@ -83,7 +83,7 @@ func GetEx(key, exp string) (string, error) {
 	if err != nil {
 		return "", errors.New("ERR invalid expire time")
 	}
-	store.Set(key, val, time.Now().Add(time.Duration(expSeconds)*time.Second))
+	store.SetWithTTL(key, val, time.Now().Unix()+expSeconds)
 	return val, nil
 }
 
@@ -123,7 +123,7 @@ func GetSet(key, value string) (string, error) {
 	if !ok {
 		return "", errors.New("ERR string does not exist")
 	}
-	store.Set(key, value, time.Now().AddDate(1000, 0, 0))
+	store.Set(key, value)
 	return val, nil
 }
 
@@ -141,14 +141,14 @@ func IncrBy(key, value string) error {
 	}
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		store.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		store.Set(key, value)
 		return nil
 	}
 	intVal, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
 		return errors.New("ERR value is not an integer or out of range")
 	}
-	store.Set(key, fmt.Sprint(intVal+incrVal), time.Now().AddDate(1000, 0, 0))
+	store.Set(key, fmt.Sprint(intVal+incrVal))
 	return nil
 }
 
@@ -162,14 +162,14 @@ func IncrByFloat(key, value string) error {
 	}
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		store.Set(key, value, time.Now().AddDate(1000, 0, 0))
+		store.Set(key, value)
 		return nil
 	}
 	floatVal, err := strconv.ParseFloat(val, 64)
 	if err != nil {
 		return errors.New("ERR value is not a float or out of range")
 	}
-	store.Set(key, fmt.Sprint(floatVal+incrVal), time.Now().AddDate(1000, 0, 0))
+	store.Set(key, fmt.Sprint(floatVal+incrVal))
 	return nil
 }
 
@@ -177,7 +177,7 @@ func Set(key, value string) {
 	lock := store.GetLock(key)
 	lock.Lock()
 	defer lock.Unlock()
-	store.Set(key, value, time.Now().AddDate(1000, 0, 0))
+	store.Set(key, value)
 }
 
 func Lcs(key1 string, key2 string, commands []string) (string, error) {
@@ -223,7 +223,7 @@ func MSet(kvPairs *map[string]string) {
 	for key, val := range *kvPairs {
 		lock := store.GetLock(key)
 		lock.Lock()
-		store.Set(key, val, time.Now().AddDate(1000, 0, 0))
+		store.Set(key, val)
 		lock.Unlock()
 	}
 }
