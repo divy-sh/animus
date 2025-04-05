@@ -185,7 +185,7 @@ func TestGetSet(t *testing.T) {
 
 func TestGetSetNonExistingKey(t *testing.T) {
 	args := []resp.Value{{Typ: "bulk", Bulk: "non_existing"}, {Typ: "bulk", Bulk: "val"}}
-	expected := "ERR key not found, or expired"
+	expected := "ERR string does not exist"
 	result := getset(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)
@@ -318,7 +318,7 @@ func TestLcsLen(t *testing.T) {
 
 func TestLcsInvalidFirstKey(t *testing.T) {
 	args := []resp.Value{{Typ: "bulk", Bulk: "invalid"}, {Typ: "bulk", Bulk: "key2"}}
-	expected := "ERR key not found, or expired"
+	expected := "ERR string does not exist"
 	result := lcs(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)
@@ -327,7 +327,7 @@ func TestLcsInvalidFirstKey(t *testing.T) {
 
 func TestLcsInvalidSecondtKey(t *testing.T) {
 	args := []resp.Value{{Typ: "bulk", Bulk: "key1"}, {Typ: "bulk", Bulk: "invalid"}}
-	expected := "ERR key not found, or expired"
+	expected := "ERR string does not exist"
 	result := lcs(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)

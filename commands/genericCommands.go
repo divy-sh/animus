@@ -17,3 +17,15 @@ func copy(args []resp.Value) resp.Value {
 	}
 	return resp.Value{Typ: "bulk", Bulk: fmt.Sprint(val)}
 }
+
+func del(args []resp.Value) resp.Value {
+	if len(args) < 1 {
+		return resp.Value{Typ: "error", Str: "ERR wrong number of arguments for 'del' command"}
+	}
+	keys := make([]string, len(args))
+	for i := 0; i < len(args); i += 2 {
+		keys[i] = args[i].Bulk
+	}
+	generics.Delete(keys)
+	return resp.Value{Typ: "bulk", Bulk: "OK"}
+}

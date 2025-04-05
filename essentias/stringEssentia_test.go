@@ -61,8 +61,8 @@ func TestGetDel(t *testing.T) {
 func TestGetDelInvalidKey(t *testing.T) {
 
 	_, err := essentias.GetDel("invalid_key")
-	if err == nil || err.Error() != "ERR key not found, or expired" {
-		t.Errorf("Expected error: %v, got: %v", "ERR key not found, or expired", err)
+	if err == nil || err.Error() != "ERR string does not exist" {
+		t.Errorf("Expected error: %v, got: %v", "ERR string does not exist", err)
 	}
 }
 
@@ -83,8 +83,8 @@ func TestGetEx(t *testing.T) {
 func TestGetExInvalidKey(t *testing.T) {
 
 	_, err := essentias.GetEx("invalid_key", "1")
-	if err == nil || err.Error() != "ERR key not found, or expired" {
-		t.Errorf("Expected error: %v, got: %v", "ERR key not found, or expired", err)
+	if err == nil || err.Error() != "ERR string does not exist" {
+		t.Errorf("Expected error: %v, got: %v", "ERR string does not exist", err)
 	}
 }
 
@@ -109,12 +109,12 @@ func TestGetRange(t *testing.T) {
 		expected string
 		err      error
 	}{
-		{"hello", "0", "4", "Hello", nil},                                      // Normal range
-		{"hello", "-6", "-1", "World!", nil},                                   // Negative index wraparound
-		{"hello", "7", "11", "World", nil},                                     // Extract "World"
-		{"hello", "0", "50", "Hello, World", nil},                              // End index exceeds length
-		{"hello", "-50", "4", "llo", nil},                                      // Start index negative out of bounds
-		{"unknown", "0", "2", "", errors.New("ERR key not found, or expired")}, // Key not found
+		{"hello", "0", "4", "Hello", nil},                                  // Normal range
+		{"hello", "-6", "-1", "World!", nil},                               // Negative index wraparound
+		{"hello", "7", "11", "World", nil},                                 // Extract "World"
+		{"hello", "0", "50", "Hello, World", nil},                          // End index exceeds length
+		{"hello", "-50", "4", "llo", nil},                                  // Start index negative out of bounds
+		{"unknown", "0", "2", "", errors.New("ERR string does not exist")}, // Key not found
 	}
 
 	for _, tt := range tests {
@@ -245,7 +245,7 @@ func TestGetSet(t *testing.T) {
 
 func TestGetSetInvalidKey(t *testing.T) {
 	val, err := essentias.GetSet("invalid", "value1")
-	expected := "ERR key not found, or expired"
+	expected := "ERR string does not exist"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error: %s, got val: %v, error: %v", expected, val, err)
 	}
@@ -399,7 +399,7 @@ func TestLcsLen2(t *testing.T) {
 
 func TestLcsInvalidFirstKey(t *testing.T) {
 	_, err := essentias.Lcs("TestLcsInvalidFirstKey", "key2", []string{})
-	expected := "ERR key not found, or expired"
+	expected := "ERR string does not exist"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error for lcs: %s, got: %v", expected, err)
 	}
@@ -408,7 +408,7 @@ func TestLcsInvalidFirstKey(t *testing.T) {
 func TestLcsInvalidSecondKey(t *testing.T) {
 	essentias.Set("key1", "lasagna")
 	_, err := essentias.Lcs("key1", "TestLcsInvalidSecondKey", []string{})
-	expected := "ERR key not found, or expired"
+	expected := "ERR string does not exist"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error for lcs: %s, got: %v", expected, err)
 	}

@@ -54,7 +54,7 @@ func Get(key string) (string, error) {
 	defer lock.RUnlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR key not found, or expired")
+		return "", errors.New("ERR string does not exist")
 	}
 	return val, nil
 }
@@ -65,7 +65,7 @@ func GetDel(key string) (string, error) {
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR key not found, or expired")
+		return "", errors.New("ERR string does not exist")
 	}
 	store.DeleteWithKey(key)
 	return val, nil
@@ -77,7 +77,7 @@ func GetEx(key, exp string) (string, error) {
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR key not found, or expired")
+		return "", errors.New("ERR string does not exist")
 	}
 	expSeconds, err := strconv.ParseInt(exp, 10, 64)
 	if err != nil {
@@ -93,7 +93,7 @@ func GetRange(key, start, end string) (string, error) {
 	defer lock.RUnlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR key not found, or expired")
+		return "", errors.New("ERR string does not exist")
 	}
 	startInd, err := strconv.ParseInt(start, 10, 64)
 	if err != nil {
@@ -121,7 +121,7 @@ func GetSet(key, value string) (string, error) {
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR key not found, or expired")
+		return "", errors.New("ERR string does not exist")
 	}
 	store.Set(key, value, time.Now().AddDate(1000, 0, 0))
 	return val, nil
@@ -190,11 +190,11 @@ func Lcs(key1 string, key2 string, commands []string) (string, error) {
 
 	val1, ok := store.Get[string, string](key1)
 	if !ok {
-		return "", errors.New("ERR key not found, or expired")
+		return "", errors.New("ERR string does not exist")
 	}
 	val2, ok := store.Get[string, string](key2)
 	if !ok {
-		return "", errors.New("ERR key not found, or expired")
+		return "", errors.New("ERR string does not exist")
 	}
 	lcs, lcsLen := findLcs(val1, val2)
 	if len(commands) == 1 && strings.ToUpper(commands[0]) == "LEN" {

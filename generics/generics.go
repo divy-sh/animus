@@ -23,3 +23,12 @@ func Copy(source, destination string) (int, error) {
 	store.Set(destination, value, time.Now().AddDate(1000, 0, 0))
 	return 1, nil
 }
+
+func Delete(keys []string) {
+	for _, key := range keys {
+		lock := store.GetLock(key)
+		lock.Lock()
+		store.DeleteWithKey(key)
+		lock.Unlock()
+	}
+}

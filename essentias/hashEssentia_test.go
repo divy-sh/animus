@@ -28,8 +28,8 @@ func TestHashEssentia_HGet_NotFound(t *testing.T) {
 
 	// Try to get a non-existent hash
 	_, err := essentias.HGet("non_existent_hash", "non_existent_key")
-	if err == nil || err.Error() != "ERR not found" {
-		t.Errorf("expected error 'ERR not found', got %v", err)
+	if err == nil || err.Error() != "ERR hash does not exist" {
+		t.Errorf("expected error 'ERR hash does not exist', got %v", err)
 	}
 }
 
@@ -41,8 +41,8 @@ func TestHashEssentia_HGet_KeyNotFound(t *testing.T) {
 	essentias.HSet(hash, key, value)
 	// Try to get a non-existent key
 	_, err := essentias.HGet("test_hash", "non_existent_key")
-	if err == nil || err.Error() != "ERR not found" {
-		t.Errorf("expected error 'ERR not found', got %v", err)
+	if err == nil || err.Error() != "ERR hash does not exist" {
+		t.Errorf("expected error 'ERR hash does not exist', got %v", err)
 	}
 }
 
