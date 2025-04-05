@@ -3,6 +3,7 @@ package essentias
 import (
 	"errors"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/store"
 )
 
@@ -12,12 +13,12 @@ func HGet(hash, key string) (string, error) {
 	defer lock.RUnlock()
 	value, ok := store.Get[string, map[string]string](hash)
 	if !ok {
-		return "", errors.New("ERR hash does not exist")
+		return "", errors.New(common.ERROR_HASH_NOT_FOUND)
 	}
 	if val, ok := value[key]; ok {
 		return val, nil
 	}
-	return "", errors.New("ERR hash does not exist")
+	return "", errors.New(common.ERROR_HASH_NOT_FOUND)
 }
 
 func HSet(hash, key, value string) {

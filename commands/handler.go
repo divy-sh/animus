@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/resp"
 )
 
@@ -28,14 +29,14 @@ func Help(args []resp.Value) resp.Value {
 		for cmd, handler := range Handlers {
 			docs = append(docs, fmt.Sprintf("%s - %s", cmd, handler.Doc))
 		}
-		return resp.Value{Typ: "bulk", Bulk: strings.Join(docs, "\n")}
+		return resp.Value{Typ: common.BULK_TYPE, Bulk: strings.Join(docs, "\n")}
 	}
 
 	cmd := strings.ToUpper(args[0].Bulk)
 	if handler, exists := Handlers[cmd]; exists {
-		return resp.Value{Typ: "bulk", Bulk: fmt.Sprintf("%s - %s", cmd, handler.Doc)}
+		return resp.Value{Typ: common.BULK_TYPE, Bulk: fmt.Sprintf("%s - %s", cmd, handler.Doc)}
 	}
-	return resp.Value{Typ: "error", Str: "Unknown command: " + cmd}
+	return resp.Value{Typ: common.ERROR_TYPE, Str: "Unknown command: " + cmd}
 }
 
 // Initialize commands with their documentation

@@ -5,6 +5,8 @@ import (
 	"io"
 	"log"
 	"strconv"
+
+	"github.com/divy-sh/animus/common"
 )
 
 type Reader struct {
@@ -59,7 +61,7 @@ func (r *Reader) readBulk() (Value, error) {
 	r.reader.Read(bulk)
 	r.readLine()
 	return Value{
-		Typ:  "bulk",
+		Typ:  common.BULK_TYPE,
 		Bulk: string(bulk),
 	}, nil
 }

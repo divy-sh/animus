@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/resp"
 )
 
@@ -16,7 +17,7 @@ func TestReadBulkString(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	expected := resp.Value{Typ: "bulk", Bulk: "hello"}
+	expected := resp.Value{Typ: common.BULK_TYPE, Bulk: "hello"}
 	if !reflect.DeepEqual(val, expected) {
 		t.Errorf("Expected %v, got %v", expected, val)
 	}
@@ -32,7 +33,7 @@ func TestReadArray(t *testing.T) {
 
 	expected := resp.Value{
 		Typ:   "array",
-		Array: []resp.Value{{Typ: "bulk", Bulk: "hello"}, {Typ: "bulk", Bulk: "world"}},
+		Array: []resp.Value{{Typ: common.BULK_TYPE, Bulk: "hello"}, {Typ: common.BULK_TYPE, Bulk: "world"}},
 	}
 
 	if !reflect.DeepEqual(val, expected) {

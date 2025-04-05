@@ -3,12 +3,13 @@ package commands
 import (
 	"testing"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/resp"
 )
 
 func TestPingNoArg(t *testing.T) {
 	result := ping([]resp.Value{})
-	if result.Typ != "string" || result.Str != "PONG" {
+	if result.Typ != common.STRING_TYPE || result.Str != "PONG" {
 		t.Errorf("expected PONG, got %v", result)
 	}
 }
@@ -16,11 +17,11 @@ func TestPingNoArg(t *testing.T) {
 func TestPingWithArg(t *testing.T) {
 	result := ping([]resp.Value{
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "test",
 		},
 	})
-	if result.Typ != "string" || result.Str != "test" {
+	if result.Typ != common.STRING_TYPE || result.Str != "test" {
 		t.Errorf("expected %s, got %v", "test", result)
 	}
 }

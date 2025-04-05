@@ -3,15 +3,16 @@ package commands
 import (
 	"testing"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/resp"
 )
 
 func TestRPush(t *testing.T) {
 	listKey := "mylist"
-	args := []resp.Value{{Typ: "bulk", Bulk: listKey}, {Typ: "bulk", Bulk: "val1"}, {Typ: "bulk", Bulk: "val2"}}
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: listKey}, {Typ: common.BULK_TYPE, Bulk: "val1"}, {Typ: common.BULK_TYPE, Bulk: "val2"}}
 	result := rpush(args)
 
-	if result.Typ != "string" || result.Str != "OK" {
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
 }
@@ -27,10 +28,10 @@ func TestRPushInvalidArgs(t *testing.T) {
 
 func TestRPopEmpty(t *testing.T) {
 	listKey := "emptylist"
-	args := []resp.Value{{Typ: "bulk", Bulk: listKey}}
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: listKey}}
 	result := rpop(args)
 
-	expected := "ERR list does not exist"
+	expected := common.ERROR_LIST_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error %s, got %v", expected, result)
 	}
@@ -38,8 +39,8 @@ func TestRPopEmpty(t *testing.T) {
 
 func TestRPopSingle(t *testing.T) {
 	listKey := "testlist"
-	rpush([]resp.Value{{Typ: "bulk", Bulk: listKey}, {Typ: "bulk", Bulk: "val1"}})
-	args := []resp.Value{{Typ: "bulk", Bulk: listKey}}
+	rpush([]resp.Value{{Typ: common.BULK_TYPE, Bulk: listKey}, {Typ: common.BULK_TYPE, Bulk: "val1"}})
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: listKey}}
 	result := rpop(args)
 
 	if result.Typ != "array" || len(result.Array) != 1 || result.Array[0].Bulk != "val1" {
@@ -59,11 +60,11 @@ func TestRPopInvalidArgs(t *testing.T) {
 func TestRPopMultiple(t *testing.T) {
 	listKey := "multilist"
 	rpush([]resp.Value{
-		{Typ: "bulk", Bulk: listKey},
-		{Typ: "bulk", Bulk: "val1"},
-		{Typ: "bulk", Bulk: "val2"},
-		{Typ: "bulk", Bulk: "val3"}})
-	args := []resp.Value{{Typ: "bulk", Bulk: listKey}, {Typ: "bulk", Bulk: "2"}}
+		{Typ: common.BULK_TYPE, Bulk: listKey},
+		{Typ: common.BULK_TYPE, Bulk: "val1"},
+		{Typ: common.BULK_TYPE, Bulk: "val2"},
+		{Typ: common.BULK_TYPE, Bulk: "val3"}})
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: listKey}, {Typ: common.BULK_TYPE, Bulk: "2"}}
 	result := rpop(args)
 
 	if result.Typ != "array" || len(result.Array) != 2 || result.Array[0].Bulk != "val2" || result.Array[1].Bulk != "val3" {

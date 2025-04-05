@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/store"
 )
 
@@ -54,7 +55,7 @@ func Get(key string) (string, error) {
 	defer lock.RUnlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR string does not exist")
+		return "", errors.New(common.ERROR_STRING_NOT_FOUND)
 	}
 	return val, nil
 }
@@ -65,7 +66,7 @@ func GetDel(key string) (string, error) {
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR string does not exist")
+		return "", errors.New(common.ERROR_STRING_NOT_FOUND)
 	}
 	store.DeleteWithKey(key)
 	return val, nil
@@ -77,7 +78,7 @@ func GetEx(key, exp string) (string, error) {
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR string does not exist")
+		return "", errors.New(common.ERROR_STRING_NOT_FOUND)
 	}
 	expSeconds, err := strconv.ParseInt(exp, 10, 64)
 	if err != nil {
@@ -93,7 +94,7 @@ func GetRange(key, start, end string) (string, error) {
 	defer lock.RUnlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR string does not exist")
+		return "", errors.New(common.ERROR_STRING_NOT_FOUND)
 	}
 	startInd, err := strconv.ParseInt(start, 10, 64)
 	if err != nil {
@@ -121,7 +122,7 @@ func GetSet(key, value string) (string, error) {
 	defer lock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
-		return "", errors.New("ERR string does not exist")
+		return "", errors.New(common.ERROR_STRING_NOT_FOUND)
 	}
 	store.Set(key, value)
 	return val, nil
@@ -190,11 +191,11 @@ func Lcs(key1 string, key2 string, commands []string) (string, error) {
 
 	val1, ok := store.Get[string, string](key1)
 	if !ok {
-		return "", errors.New("ERR string does not exist")
+		return "", errors.New(common.ERROR_STRING_NOT_FOUND)
 	}
 	val2, ok := store.Get[string, string](key2)
 	if !ok {
-		return "", errors.New("ERR string does not exist")
+		return "", errors.New(common.ERROR_STRING_NOT_FOUND)
 	}
 	lcs, lcsLen := findLcs(val1, val2)
 	if len(commands) == 1 && strings.ToUpper(commands[0]) == "LEN" {

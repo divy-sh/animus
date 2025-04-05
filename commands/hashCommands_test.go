@@ -3,39 +3,40 @@ package commands
 import (
 	"testing"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/resp"
 )
 
 func TestHsetAndHget(t *testing.T) {
 	input := []resp.Value{
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "hash",
 		},
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "key",
 		},
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "value",
 		},
 	}
 	result := hset(input)
-	if result.Typ != "string" || result.Str != "OK" {
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected success but got type: %s, value: %s", result.Typ, result.Str)
 	}
 	result = hget([]resp.Value{
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "hash",
 		},
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "key",
 		},
 	})
-	if result.Typ != "bulk" || result.Bulk != "value" {
+	if result.Typ != common.BULK_TYPE || result.Bulk != "value" {
 		t.Errorf("Expected success but got type: %s, value: %s", result.Typ, result.Str)
 	}
 }
@@ -43,15 +44,15 @@ func TestHsetAndHget(t *testing.T) {
 func TestHgetWithoutHset(t *testing.T) {
 	result := hget([]resp.Value{
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "not_set",
 		},
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "not_set",
 		},
 	})
-	expected := "ERR hash does not exist"
+	expected := common.ERROR_HASH_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
 	}
@@ -60,11 +61,11 @@ func TestHgetWithoutHset(t *testing.T) {
 func TestHsetInvalidCommandSize(t *testing.T) {
 	input := []resp.Value{
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "hash",
 		},
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "key",
 		},
 	}
@@ -77,7 +78,7 @@ func TestHsetInvalidCommandSize(t *testing.T) {
 func TestHGetInvalidCommandSize(t *testing.T) {
 	result := hget([]resp.Value{
 		{
-			Typ:  "bulk",
+			Typ:  common.BULK_TYPE,
 			Bulk: "hash",
 		},
 	})

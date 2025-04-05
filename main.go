@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/divy-sh/animus/commands"
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/resp"
 )
 
@@ -72,7 +73,7 @@ func main() {
 		handler, ok := commands.Handlers[command]
 		if !ok {
 			log.Print("Invalid command: ", command)
-			writer.Write(resp.Value{Typ: "string", Str: ""})
+			writer.Write(resp.Value{Typ: common.STRING_TYPE, Str: ""})
 			continue
 		}
 

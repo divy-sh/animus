@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/resp"
 )
 
 func TestMarshalInt(t *testing.T) {
-	v := resp.Value{Typ: "integer", Num: 42}
+	v := resp.Value{Typ: common.INTEGER_TYPE, Num: 42}
 	expected := []byte{resp.INTEGER, byte(42), '\r', '\n'}
 	result := v.Marshal()
 
@@ -18,7 +19,7 @@ func TestMarshalInt(t *testing.T) {
 }
 
 func TestMarshalString(t *testing.T) {
-	v := resp.Value{Typ: "string", Str: "Hello"}
+	v := resp.Value{Typ: common.STRING_TYPE, Str: "Hello"}
 	expected := append([]byte{resp.STRING}, "Hello"...)
 	expected = append(expected, '\r', '\n')
 	result := v.Marshal()
@@ -29,7 +30,7 @@ func TestMarshalString(t *testing.T) {
 }
 
 func TestMarshalBulk(t *testing.T) {
-	v := resp.Value{Typ: "bulk", Bulk: "data"}
+	v := resp.Value{Typ: common.BULK_TYPE, Bulk: "data"}
 	expected := append([]byte{resp.BULK}, "4\r\ndata\r\n"...)
 	result := v.Marshal()
 
@@ -39,13 +40,13 @@ func TestMarshalBulk(t *testing.T) {
 }
 
 func TestMarshalArray(t *testing.T) {
-	v := resp.Value{Typ: "array", Array: []resp.Value{
-		{Typ: "string", Str: "one"},
-		{Typ: "integer", Num: 2},
+	v := resp.Value{Typ: common.ARRAY_TYPE, Array: []resp.Value{
+		{Typ: common.STRING_TYPE, Str: "one"},
+		{Typ: common.ARRAY_TYPE, Num: 2},
 	}}
 	expected := append([]byte{resp.ARRAY}, "2\r\n"...)
-	expected = append(expected, resp.Value{Typ: "string", Str: "one"}.Marshal()...)
-	expected = append(expected, resp.Value{Typ: "integer", Num: 2}.Marshal()...)
+	expected = append(expected, resp.Value{Typ: common.STRING_TYPE, Str: "one"}.Marshal()...)
+	expected = append(expected, resp.Value{Typ: common.ARRAY_TYPE, Num: 2}.Marshal()...)
 	result := v.Marshal()
 
 	if !bytes.Equal(result, expected) {
@@ -54,7 +55,7 @@ func TestMarshalArray(t *testing.T) {
 }
 
 func TestMarshalError(t *testing.T) {
-	v := resp.Value{Typ: "error", Str: "ERR error"}
+	v := resp.Value{Typ: common.ERROR_TYPE, Str: "ERR error"}
 	expected := append([]byte{resp.ERROR}, "ERR error\r\n"...)
 	result := v.Marshal()
 
@@ -64,7 +65,7 @@ func TestMarshalError(t *testing.T) {
 }
 
 func TestMarshalNull(t *testing.T) {
-	v := resp.Value{Typ: "null"}
+	v := resp.Value{Typ: common.NULL_TYPE}
 	expected := []byte("$-1\r\n")
 	result := v.Marshal()
 
@@ -76,7 +77,7 @@ func TestMarshalNull(t *testing.T) {
 func TestWriter(t *testing.T) {
 	var buf bytes.Buffer
 	w := resp.NewWriter(&buf)
-	v := resp.Value{Typ: "string", Str: "test"}
+	v := resp.Value{Typ: common.STRING_TYPE, Str: "test"}
 
 	err := w.Write(v)
 	if err != nil {

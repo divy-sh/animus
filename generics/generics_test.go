@@ -3,6 +3,7 @@ package generics
 import (
 	"testing"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/essentias"
 )
 
@@ -37,7 +38,7 @@ func TestStringDelete(t *testing.T) {
 	essentias.Set("TestStringDelete", "expected")
 	Delete([]string{"TestStringDelete"})
 	val, err := essentias.Get("TestStringDelete")
-	if err == nil || err.Error() != "ERR string does not exist" {
+	if err == nil || err.Error() != common.ERROR_STRING_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
 	}
 }
@@ -46,7 +47,7 @@ func TestHashDelete(t *testing.T) {
 	essentias.HSet("TestHashDelete", "pizza", "expected")
 	Delete([]string{"TestHashDelete"})
 	val, err := essentias.HGet("TestHashDelete", "pizza")
-	if err == nil || err.Error() != "ERR hash does not exist" {
+	if err == nil || err.Error() != common.ERROR_HASH_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
 	}
 }
@@ -55,7 +56,7 @@ func TestListDelete(t *testing.T) {
 	essentias.RPush("TestListDelete", &[]string{"expected"})
 	Delete([]string{"TestListDelete"})
 	val, err := essentias.RPop("TestListDelete", "1")
-	if err == nil || err.Error() != "ERR list does not exist" {
+	if err == nil || err.Error() != common.ERROR_LIST_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
 	}
 }

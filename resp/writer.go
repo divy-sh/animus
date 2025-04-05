@@ -3,6 +3,8 @@ package resp
 import (
 	"io"
 	"strconv"
+
+	"github.com/divy-sh/animus/common"
 )
 
 type Writer struct {
@@ -15,17 +17,17 @@ func NewWriter(w io.Writer) *Writer {
 
 func (v Value) Marshal() []byte {
 	switch v.Typ {
-	case "array":
+	case common.ARRAY_TYPE:
 		return v.marshalArray()
-	case "bulk":
+	case common.BULK_TYPE:
 		return v.marshalBulk()
-	case "integer":
+	case common.INTEGER_TYPE:
 		return v.marshalInt()
-	case "string":
+	case common.STRING_TYPE:
 		return v.marshalString()
-	case "null":
+	case common.NULL_TYPE:
 		return v.marshallNull()
-	case "error":
+	case common.ERROR_TYPE:
 		return v.marshallError()
 	default:
 		return []byte{}

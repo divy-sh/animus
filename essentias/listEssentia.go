@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/store"
 )
 
@@ -13,7 +14,7 @@ func RPop(key string, count string) ([]string, error) {
 	defer lock.Unlock()
 	vals, ok := store.Get[string, []string](key)
 	if !ok {
-		return nil, errors.New("ERR list does not exist")
+		return nil, errors.New(common.ERROR_LIST_NOT_FOUND)
 	}
 	cnt, err := strconv.ParseInt(count, 10, 64)
 	if err != nil || cnt <= 0 || cnt > int64(len(vals)) {
