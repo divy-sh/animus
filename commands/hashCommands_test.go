@@ -51,8 +51,9 @@ func TestHgetWithoutHset(t *testing.T) {
 			Bulk: "not_set",
 		},
 	})
-	if result.Typ != "null" || result.Bulk != "" {
-		t.Errorf("Expected null but got %v", result)
+	expected := "ERR hash does not exist"
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected %s, got %v", expected, result)
 	}
 }
 

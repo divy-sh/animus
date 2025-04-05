@@ -35,3 +35,36 @@ func TestListCopy(t *testing.T) {
 		t.Errorf("Expected array or null, got %v", result)
 	}
 }
+
+func TestStringDelete(t *testing.T) {
+	set([]resp.Value{{Typ: "bulk", Bulk: "TestStringDelete1"}, {Typ: "bulk", Bulk: "value"}})
+	del([]resp.Value{{Typ: "bulk", Bulk: "TestStringDelete1"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "TestStringDelete1"}}
+	result := get(args)
+	expected := "ERR string does not exist"
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected %s, got %v", expected, result)
+	}
+}
+
+func TestHashDelete(t *testing.T) {
+	hset([]resp.Value{{Typ: "bulk", Bulk: "TestHashDelete1"}, {Typ: "bulk", Bulk: "TestHashDelete1"}, {Typ: "bulk", Bulk: "value"}})
+	del([]resp.Value{{Typ: "bulk", Bulk: "TestHashDelete1"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "TestHashDelete1"}, {Typ: "bulk", Bulk: "TestHashDelete1"}}
+	result := hget(args)
+	expected := "ERR hash does not exist"
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected %s, got %v", expected, result)
+	}
+}
+
+func TestListDelete(t *testing.T) {
+	rpush([]resp.Value{{Typ: "bulk", Bulk: "TestListDelete1"}, {Typ: "bulk", Bulk: "value1"}, {Typ: "bulk", Bulk: "value2"}})
+	del([]resp.Value{{Typ: "bulk", Bulk: "TestListDelete1"}})
+	args := []resp.Value{{Typ: "bulk", Bulk: "TestListDelete2"}}
+	result := rpop(args)
+	expected := "ERR list does not exist"
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected %s, got %v", expected, result)
+	}
+}

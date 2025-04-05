@@ -84,8 +84,9 @@ func TestGet(t *testing.T) {
 func TestGetNonExistingKey(t *testing.T) {
 	args := []resp.Value{{Typ: "bulk", Bulk: "non_existing"}}
 	result := get(args)
-	if result.Typ != "null" {
-		t.Errorf("Expected null, got %v", result)
+	expected := "ERR string does not exist"
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected %s, got %v", expected, result)
 	}
 }
 

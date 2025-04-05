@@ -43,7 +43,7 @@ func get(args []resp.Value) resp.Value {
 	}
 	value, err := essentias.Get(args[0].Bulk)
 	if err != nil {
-		return resp.Value{Typ: "null"}
+		return resp.Value{Typ: "error", Str: err.Error()}
 	}
 	return resp.Value{Typ: "bulk", Bulk: value}
 }
