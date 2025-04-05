@@ -8,7 +8,7 @@ import (
 
 func hset(args []resp.Value) resp.Value {
 	if len(args) != 3 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'hset' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
 	essentias.HSet(args[0].Bulk, args[1].Bulk, args[2].Bulk)
@@ -17,7 +17,7 @@ func hset(args []resp.Value) resp.Value {
 
 func hget(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'hget' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
 	value, err := essentias.HGet(args[0].Bulk, args[1].Bulk)

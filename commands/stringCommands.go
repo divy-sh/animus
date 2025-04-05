@@ -8,7 +8,7 @@ import (
 
 func appendCmd(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'append' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	essentias.Append(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
@@ -16,7 +16,7 @@ func appendCmd(args []resp.Value) resp.Value {
 
 func decr(args []resp.Value) resp.Value {
 	if len(args) != 1 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'decr' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	err := essentias.Decr(args[0].Bulk)
 	if err != nil {
@@ -27,7 +27,7 @@ func decr(args []resp.Value) resp.Value {
 
 func decrby(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'decrby' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
 	err := essentias.DecrBy(args[0].Bulk, args[1].Bulk)
@@ -40,7 +40,7 @@ func decrby(args []resp.Value) resp.Value {
 
 func get(args []resp.Value) resp.Value {
 	if len(args) != 1 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'get' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	value, err := essentias.Get(args[0].Bulk)
 	if err != nil {
@@ -51,7 +51,7 @@ func get(args []resp.Value) resp.Value {
 
 func getdel(args []resp.Value) resp.Value {
 	if len(args) != 1 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'getdel' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	value, err := essentias.GetDel(args[0].Bulk)
 	if err != nil {
@@ -62,7 +62,7 @@ func getdel(args []resp.Value) resp.Value {
 
 func getex(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'getex' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	value, err := essentias.GetEx(args[0].Bulk, args[1].Bulk)
 	if err != nil {
@@ -73,7 +73,7 @@ func getex(args []resp.Value) resp.Value {
 
 func getrange(args []resp.Value) resp.Value {
 	if len(args) != 3 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'getrange' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	value, err := essentias.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
 	if err != nil {
@@ -84,7 +84,7 @@ func getrange(args []resp.Value) resp.Value {
 
 func getset(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'getset' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
 	val, err := essentias.GetSet(args[0].Bulk, args[1].Bulk)
@@ -96,7 +96,7 @@ func getset(args []resp.Value) resp.Value {
 
 func incr(args []resp.Value) resp.Value {
 	if len(args) != 1 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'incr' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	err := essentias.Incr(args[0].Bulk)
 	if err != nil {
@@ -107,7 +107,7 @@ func incr(args []resp.Value) resp.Value {
 
 func incrby(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'incrby' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
 	err := essentias.IncrBy(args[0].Bulk, args[1].Bulk)
@@ -120,7 +120,7 @@ func incrby(args []resp.Value) resp.Value {
 
 func incrbyfloat(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'incrby' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
 	err := essentias.IncrByFloat(args[0].Bulk, args[1].Bulk)
@@ -133,7 +133,7 @@ func incrbyfloat(args []resp.Value) resp.Value {
 
 func lcs(args []resp.Value) resp.Value {
 	if len(args) < 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'lcs' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	commands := []string{}
 	for _, arg := range args[2:] {
@@ -148,7 +148,7 @@ func lcs(args []resp.Value) resp.Value {
 
 func mget(args []resp.Value) resp.Value {
 	if len(args) < 1 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'mget' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	keys := []string{}
 	for _, arg := range args {
@@ -168,7 +168,7 @@ func mget(args []resp.Value) resp.Value {
 
 func mset(args []resp.Value) resp.Value {
 	if len(args) < 2 || len(args)&1 == 1 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'mget' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	kvPairs := map[string]string{}
 	for i := 0; i < len(args); i += 2 {
@@ -180,7 +180,7 @@ func mset(args []resp.Value) resp.Value {
 
 func set(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'set' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
 	essentias.Set(args[0].Bulk, args[1].Bulk)

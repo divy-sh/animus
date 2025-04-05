@@ -8,7 +8,7 @@ import (
 
 func rpop(args []resp.Value) resp.Value {
 	if len(args) < 1 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'rpop' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	var values []string
 	var err error
@@ -29,7 +29,7 @@ func rpop(args []resp.Value) resp.Value {
 
 func rpush(args []resp.Value) resp.Value {
 	if len(args) < 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'rpush' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	values := make([]string, len(args)-1)
 	for i, val := range args[1:] {

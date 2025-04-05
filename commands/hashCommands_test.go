@@ -70,7 +70,7 @@ func TestHsetInvalidCommandSize(t *testing.T) {
 		},
 	}
 	result := hset(input)
-	if result.Typ != "error" || result.Str != "ERR wrong number of arguments for 'hset' command" {
+	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
 		t.Errorf("Expected ERR wrong number of arguments for 'hset' command but got %v", result)
 	}
 }
@@ -82,7 +82,7 @@ func TestHGetInvalidCommandSize(t *testing.T) {
 			Bulk: "hash",
 		},
 	})
-	if result.Typ != "error" || result.Str != "ERR wrong number of arguments for 'hget' command" {
+	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
 		t.Errorf("Expected ERR wrong number of arguments for 'hget' command but got %v", result)
 	}
 }

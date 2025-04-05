@@ -10,7 +10,7 @@ import (
 
 func copy(args []resp.Value) resp.Value {
 	if len(args) != 2 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'copy' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	val, err := generics.Copy(args[0].Bulk, args[1].Bulk)
 	if err != nil {
@@ -21,7 +21,7 @@ func copy(args []resp.Value) resp.Value {
 
 func del(args []resp.Value) resp.Value {
 	if len(args) < 1 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: "ERR wrong number of arguments for 'del' command"}
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 	keys := make([]string, len(args))
 	for i := 0; i < len(args); i += 2 {
