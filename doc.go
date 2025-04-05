@@ -49,9 +49,12 @@ Key Features:
 	Inserts one or more elements at the end of the list stored at key.
   - **HELP (Help)**: HELP [COMMAND]
 	Shows documentation for available commands.
-  - **COPY (String)**: Copy [key1] [key2]
+  - **COPY (String)**: COPY [key1] [key2]
 	Copies value(s) of key1 into key2.
 	If key2 doesn't exist, creates key2 and sets its value.
+  - **DEL (String)**: DEL key1 [keys...]
+	Deletes all the keys passes as argument.
+	If a key doesn't exist, it is ignored.
 
 Roadmap:
   - Advanced data structures (Sets, Sorted Sets)
