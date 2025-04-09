@@ -38,7 +38,7 @@ func TestStringDelete(t *testing.T) {
 	essentias.Set("TestStringDelete", "expected")
 	Delete([]string{"TestStringDelete"})
 	val, err := essentias.Get("TestStringDelete")
-	if err == nil || err.Error() != common.ERROR_STRING_NOT_FOUND {
+	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
 	}
 }
@@ -47,7 +47,7 @@ func TestHashDelete(t *testing.T) {
 	essentias.HSet("TestHashDelete", "pizza", "expected")
 	Delete([]string{"TestHashDelete"})
 	val, err := essentias.HGet("TestHashDelete", "pizza")
-	if err == nil || err.Error() != common.ERROR_HASH_NOT_FOUND {
+	if err == nil || err.Error() != common.ERR_HASH_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
 	}
 }
@@ -56,7 +56,14 @@ func TestListDelete(t *testing.T) {
 	essentias.RPush("TestListDelete", &[]string{"expected"})
 	Delete([]string{"TestListDelete"})
 	val, err := essentias.RPop("TestListDelete", "1")
-	if err == nil || err.Error() != common.ERROR_LIST_NOT_FOUND {
+	if err == nil || err.Error() != common.ERR_LIST_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
+	}
+}
+
+func TestInvalidKeyCopy(t *testing.T) {
+	val, err := Copy("TestInvalidKeyCopy", "TestInvalidKeyCopy2")
+	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
+		t.Errorf("%v, %v", val, err)
 	}
 }

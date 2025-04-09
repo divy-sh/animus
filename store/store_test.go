@@ -1,13 +1,14 @@
 package store
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
 
 func TestStore_SetAndGet(t *testing.T) {
 	key, value := "testKey", "testValue"
-	SetWithTTL(key, value, time.Now().Add(time.Minute).Unix())
+	SetWithTTL(key, value, 60)
 	storedValue, found := Get[string, string](key)
 
 	if !found {
@@ -30,8 +31,21 @@ func TestStore_OverwriteKey(t *testing.T) {
 	key := "testKey"
 	firstValue, secondValue := "firstValue", "secondValue"
 
-	SetWithTTL(key, firstValue, time.Now().Add(time.Minute).Unix())
-	SetWithTTL(key, secondValue, time.Now().Add(time.Minute).Unix())
+	Set(key, firstValue)
+	Set(key, secondValue)
+
+	storedValue, _ := Get[string, string](key)
+	if storedValue != secondValue {
+		t.Errorf("Expected value %v, got %v", secondValue, storedValue)
+	}
+}
+
+func TestStore_OverwriteKeyWithTTL(t *testing.T) {
+	key := "testKey"
+	firstValue, secondValue := "firstValue", "secondValue"
+
+	SetWithTTL(key, firstValue, 120)
+	SetWithTTL(key, secondValue, 120)
 
 	storedValue, _ := Get[string, string](key)
 	if storedValue != secondValue {
@@ -40,8 +54,8 @@ func TestStore_OverwriteKey(t *testing.T) {
 }
 
 func TestStore_TTLExpirationOnGet(t *testing.T) {
-	SetWithTTL("expiringKey", "value", time.Now().Add(50*time.Millisecond).Unix())
-	time.Sleep(100 * time.Millisecond) // Allow time for expiration
+	SetWithTTL("expiringKey", "value", 0)
+	time.Sleep(1 * time.Microsecond) // Allow time for expiration
 	Get[string, string]("expiringKey")
 	_, found := Get[string, string]("expiringKey")
 	if found {
@@ -50,8 +64,8 @@ func TestStore_TTLExpirationOnGet(t *testing.T) {
 }
 
 func TestStore_TTLExpirationOnSet(t *testing.T) {
-	SetWithTTL("expiringKey", "value", time.Now().Add(50*time.Millisecond).Unix())
-	time.Sleep(100 * time.Millisecond) // Allow time for expiration
+	SetWithTTL("expiringKey", "value", 0)
+	time.Sleep(1 * time.Microsecond) // Allow time for expiration
 	Set("newKey", "value")
 	_, found := Get[string, string]("expiringKey")
 	if found {
@@ -72,15 +86,32 @@ func TestStore_DeleteWithKey(t *testing.T) {
 	}
 }
 
-// Need to come up with a way to mock a store creation with limited size to test this.
-// func TestStore_LRU_Eviction(t *testing.T) {
-// 	Set("key1", "value1", time.Now().Add(time.Minute))
-// 	Set("key2", "value2", time.Now().Add(time.Minute))
-// 	Set("key3", "value3", time.Now().Add(time.Minute))
-// 	Set("key4", "value4", time.Now().Add(time.Minute)) // This should trigger LRU eviction
+func TestStore_TTL_Eviction(t *testing.T) {
+	store := GetSharedStore()
+	store.maxSize = 3
+	SetWithTTL("key1", "value1", 60)
+	SetWithTTL("key2", "value2", 60)
+	SetWithTTL("key3", "value3", 60)
+	SetWithTTL("key4", "value4", 60) // This should trigger TTL eviction
+	store.maxSize = 100_000          // Revert size
+	_, found := Get[string, string]("key1")
+	if found {
+		t.Errorf("Expected LRU key 'key1' to be evicted, but it was found")
+	}
+}
 
-// 	_, found := Get[string, string]("key1")
-// 	if found {
-// 		t.Errorf("Expected LRU key 'key1' to be evicted, but it was found")
-// 	}
-// }
+func TestStore_LRU_Eviction(t *testing.T) {
+	store := GetSharedStore()
+	store.maxSize = 3
+	Set("LruEviction1", "value1")
+	Set("LruEviction2", "value2")
+	Set("LruEviction3", "value3")
+	Set("LruEviction4", "value4") // This should trigger LRU eviction
+	store.maxSize = 100_000       // Revert size
+
+	fmt.Println(store.dict)
+	_, found := Get[string, string]("key1")
+	if found {
+		t.Errorf("Expected LRU key 'key1' to be evicted, but it was found")
+	}
+}

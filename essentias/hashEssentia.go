@@ -13,12 +13,12 @@ func HGet(hash, key string) (string, error) {
 	defer lock.RUnlock()
 	value, ok := store.Get[string, map[string]string](hash)
 	if !ok {
-		return "", errors.New(common.ERROR_HASH_NOT_FOUND)
+		return "", errors.New(common.ERR_HASH_NOT_FOUND)
 	}
 	if val, ok := value[key]; ok {
 		return val, nil
 	}
-	return "", errors.New(common.ERROR_HASH_NOT_FOUND)
+	return "", errors.New(common.ERR_HASH_NOT_FOUND)
 }
 
 func HSet(hash, key, value string) {

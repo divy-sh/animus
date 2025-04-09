@@ -34,7 +34,7 @@ func TestRPopEmpty(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: listKey}}
 	result := rpop(args)
 
-	expected := common.ERROR_LIST_NOT_FOUND
+	expected := common.ERR_LIST_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error %s, got %v", expected, result)
 	}

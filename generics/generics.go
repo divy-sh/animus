@@ -3,6 +3,7 @@ package generics
 import (
 	"errors"
 
+	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/store"
 )
 
@@ -13,7 +14,7 @@ func Copy(source, destination string) (int, error) {
 	lock.RUnlock()
 
 	if !ok {
-		return 0, errors.New("ERR source key not found, or expired")
+		return 0, errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
 	}
 
 	lock2 := store.GetLock(destination)

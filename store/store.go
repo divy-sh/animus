@@ -2,6 +2,7 @@ package store
 
 import (
 	"container/list"
+	"math"
 	"sync"
 	"time"
 
@@ -30,7 +31,7 @@ type BTreeItem struct {
 }
 
 func (a BTreeItem) Less(b btree.Item) bool {
-	return a.ttl >= 0 && time.Unix(a.ttl, 0).Before(time.Unix(b.(BTreeItem).ttl, 0))
+	return a.ttl >= 0 && a.ttl < b.(BTreeItem).ttl
 }
 
 /* Singleton instance */
@@ -76,7 +77,7 @@ func Get[K comparable, V any](key K) (V, bool) {
 	if !found {
 		var zero V
 		return zero, false
-	} else if node.Value.(*DataNode).ttl >= 0 && time.Unix(node.Value.(*DataNode).ttl, 0).Before(time.Now()) {
+	} else if node.Value.(*DataNode).ttl <= time.Now().Unix() {
 		store.evictWithKey(key)
 		var zero V
 		return zero, false
@@ -94,7 +95,7 @@ func Get[K comparable, V any](key K) (V, bool) {
 // Set stores a value with TTL
 func Set[K comparable, V any](key K, value V) {
 	store := GetSharedStore()
-	ttl := int64(-1)
+	ttl := int64(math.MaxInt64)
 	node, found := store.dict[key]
 	if found {
 		node.Value.(*DataNode).data = value
@@ -118,7 +119,7 @@ func Set[K comparable, V any](key K, value V) {
 
 func SetWithTTL[K comparable, V any](key K, value V, ttl int64) {
 	store := GetSharedStore()
-
+	ttl = time.Now().Unix() + ttl
 	node, found := store.dict[key]
 	if found {
 		node.Value.(*DataNode).data = value
@@ -161,7 +162,7 @@ func (s *Store) lazyEvict() {
 
 func (s *Store) evictTtlExpired() bool {
 	item := s.expTree.Min()
-	if item != nil && time.Unix(item.(BTreeItem).ttl, 0).Before(time.Now()) {
+	if item != nil && item.(BTreeItem).ttl < time.Now().Unix() {
 		key := s.expTree.Delete(item).(BTreeItem).key
 		s.queue.Remove(s.dict[key])
 		delete(s.dict, key)

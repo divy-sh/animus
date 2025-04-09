@@ -102,7 +102,7 @@ func TestGet(t *testing.T) {
 func TestGetNonExistingKey(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "non_existing"}}
 	result := get(args)
-	expected := common.ERROR_STRING_NOT_FOUND
+	expected := common.ERR_STRING_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
 	}
@@ -228,7 +228,7 @@ func TestGetSetNonExistingKey(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "non_existing"},
 		{Typ: common.BULK_TYPE, Bulk: "val"}}
-	expected := common.ERROR_STRING_NOT_FOUND
+	expected := common.ERR_STRING_NOT_FOUND
 	result := getset(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)
@@ -394,7 +394,7 @@ func TestLcsInvalidFirstKey(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "invalid"},
 		{Typ: common.BULK_TYPE, Bulk: "key2"}}
-	expected := common.ERROR_STRING_NOT_FOUND
+	expected := common.ERR_STRING_NOT_FOUND
 	result := lcs(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)
@@ -405,7 +405,7 @@ func TestLcsInvalidSecondtKey(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key1"},
 		{Typ: common.BULK_TYPE, Bulk: "invalid"}}
-	expected := common.ERROR_STRING_NOT_FOUND
+	expected := common.ERR_STRING_NOT_FOUND
 	result := lcs(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)

@@ -52,7 +52,7 @@ func TestHgetWithoutHset(t *testing.T) {
 			Bulk: "not_set",
 		},
 	})
-	expected := common.ERROR_HASH_NOT_FOUND
+	expected := common.ERR_HASH_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
 	}

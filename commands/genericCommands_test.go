@@ -60,7 +60,7 @@ func TestStringDelete(t *testing.T) {
 	del([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestStringDelete1"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestStringDelete1"}}
 	result := get(args)
-	expected := common.ERROR_STRING_NOT_FOUND
+	expected := common.ERR_STRING_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
 	}
@@ -76,7 +76,7 @@ func TestHashDelete(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "TestHashDelete1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestHashDelete1"}}
 	result := hget(args)
-	expected := common.ERROR_HASH_NOT_FOUND
+	expected := common.ERR_HASH_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
 	}
@@ -90,7 +90,7 @@ func TestListDelete(t *testing.T) {
 	del([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestListDelete1"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestListDelete2"}}
 	result := rpop(args)
-	expected := common.ERROR_LIST_NOT_FOUND
+	expected := common.ERR_LIST_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
 	}
