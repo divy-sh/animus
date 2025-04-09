@@ -11,7 +11,7 @@ func TestStringCopy(t *testing.T) {
 	set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestStringCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	copy([]resp.Value{
+	copyVal([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestStringCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestStringCopy2"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestStringCopy2"}}
@@ -26,7 +26,7 @@ func TestHashCopy(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	copy([]resp.Value{
+	copyVal([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy2"}})
 	args := []resp.Value{
@@ -43,7 +43,7 @@ func TestListCopy(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "TestListCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "value1"},
 		{Typ: common.BULK_TYPE, Bulk: "value2"}})
-	copy([]resp.Value{
+	copyVal([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestListCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestListCopy2"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestListCopy2"}}
@@ -54,11 +54,11 @@ func TestListCopy(t *testing.T) {
 }
 
 func TestGeneric_Copy_InvalidArgumentsCount(t *testing.T) {
-	copy([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "invalidArguemntCount"}})
+	copyVal([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "invalidArguemntCount"}})
 }
 
 func TestGeneric_Copy_InvalidSourceKey(t *testing.T) {
-	copy([]resp.Value{
+	copyVal([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "InvalidSourceKey"},
 		{Typ: common.BULK_TYPE, Bulk: "InvalidDestinationKey"},
 	})

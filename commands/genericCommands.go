@@ -8,7 +8,7 @@ import (
 	"github.com/divy-sh/animus/resp"
 )
 
-func copy(args []resp.Value) resp.Value {
+func copyVal(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}

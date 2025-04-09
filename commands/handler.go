@@ -96,7 +96,7 @@ func init() {
 	Shows documentation for available commands.`)
 
 	// Generics
-	RegisterCommand("COPY", copy, `COPY [key1] [key2]
+	RegisterCommand("COPY", copyVal, `COPY [key1] [key2]
 	Copies value(s) of key1 into key2.
 	If key2 doesn't exist, creates key2 and sets its value.`)
 	RegisterCommand("DEL", del, `DEL key1 [keys...]
