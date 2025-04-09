@@ -59,7 +59,7 @@ func GetLock(key any) *sync.RWMutex {
 	return actual.(*sync.RWMutex)
 }
 
-func getLocks(keys *[]any) []*sync.RWMutex {
+func GetLocks(keys *[]any) []*sync.RWMutex {
 	store := GetSharedStore()
 	locks := []*sync.RWMutex{}
 	for _, key := range *keys {

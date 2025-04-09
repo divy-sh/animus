@@ -74,6 +74,16 @@ func TestMarshalNull(t *testing.T) {
 	}
 }
 
+func TestMarshalUnknownType(t *testing.T) {
+	v := resp.Value{Typ: ""}
+	expected := []byte{}
+	result := v.Marshal()
+
+	if !bytes.Equal(result, expected) {
+		t.Errorf("Expected %q, got %q", expected, result)
+	}
+}
+
 func TestWriter(t *testing.T) {
 	var buf bytes.Buffer
 	w := resp.NewWriter(&buf)

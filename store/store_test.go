@@ -1,10 +1,25 @@
 package store
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
+
+func TestStore_GetLock(t *testing.T) {
+	Set("GetLock", "GetLock")
+	lock := GetLock("GetLock")
+	lock.Lock()
+	Get[string, string]("GetLock")
+	lock.Unlock()
+}
+
+func TestStore_GetLocks(t *testing.T) {
+	Set("GetLocks", "GetLocks")
+	lock := GetLocks(&[]any{"GetLocks"})
+	lock[0].Lock()
+	Get[string, string]("GetLocks")
+	lock[0].Unlock()
+}
 
 func TestStore_SetAndGet(t *testing.T) {
 	key, value := "testKey", "testValue"
@@ -91,12 +106,13 @@ func TestStore_TTL_Eviction(t *testing.T) {
 	store.maxSize = 3
 	SetWithTTL("key1", "value1", 60)
 	SetWithTTL("key2", "value2", 60)
-	SetWithTTL("key3", "value3", 60)
-	SetWithTTL("key4", "value4", 60) // This should trigger TTL eviction
-	store.maxSize = 100_000          // Revert size
-	_, found := Get[string, string]("key1")
+	SetWithTTL("key3", "value3", 0)
+	// This should evict key3, even though LRU should've evicted key1
+	SetWithTTL("key4", "value4", 60)
+	store.maxSize = 100_000 // Revert size
+	_, found := Get[string, string]("key3")
 	if found {
-		t.Errorf("Expected LRU key 'key1' to be evicted, but it was found")
+		t.Errorf("Expected LRU key 'key3' to be evicted, but it was found")
 	}
 }
 
@@ -109,7 +125,6 @@ func TestStore_LRU_Eviction(t *testing.T) {
 	Set("LruEviction4", "value4") // This should trigger LRU eviction
 	store.maxSize = 100_000       // Revert size
 
-	fmt.Println(store.dict)
 	_, found := Get[string, string]("key1")
 	if found {
 		t.Errorf("Expected LRU key 'key1' to be evicted, but it was found")

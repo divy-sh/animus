@@ -53,6 +53,17 @@ func TestListCopy(t *testing.T) {
 	}
 }
 
+func TestGeneric_Copy_InvalidArgumentsCount(t *testing.T) {
+	copy([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "invalidArguemntCount"}})
+}
+
+func TestGeneric_Copy_InvalidSourceKey(t *testing.T) {
+	copy([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "InvalidSourceKey"},
+		{Typ: common.BULK_TYPE, Bulk: "InvalidDestinationKey"},
+	})
+}
+
 func TestStringDelete(t *testing.T) {
 	set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestStringDelete1"},
@@ -94,4 +105,8 @@ func TestListDelete(t *testing.T) {
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
 	}
+}
+
+func TestGeneric_Delete_InvalidArgumentsCount(t *testing.T) {
+	del([]resp.Value{})
 }
