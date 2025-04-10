@@ -102,4 +102,6 @@ func init() {
 	RegisterCommand("DEL", del, `DEL key1 [keys...]
 	Deletes all the keys passes as argument.
 	If a key doesn't exist, it is ignored.`)
+	RegisterCommand("EXISTS", exists, `EXISTS key1 [keys...]
+	Returns an integer denoting how many of the passed keys exist in the cache.`)
 }

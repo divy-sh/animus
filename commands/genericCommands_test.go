@@ -110,3 +110,30 @@ func TestListDelete(t *testing.T) {
 func TestGeneric_Delete_InvalidArgumentsCount(t *testing.T) {
 	del([]resp.Value{})
 }
+
+func TestGeneric_Exists(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestExistsKey"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestExistsKey"}}
+	result := exists(args)
+	if result.Typ != common.INTEGER_TYPE || result.Num != 1 {
+		t.Errorf("Expected key to exist, got %v", result)
+	}
+}
+
+func TestGeneric_Exists_InvalidKey(t *testing.T) {
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestExistsInvalidKey"}}
+	result := exists(args)
+	if result.Typ != common.INTEGER_TYPE || result.Num != 0 {
+		t.Errorf("Expected key to exist, got %v", result)
+	}
+}
+
+func TestGeneric_Exists_InvalidArguments(t *testing.T) {
+	args := []resp.Value{}
+	result := exists(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected error: %s, got %v", common.ERR_WRONG_ARGUMENT_COUNT, result)
+	}
+}

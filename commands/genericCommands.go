@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"fmt"
-
 	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/generics"
 	"github.com/divy-sh/animus/resp"
@@ -16,7 +14,7 @@ func copyVal(args []resp.Value) resp.Value {
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
-	return resp.Value{Typ: common.BULK_TYPE, Bulk: fmt.Sprint(val)}
+	return resp.Value{Typ: common.INTEGER_TYPE, Num: val}
 }
 
 func del(args []resp.Value) resp.Value {
@@ -27,6 +25,18 @@ func del(args []resp.Value) resp.Value {
 	for i := 0; i < len(args); i += 2 {
 		keys[i] = args[i].Bulk
 	}
-	generics.Delete(keys)
+	generics.Delete(&keys)
 	return resp.Value{Typ: common.BULK_TYPE, Bulk: "OK"}
+}
+
+func exists(args []resp.Value) resp.Value {
+	if len(args) < 1 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+	keys := make([]string, len(args))
+	for i := 0; i < len(args); i += 2 {
+		keys[i] = args[i].Bulk
+	}
+	validKeyCount := generics.Exists(&keys)
+	return resp.Value{Typ: common.INTEGER_TYPE, Num: validKeyCount}
 }

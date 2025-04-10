@@ -24,11 +24,25 @@ func Copy(source, destination string) (int, error) {
 	return 1, nil
 }
 
-func Delete(keys []string) {
-	for _, key := range keys {
+func Delete(keys *[]string) {
+	for _, key := range *keys {
 		lock := store.GetLock(key)
 		lock.Lock()
 		store.DeleteWithKey(key)
 		lock.Unlock()
 	}
+}
+
+func Exists(keys *[]string) int {
+	validKeyCount := 0
+	for _, key := range *keys {
+		lock := store.GetLock(key)
+		lock.RLock()
+		_, exists := store.Get[any, any](key)
+		if exists {
+			validKeyCount++
+		}
+		lock.RUnlock()
+	}
+	return validKeyCount
 }

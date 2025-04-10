@@ -34,9 +34,16 @@ func TestListCopy(t *testing.T) {
 	}
 }
 
+func TestInvalidKeyCopy(t *testing.T) {
+	val, err := Copy("TestInvalidKeyCopy", "TestInvalidKeyCopy2")
+	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
+		t.Errorf("%v, %v", val, err)
+	}
+}
+
 func TestStringDelete(t *testing.T) {
 	essentias.Set("TestStringDelete", "expected")
-	Delete([]string{"TestStringDelete"})
+	Delete(&[]string{"TestStringDelete"})
 	val, err := essentias.Get("TestStringDelete")
 	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
@@ -45,7 +52,7 @@ func TestStringDelete(t *testing.T) {
 
 func TestHashDelete(t *testing.T) {
 	essentias.HSet("TestHashDelete", "pizza", "expected")
-	Delete([]string{"TestHashDelete"})
+	Delete(&[]string{"TestHashDelete"})
 	val, err := essentias.HGet("TestHashDelete", "pizza")
 	if err == nil || err.Error() != common.ERR_HASH_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
@@ -54,16 +61,24 @@ func TestHashDelete(t *testing.T) {
 
 func TestListDelete(t *testing.T) {
 	essentias.RPush("TestListDelete", &[]string{"expected"})
-	Delete([]string{"TestListDelete"})
+	Delete(&[]string{"TestListDelete"})
 	val, err := essentias.RPop("TestListDelete", "1")
 	if err == nil || err.Error() != common.ERR_LIST_NOT_FOUND {
 		t.Errorf("Expected the key to be deleted, got: %v, %v", val, err)
 	}
 }
 
-func TestInvalidKeyCopy(t *testing.T) {
-	val, err := Copy("TestInvalidKeyCopy", "TestInvalidKeyCopy2")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("%v, %v", val, err)
+func TestExists(t *testing.T) {
+	essentias.Set("TestExists", "expected")
+	validKeyCount := Exists(&[]string{"TestExists"})
+	if validKeyCount != 1 {
+		t.Errorf("Expected count to be %d, got: %v", 1, validKeyCount)
+	}
+}
+
+func TestExistsInvalidKey(t *testing.T) {
+	validKeyCount := Exists(&[]string{"TestExistsInvalidKey"})
+	if validKeyCount != 0 {
+		t.Errorf("Expected count to be %d, got: %v", 0, validKeyCount)
 	}
 }
