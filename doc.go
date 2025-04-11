@@ -55,6 +55,8 @@ Key Features:
   - **DEL (String)**: DEL key1 [keys...]
     Deletes all the keys passes as argument.
     If a key doesn't exist, it is ignored.
+  - **EXISTS (String)**: EXISTS key1 [keys...]
+    Returns an integer denoting how many of the passed keys exist in the cache.
 
 Roadmap:
   - Advanced data structures (Sets, Sorted Sets)
