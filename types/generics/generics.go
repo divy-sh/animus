@@ -8,6 +8,8 @@ import (
 )
 
 func Copy(source, destination string) (int, error) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	value, ok := store.Get[any, any](source)
 	if !ok {
 		return 0, errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
@@ -17,12 +19,16 @@ func Copy(source, destination string) (int, error) {
 }
 
 func Delete(keys *[]string) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	for _, key := range *keys {
 		store.Delete(key)
 	}
 }
 
 func Exists(keys *[]string) int {
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
 	validKeyCount := 0
 	for _, key := range *keys {
 		_, exists := store.Get[any, any](key)

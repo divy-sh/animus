@@ -12,6 +12,8 @@ import (
 
 // public functions
 func Append(key, value string) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
 		store.Set(key, value)
@@ -25,6 +27,8 @@ func Decr(key string) error {
 }
 
 func DecrBy(key, value string) error {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	decrVal, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return errors.New("ERR invalid decrement value")
@@ -43,6 +47,8 @@ func DecrBy(key, value string) error {
 }
 
 func Get(key string) (string, error) {
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New(common.ERR_STRING_NOT_FOUND)
@@ -51,6 +57,8 @@ func Get(key string) (string, error) {
 }
 
 func GetDel(key string) (string, error) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New(common.ERR_STRING_NOT_FOUND)
@@ -60,6 +68,8 @@ func GetDel(key string) (string, error) {
 }
 
 func GetEx(key, exp string) (string, error) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New(common.ERR_STRING_NOT_FOUND)
@@ -73,6 +83,8 @@ func GetEx(key, exp string) (string, error) {
 }
 
 func GetRange(key, start, end string) (string, error) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New(common.ERR_STRING_NOT_FOUND)
@@ -98,6 +110,8 @@ func GetRange(key, start, end string) (string, error) {
 }
 
 func GetSet(key, value string) (string, error) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	val, ok := store.Get[string, string](key)
 	if !ok {
 		return "", errors.New(common.ERR_STRING_NOT_FOUND)
@@ -111,6 +125,8 @@ func Incr(key string) error {
 }
 
 func IncrBy(key, value string) error {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	incrVal, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return errors.New("ERR invalid increment value")
@@ -129,6 +145,8 @@ func IncrBy(key, value string) error {
 }
 
 func IncrByFloat(key, value string) error {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	incrVal, err := strconv.ParseFloat(value, 64)
 	if err != nil {
 		return errors.New("ERR invalid increment value")
@@ -147,18 +165,21 @@ func IncrByFloat(key, value string) error {
 }
 
 func Set(key, value string) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	store.Set(key, value)
 }
 
 func Lcs(key1 string, key2 string, commands []string) (string, error) {
-	val1, ok := store.Get[string, string](key1)
-	if !ok {
+	store.GlobalLock.RLock()
+	val1, ok1 := store.Get[string, string](key1)
+	val2, ok2 := store.Get[string, string](key2)
+	store.GlobalLock.RUnlock()
+
+	if !ok1 || !ok2 {
 		return "", errors.New(common.ERR_STRING_NOT_FOUND)
 	}
-	val2, ok := store.Get[string, string](key2)
-	if !ok {
-		return "", errors.New(common.ERR_STRING_NOT_FOUND)
-	}
+
 	lcs, lcsLen := findLcs(val1, val2)
 	if len(commands) == 1 && strings.ToUpper(commands[0]) == "LEN" {
 		return fmt.Sprint(lcsLen), nil
@@ -167,6 +188,8 @@ func Lcs(key1 string, key2 string, commands []string) (string, error) {
 }
 
 func MGet(keys *[]string) *[]string {
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
 	values := make([]string, len(*keys))
 	for i, key := range *keys {
 		val, ok := store.Get[string, string](key)
@@ -180,6 +203,8 @@ func MGet(keys *[]string) *[]string {
 }
 
 func MSet(kvPairs *map[string]string) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	for key, val := range *kvPairs {
 		store.Set(key, val)
 	}

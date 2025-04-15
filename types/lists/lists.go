@@ -9,6 +9,8 @@ import (
 )
 
 func RPop(key string, count string) ([]string, error) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	vals, ok := store.Get[string, []string](key)
 	if !ok {
 		return nil, errors.New(common.ERR_LIST_NOT_FOUND)
@@ -22,6 +24,8 @@ func RPop(key string, count string) ([]string, error) {
 }
 
 func RPush(key string, values *[]string) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
 	vals, ok := store.Get[string, []string](key)
 	if !ok {
 		vals = *values
