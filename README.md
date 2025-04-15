@@ -53,13 +53,10 @@ go tool cover -html cover.out -o cover.html
 - Add these functions
     - GETSET, INCR, INCRBY, INCRBYFLOAT
 
-- Added key based locking instead of locking the store globally, leading to huge increase in concurrency.
-
 ### v0.1.0
 
-- Finalize how to handle the store, and expose the store locks so that they can be used by other commands as required.
-
 - Add many other commands, details can be found in doc.go file.
+
 # License
 
 Animus is licensed under the GNU General Public License v3.0 (GPL-3.0). See the LICENSE file for more information.
