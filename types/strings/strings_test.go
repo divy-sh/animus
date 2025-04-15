@@ -5,6 +5,7 @@ import (
 	"math"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/types/strings"
@@ -66,19 +67,19 @@ func TestGetDelInvalidKey(t *testing.T) {
 	}
 }
 
-// func TestGetEx(t *testing.T) {
-// 	strings.Set("key1", "value1")
+func TestGetEx(t *testing.T) {
+	strings.Set("key1", "value1")
 
-// 	val, err := strings.GetEx("key1", "0")
-// 	if err != nil || val != "value1" {
-// 		t.Errorf("Expected value1, got %v, err: %v", val, err)
-// 	}
-// 	time.Sleep(50 * time.Millisecond)
-// 	_, err = strings.Get("key1")
-// 	if err == nil {
-// 		t.Errorf("Expected error for deleted key, but got none")
-// 	}
-// }
+	val, err := strings.GetEx("key1", "0")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected value1, got %v, err: %v", val, err)
+	}
+	time.Sleep(50 * time.Millisecond)
+	_, err = strings.Get("key1")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
 
 func TestGetExInvalidKey(t *testing.T) {
 
