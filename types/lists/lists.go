@@ -1,4 +1,4 @@
-package essentias
+package lists
 
 import (
 	"errors"
@@ -9,9 +9,6 @@ import (
 )
 
 func RPop(key string, count string) ([]string, error) {
-	lock := store.GetLock(key)
-	lock.Lock()
-	defer lock.Unlock()
 	vals, ok := store.Get[string, []string](key)
 	if !ok {
 		return nil, errors.New(common.ERR_LIST_NOT_FOUND)
@@ -25,9 +22,6 @@ func RPop(key string, count string) ([]string, error) {
 }
 
 func RPush(key string, values *[]string) {
-	lock := store.GetLock(key)
-	lock.Lock()
-	defer lock.Unlock()
 	vals, ok := store.Get[string, []string](key)
 	if !ok {
 		vals = *values

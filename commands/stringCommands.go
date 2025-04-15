@@ -2,15 +2,15 @@ package commands
 
 import (
 	"github.com/divy-sh/animus/common"
-	"github.com/divy-sh/animus/essentias"
 	"github.com/divy-sh/animus/resp"
+	"github.com/divy-sh/animus/types/strings"
 )
 
 func appendCmd(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
-	essentias.Append(args[0].Bulk, args[1].Bulk)
+	strings.Append(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
 }
 
@@ -18,7 +18,7 @@ func decr(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
-	err := essentias.Decr(args[0].Bulk)
+	err := strings.Decr(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
@@ -30,7 +30,7 @@ func decrby(args []resp.Value) resp.Value {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
-	err := essentias.DecrBy(args[0].Bulk, args[1].Bulk)
+	err := strings.DecrBy(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
@@ -42,7 +42,7 @@ func get(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
-	value, err := essentias.Get(args[0].Bulk)
+	value, err := strings.Get(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
@@ -53,7 +53,7 @@ func getdel(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
-	value, err := essentias.GetDel(args[0].Bulk)
+	value, err := strings.GetDel(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.NULL_TYPE}
 	}
@@ -64,7 +64,7 @@ func getex(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
-	value, err := essentias.GetEx(args[0].Bulk, args[1].Bulk)
+	value, err := strings.GetEx(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.NULL_TYPE}
 	}
@@ -75,7 +75,7 @@ func getrange(args []resp.Value) resp.Value {
 	if len(args) != 3 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
-	value, err := essentias.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
+	value, err := strings.GetRange(args[0].Bulk, args[1].Bulk, args[2].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.NULL_TYPE}
 	}
@@ -87,7 +87,7 @@ func getset(args []resp.Value) resp.Value {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
-	val, err := essentias.GetSet(args[0].Bulk, args[1].Bulk)
+	val, err := strings.GetSet(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
@@ -98,7 +98,7 @@ func incr(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
-	err := essentias.Incr(args[0].Bulk)
+	err := strings.Incr(args[0].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
@@ -110,7 +110,7 @@ func incrby(args []resp.Value) resp.Value {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
-	err := essentias.IncrBy(args[0].Bulk, args[1].Bulk)
+	err := strings.IncrBy(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
@@ -123,7 +123,7 @@ func incrbyfloat(args []resp.Value) resp.Value {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
-	err := essentias.IncrByFloat(args[0].Bulk, args[1].Bulk)
+	err := strings.IncrByFloat(args[0].Bulk, args[1].Bulk)
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
@@ -139,7 +139,7 @@ func lcs(args []resp.Value) resp.Value {
 	for _, arg := range args[2:] {
 		commands = append(commands, arg.Bulk)
 	}
-	val, err := essentias.Lcs(args[0].Bulk, args[1].Bulk, commands)
+	val, err := strings.Lcs(args[0].Bulk, args[1].Bulk, commands)
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
@@ -154,7 +154,7 @@ func mget(args []resp.Value) resp.Value {
 	for _, arg := range args {
 		keys = append(keys, arg.Bulk)
 	}
-	values := essentias.MGet(&keys)
+	values := strings.MGet(&keys)
 	response := make([]resp.Value, len(keys))
 	for i, val := range *values {
 		if val == "" {
@@ -174,7 +174,7 @@ func mset(args []resp.Value) resp.Value {
 	for i := 0; i < len(args); i += 2 {
 		kvPairs[args[i].Bulk] = args[i+1].Bulk
 	}
-	essentias.MSet(&kvPairs)
+	strings.MSet(&kvPairs)
 	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
 }
 
@@ -183,6 +183,6 @@ func set(args []resp.Value) resp.Value {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
 
-	essentias.Set(args[0].Bulk, args[1].Bulk)
+	strings.Set(args[0].Bulk, args[1].Bulk)
 	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
 }

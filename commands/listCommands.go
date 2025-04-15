@@ -2,8 +2,8 @@ package commands
 
 import (
 	"github.com/divy-sh/animus/common"
-	"github.com/divy-sh/animus/essentias"
 	"github.com/divy-sh/animus/resp"
+	"github.com/divy-sh/animus/types/lists"
 )
 
 func rpop(args []resp.Value) resp.Value {
@@ -13,9 +13,9 @@ func rpop(args []resp.Value) resp.Value {
 	var values []string
 	var err error
 	if len(args) == 1 {
-		values, err = essentias.RPop(args[0].Bulk, "1")
+		values, err = lists.RPop(args[0].Bulk, "1")
 	} else {
-		values, err = essentias.RPop(args[0].Bulk, args[1].Bulk)
+		values, err = lists.RPop(args[0].Bulk, args[1].Bulk)
 	}
 	if err != nil {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
@@ -35,6 +35,6 @@ func rpush(args []resp.Value) resp.Value {
 	for i, val := range args[1:] {
 		values[i] = val.Bulk
 	}
-	essentias.RPush(args[0].Bulk, &values)
+	lists.RPush(args[0].Bulk, &values)
 	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
 }

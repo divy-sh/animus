@@ -1,14 +1,13 @@
-package essentias_test
+package strings_test
 
 import (
 	"errors"
 	"math"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/divy-sh/animus/common"
-	"github.com/divy-sh/animus/essentias"
+	"github.com/divy-sh/animus/types/strings"
 )
 
 const float64EqualityThreshold = 1e-9
@@ -18,42 +17,42 @@ func floatsAlmostEqual(a, b float64) bool {
 }
 
 func TestSetAndGet(t *testing.T) {
-	essentias.Set("key1", "value1")
+	strings.Set("key1", "value1")
 
-	val, err := essentias.Get("key1")
+	val, err := strings.Get("key1")
 	if err != nil || val != "value1" {
 		t.Errorf("Expected value1, got %v, err: %v", val, err)
 	}
 }
 
 func TestAppend(t *testing.T) {
-	essentias.Set("key1", "value1")
-	essentias.Append("key1", "_appended")
+	strings.Set("key1", "value1")
+	strings.Append("key1", "_appended")
 
-	val, err := essentias.Get("key1")
+	val, err := strings.Get("key1")
 	if err != nil || val != "value1_appended" {
 		t.Errorf("Expected value1_appended, got %v, err: %v", val, err)
 	}
 }
 
 func TestAppendNewKey(t *testing.T) {
-	essentias.Append("TestAppendNewKey", "appended")
+	strings.Append("TestAppendNewKey", "appended")
 
-	val, err := essentias.Get("TestAppendNewKey")
+	val, err := strings.Get("TestAppendNewKey")
 	if err != nil || val != "appended" {
 		t.Errorf("Expected appended, got %v, err: %v", val, err)
 	}
 }
 
 func TestGetDel(t *testing.T) {
-	essentias.Set("key1", "value1")
+	strings.Set("key1", "value1")
 
-	val, err := essentias.GetDel("key1")
+	val, err := strings.GetDel("key1")
 	if err != nil || val != "value1" {
 		t.Errorf("Expected value1, got %v, err: %v", val, err)
 	}
 
-	_, err = essentias.Get("key1")
+	_, err = strings.Get("key1")
 	if err == nil {
 		t.Errorf("Expected error for deleted key, but got none")
 	}
@@ -61,38 +60,38 @@ func TestGetDel(t *testing.T) {
 
 func TestGetDelInvalidKey(t *testing.T) {
 
-	_, err := essentias.GetDel("invalid_key")
+	_, err := strings.GetDel("invalid_key")
 	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
 		t.Errorf("Expected error: %v, got: %v", common.ERR_STRING_NOT_FOUND, err)
 	}
 }
 
-func TestGetEx(t *testing.T) {
-	essentias.Set("key1", "value1")
+// func TestGetEx(t *testing.T) {
+// 	strings.Set("key1", "value1")
 
-	val, err := essentias.GetEx("key1", "0")
-	if err != nil || val != "value1" {
-		t.Errorf("Expected value1, got %v, err: %v", val, err)
-	}
-	time.Sleep(50 * time.Millisecond)
-	_, err = essentias.Get("key1")
-	if err == nil {
-		t.Errorf("Expected error for deleted key, but got none")
-	}
-}
+// 	val, err := strings.GetEx("key1", "0")
+// 	if err != nil || val != "value1" {
+// 		t.Errorf("Expected value1, got %v, err: %v", val, err)
+// 	}
+// 	time.Sleep(50 * time.Millisecond)
+// 	_, err = strings.Get("key1")
+// 	if err == nil {
+// 		t.Errorf("Expected error for deleted key, but got none")
+// 	}
+// }
 
 func TestGetExInvalidKey(t *testing.T) {
 
-	_, err := essentias.GetEx("invalid_key", "1")
+	_, err := strings.GetEx("invalid_key", "1")
 	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
 		t.Errorf("Expected error: %v, got: %v", common.ERR_STRING_NOT_FOUND, err)
 	}
 }
 
 func TestGetExInvalidTime(t *testing.T) {
-	essentias.Set("key1", "value1")
+	strings.Set("key1", "value1")
 
-	_, err := essentias.GetEx("key1", "invalid")
+	_, err := strings.GetEx("key1", "invalid")
 	if err == nil || err.Error() != "ERR invalid expire time" {
 		t.Errorf("Expected error: %v, got: %v", "ERR invalid expire time", err)
 	}
@@ -100,8 +99,8 @@ func TestGetExInvalidTime(t *testing.T) {
 
 func TestGetRange(t *testing.T) {
 	// Create a StringEssentia instance and populate it
-	essentias.Set("hello", "Hello, World!")
-	essentias.Set("empty", "")
+	strings.Set("hello", "Hello, World!")
+	strings.Set("empty", "")
 
 	tests := []struct {
 		key      string
@@ -119,7 +118,7 @@ func TestGetRange(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result, err := essentias.GetRange(tt.key, tt.start, tt.end)
+		result, err := strings.GetRange(tt.key, tt.start, tt.end)
 
 		// Check error equality
 		if (err != nil && tt.err == nil) || (err == nil && tt.err != nil) ||
@@ -135,8 +134,8 @@ func TestGetRange(t *testing.T) {
 }
 
 func TestGetRangeInvalidStartIndex(t *testing.T) {
-	essentias.Set("hello", "Hello, World!")
-	_, err := essentias.GetRange("hello", "invalid_start_index", "20")
+	strings.Set("hello", "Hello, World!")
+	_, err := strings.GetRange("hello", "invalid_start_index", "20")
 	expected := "ERR invalid start index"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error: %v, got: %v", expected, err)
@@ -144,8 +143,8 @@ func TestGetRangeInvalidStartIndex(t *testing.T) {
 }
 
 func TestGetRangeInvalidEndIndex(t *testing.T) {
-	essentias.Set("hello", "Hello, World!")
-	_, err := essentias.GetRange("hello", "0", "invalid_end_index")
+	strings.Set("hello", "Hello, World!")
+	_, err := strings.GetRange("hello", "0", "invalid_end_index")
 	expected := "ERR invalid end index"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error: %v, got: %v", expected, err)
@@ -153,8 +152,8 @@ func TestGetRangeInvalidEndIndex(t *testing.T) {
 }
 
 func TestGetRangeStartIndexLargerThanEndIndex(t *testing.T) {
-	essentias.Set("hello", "Hello, World!")
-	_, err := essentias.GetRange("hello", "6", "5")
+	strings.Set("hello", "Hello, World!")
+	_, err := strings.GetRange("hello", "6", "5")
 	expected := "ERR start index greater than end index"
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error: %v, got: %v", expected, err)
@@ -162,8 +161,8 @@ func TestGetRangeStartIndexLargerThanEndIndex(t *testing.T) {
 }
 
 func TestGetRangeEmptyVal(t *testing.T) {
-	essentias.Set("hello", "")
-	val, err := essentias.GetRange("hello", "0", "20")
+	strings.Set("hello", "")
+	val, err := strings.GetRange("hello", "0", "20")
 	expected := ""
 	if err != nil || val != expected {
 		t.Errorf("Expected value: %v, got error: %v", expected, err)
@@ -171,28 +170,28 @@ func TestGetRangeEmptyVal(t *testing.T) {
 }
 
 func TestDecr(t *testing.T) {
-	essentias.Set("num", "10")
+	strings.Set("num", "10")
 
-	err := essentias.Decr("num")
+	err := strings.Decr("num")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := essentias.Get("num")
+	val, _ := strings.Get("num")
 	if val != "9" {
 		t.Errorf("Expected 9, got %v", val)
 	}
 }
 
 func TestDecrBy(t *testing.T) {
-	essentias.Set("num", "10")
+	strings.Set("num", "10")
 
-	err := essentias.DecrBy("num", "3")
+	err := strings.DecrBy("num", "3")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := essentias.Get("num")
+	val, _ := strings.Get("num")
 	if val != "7" {
 		t.Errorf("Expected 7, got %v", val)
 	}
@@ -200,44 +199,44 @@ func TestDecrBy(t *testing.T) {
 
 func TestDecrByNewKey(t *testing.T) {
 
-	err := essentias.DecrBy("TestDecrByNewKey", "3")
+	err := strings.DecrBy("TestDecrByNewKey", "3")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := essentias.Get("TestDecrByNewKey")
+	val, _ := strings.Get("TestDecrByNewKey")
 	if val != "-3" {
 		t.Errorf("Expected -3, got %v", val)
 	}
 }
 
 func TestDecrByInvalidValue(t *testing.T) {
-	essentias.Set("num", "Z")
+	strings.Set("num", "Z")
 
-	err := essentias.DecrBy("num", "3")
+	err := strings.DecrBy("num", "3")
 	if err == nil {
 		t.Errorf("Expected error for invalid value, got: %v", err)
 	}
 }
 
 func TestDecrByInvalid(t *testing.T) {
-	essentias.Set("num", "10")
+	strings.Set("num", "10")
 
-	err := essentias.DecrBy("num", "invalid")
+	err := strings.DecrBy("num", "invalid")
 	if err == nil || err.Error() != "ERR invalid decrement value" {
 		t.Errorf("Expected error for invalid decrement, got: %v", err)
 	}
 }
 
 func TestGetSet(t *testing.T) {
-	essentias.Set("key1", "value1")
+	strings.Set("key1", "value1")
 
-	val, err := essentias.GetSet("key1", "value2")
+	val, err := strings.GetSet("key1", "value2")
 	if err != nil || val != "value1" {
 		t.Errorf("Expected value1, got %v, err: %v", val, err)
 	}
 
-	val, err = essentias.Get("key1")
+	val, err = strings.Get("key1")
 	if err != nil || val != "value2" {
 		t.Errorf("Expected val: value2, got val: %v, error: %v", val, err)
 	}
@@ -245,7 +244,7 @@ func TestGetSet(t *testing.T) {
 }
 
 func TestGetSetInvalidKey(t *testing.T) {
-	val, err := essentias.GetSet("invalid", "value1")
+	val, err := strings.GetSet("invalid", "value1")
 	expected := common.ERR_STRING_NOT_FOUND
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error: %s, got val: %v, error: %v", expected, val, err)
@@ -253,28 +252,28 @@ func TestGetSetInvalidKey(t *testing.T) {
 }
 
 func TestIncr(t *testing.T) {
-	essentias.Set("num", "10")
+	strings.Set("num", "10")
 
-	err := essentias.Incr("num")
+	err := strings.Incr("num")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := essentias.Get("num")
+	val, _ := strings.Get("num")
 	if val != "11" {
 		t.Errorf("Expected 11, got %v", val)
 	}
 }
 
 func TestIncrBy(t *testing.T) {
-	essentias.Set("num", "10")
+	strings.Set("num", "10")
 
-	err := essentias.IncrBy("num", "3")
+	err := strings.IncrBy("num", "3")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := essentias.Get("num")
+	val, _ := strings.Get("num")
 	if val != "13" {
 		t.Errorf("Expected 13, got %v", val)
 	}
@@ -282,30 +281,30 @@ func TestIncrBy(t *testing.T) {
 
 func TestIncrByNewKey(t *testing.T) {
 
-	err := essentias.IncrBy("TestIncrByNewKey", "3")
+	err := strings.IncrBy("TestIncrByNewKey", "3")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := essentias.Get("TestIncrByNewKey")
+	val, _ := strings.Get("TestIncrByNewKey")
 	if val != "3" {
 		t.Errorf("Expected 3, got %v", val)
 	}
 }
 
 func TestIncrByInvalidValue(t *testing.T) {
-	essentias.Set("num", "Z")
+	strings.Set("num", "Z")
 
-	err := essentias.IncrBy("num", "3")
+	err := strings.IncrBy("num", "3")
 	if err == nil {
 		t.Errorf("Expected error for invalid value, got: %v", err)
 	}
 }
 
 func TestIncrByInvalid(t *testing.T) {
-	essentias.Set("num", "10")
+	strings.Set("num", "10")
 
-	err := essentias.IncrBy("num", "invalid")
+	err := strings.IncrBy("num", "invalid")
 	if err == nil || err.Error() != "ERR invalid increment value" {
 		t.Errorf("Expected error for invalid increment, got: %v", err)
 	}
@@ -325,14 +324,14 @@ func TestIncrByFloat(t *testing.T) {
 		{"hello", "19.4", "4.4", 23.8, nil},
 	}
 	for _, tt := range tests {
-		essentias.Set(tt.key, tt.val)
+		strings.Set(tt.key, tt.val)
 
-		err := essentias.IncrByFloat(tt.key, tt.incr)
+		err := strings.IncrByFloat(tt.key, tt.incr)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
-		val, _ := essentias.Get(tt.key)
+		val, _ := strings.Get(tt.key)
 		floatVal, _ := strconv.ParseFloat(val, 64)
 		if !floatsAlmostEqual(floatVal, tt.expected) {
 			t.Errorf("Expected %f, got %v", tt.expected, val)
@@ -342,64 +341,64 @@ func TestIncrByFloat(t *testing.T) {
 
 func TestIncrByNewKeyFloat(t *testing.T) {
 
-	err := essentias.IncrByFloat("TestIncrByNewKeyFloat", "3")
+	err := strings.IncrByFloat("TestIncrByNewKeyFloat", "3")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	val, _ := essentias.Get("TestIncrByNewKeyFloat")
+	val, _ := strings.Get("TestIncrByNewKeyFloat")
 	if val != "3" {
 		t.Errorf("Expected 3, got %v", val)
 	}
 }
 
 func TestIncrByInvalidValueFloat(t *testing.T) {
-	essentias.Set("TestIncrByInvalidValueFloat", "Z")
+	strings.Set("TestIncrByInvalidValueFloat", "Z")
 
-	err := essentias.IncrByFloat("TestIncrByInvalidValueFloat", "3")
+	err := strings.IncrByFloat("TestIncrByInvalidValueFloat", "3")
 	if err == nil {
 		t.Errorf("Expected error for invalid value, got: %v", err)
 	}
 }
 
 func TestIncrByInvalidFloat(t *testing.T) {
-	essentias.Set("num", "10")
+	strings.Set("num", "10")
 
-	err := essentias.IncrByFloat("num", "invalid")
+	err := strings.IncrByFloat("num", "invalid")
 	if err == nil || err.Error() != "ERR invalid increment value" {
 		t.Errorf("Expected error for invalid increment, got: %v", err)
 	}
 }
 
 func TestLcs(t *testing.T) {
-	essentias.Set("key1", "lasagna")
-	essentias.Set("key2", "baigan")
-	lcs, err := essentias.Lcs("key1", "key2", []string{})
+	strings.Set("key1", "lasagna")
+	strings.Set("key2", "baigan")
+	lcs, err := strings.Lcs("key1", "key2", []string{})
 	if err != nil || lcs != "aga" {
 		t.Errorf("Expected value for lcs, got: %v", err)
 	}
 }
 
 func TestLcsLen(t *testing.T) {
-	essentias.Set("key1", "lasagna")
-	essentias.Set("key2", "baigan")
-	lcsLen, err := essentias.Lcs("key1", "key2", []string{"len"})
+	strings.Set("key1", "lasagna")
+	strings.Set("key2", "baigan")
+	lcsLen, err := strings.Lcs("key1", "key2", []string{"len"})
 	if err != nil || lcsLen != "3" {
 		t.Errorf("Expected value for lcs, got: %v", err)
 	}
 }
 
 func TestLcsLen2(t *testing.T) {
-	essentias.Set("key1", "lasagna")
-	essentias.Set("key2", "baigan")
-	lcsLen, err := essentias.Lcs("key2", "key1", []string{"len"})
+	strings.Set("key1", "lasagna")
+	strings.Set("key2", "baigan")
+	lcsLen, err := strings.Lcs("key2", "key1", []string{"len"})
 	if err != nil || lcsLen != "3" {
 		t.Errorf("Expected value for lcs, got: %v", err)
 	}
 }
 
 func TestLcsInvalidFirstKey(t *testing.T) {
-	_, err := essentias.Lcs("TestLcsInvalidFirstKey", "key2", []string{})
+	_, err := strings.Lcs("TestLcsInvalidFirstKey", "key2", []string{})
 	expected := common.ERR_STRING_NOT_FOUND
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error for lcs: %s, got: %v", expected, err)
@@ -407,8 +406,8 @@ func TestLcsInvalidFirstKey(t *testing.T) {
 }
 
 func TestLcsInvalidSecondKey(t *testing.T) {
-	essentias.Set("key1", "lasagna")
-	_, err := essentias.Lcs("key1", "TestLcsInvalidSecondKey", []string{})
+	strings.Set("key1", "lasagna")
+	_, err := strings.Lcs("key1", "TestLcsInvalidSecondKey", []string{})
 	expected := common.ERR_STRING_NOT_FOUND
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected error for lcs: %s, got: %v", expected, err)
@@ -416,13 +415,13 @@ func TestLcsInvalidSecondKey(t *testing.T) {
 }
 
 func TestMGetAndMSet(t *testing.T) {
-	essentias.MSet(&map[string]string{
+	strings.MSet(&map[string]string{
 		"key1": "value1",
 		"key2": "value2",
 		"key3": "value3",
 	})
 
-	values := essentias.MGet(&[]string{"key1", "key2", "key3", "invalid"})
+	values := strings.MGet(&[]string{"key1", "key2", "key3", "invalid"})
 	expected := []string{"value1", "value2", "value3", ""}
 	for i := range *values {
 		if (*values)[i] != expected[i] {

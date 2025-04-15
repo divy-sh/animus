@@ -2,8 +2,8 @@ package commands
 
 import (
 	"github.com/divy-sh/animus/common"
-	"github.com/divy-sh/animus/generics"
 	"github.com/divy-sh/animus/resp"
+	"github.com/divy-sh/animus/types/generics"
 )
 
 func copyVal(args []resp.Value) resp.Value {
