@@ -22,26 +22,21 @@ type Value struct {
 }
 
 var (
-	sharedInstance *Store
-	once           sync.Once
+	store *Store
 )
 
-func getSharedStore() *Store {
-	once.Do(func() {
-		cache, _ := lru.New[any, any](100000)
-		sharedInstance = &Store{
-			LRUCache:    cache,
-			stopCleaner: make(chan struct{}),
-			isRunning:   false,
-		}
-		// // Start the cleaner automatically
-		// StartExpiryCleaner()
-	})
-	return sharedInstance
+func init() {
+	cache, _ := lru.New[any, any](100000)
+	store = &Store{
+		LRUCache:    cache,
+		stopCleaner: make(chan struct{}),
+		isRunning:   false,
+	}
+	// // Start the cleaner automatically
+	StartExpiryCleaner()
 }
 
 func Get[K comparable, V any](key K) (V, bool) {
-	store := getSharedStore()
 	store.mutex.RLock()
 	val, ok := store.LRUCache.Get(key)
 	store.mutex.RUnlock()
@@ -59,28 +54,24 @@ func Get[K comparable, V any](key K) (V, bool) {
 }
 
 func Set[K comparable, V any](key K, value V) {
-	store := getSharedStore()
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
 	store.LRUCache.Add(key, &Value{value, -1})
 }
 
 func SetWithTTL[K comparable, V any](key K, value V, ttl int64) {
-	store := getSharedStore()
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
 	store.LRUCache.Add(key, &Value{value, ttl + time.Now().Unix()})
 }
 
 func Delete[K comparable](key K) {
-	store := getSharedStore()
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
 	store.LRUCache.Remove(key)
 }
 
 func StartExpiryCleaner() {
-	store := getSharedStore()
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
 	if store.isRunning {
@@ -92,7 +83,6 @@ func StartExpiryCleaner() {
 }
 
 func StopExpiryCleaner() {
-	store := getSharedStore()
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
 	if !store.isRunning {
@@ -121,7 +111,6 @@ func cleanExpiredKeys() {
 		targetPercent = 25.0
 		maxIterations = 3
 	)
-	store := getSharedStore()
 	now := time.Now().Unix()
 	store.mutex.RLock()
 	allKeys := store.LRUCache.Keys()
