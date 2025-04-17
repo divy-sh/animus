@@ -104,4 +104,10 @@ func init() {
 	If a key doesn't exist, it is ignored.`)
 	RegisterCommand("EXISTS", exists, `EXISTS key1 [keys...]
 	Returns an integer denoting how many of the passed keys exist in the cache.`)
+	RegisterCommand("EXPIRE", expire, `EXPIRE key seconds [NX XX GT LT]
+	Sets a timeout on key. After the timeout, the key gets deleted.
+	NX - Only set timeout if the key has no previous expiry.
+	XX - Only set timeout if the key has a previous expiry.
+	GT - Only set timeout if the new time is greater than the existing expiry.
+	LT - Only set timeout if the new time is less than the existing expiry.`)
 }

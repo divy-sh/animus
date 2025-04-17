@@ -2,6 +2,9 @@ package generics
 
 import (
 	"errors"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/store"
@@ -37,4 +40,28 @@ func Exists(keys *[]string) int {
 		}
 	}
 	return validKeyCount
+}
+
+func Expire(key, seconds, flag string) error {
+	secs, _ := strconv.ParseInt(seconds, 10, 64)
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
+	val, ttl, ok := store.GetWithTTL[any, any](key)
+	if !ok {
+		return errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
+	}
+	if ttl == -1 && strings.ToUpper(flag) == common.EXP_XX {
+		return errors.New(common.ERR_EXPIRY_TYPE)
+	}
+	if ttl >= 0 && strings.ToUpper(flag) == common.EXP_NX {
+		return errors.New(common.ERR_EXPIRY_TYPE)
+	}
+	if ttl > time.Now().Unix()+secs && strings.ToUpper(flag) == common.EXP_GT {
+		return errors.New(common.ERR_EXPIRY_TYPE)
+	}
+	if ttl < time.Now().Unix()+secs && strings.ToUpper(flag) == common.EXP_LT {
+		return errors.New(common.ERR_EXPIRY_TYPE)
+	}
+	store.SetWithTTL(key, val, secs)
+	return nil
 }

@@ -137,3 +137,275 @@ func TestGeneric_Exists_InvalidArguments(t *testing.T) {
 		t.Errorf("Expected error: %s, got %v", common.ERR_WRONG_ARGUMENT_COUNT, result)
 	}
 }
+
+func TestGenerics_Expire_InvalidArgumentCount1(t *testing.T) {
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_WRONG_ARGUMENT_COUNT, result)
+	}
+}
+
+func TestGenerics_Expire_InvalidArgumentCount2(t *testing.T) {
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_WRONG_ARGUMENT_COUNT, result)
+	}
+}
+
+func TestGenerics_ExpireNoFlagKeyWithNoExpiry(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "0"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, result)
+	}
+}
+
+func TestGenerics_ExpireNoFlagKeyWithExpiry(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "100"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "0"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, result)
+	}
+}
+
+func TestGenerics_ExpireNoFlagInvalidKey(t *testing.T) {
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagInvalidKey"},
+		{Typ: common.BULK_TYPE, Bulk: "10"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_SOURCE_KEY_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, result)
+	}
+}
+
+func TestGenerics_ExpireNXKeyWithNoExpiry(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "NX"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+}
+
+func TestGenerics_ExpireNXKeyWithExpiry(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "100"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "NX"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_EXPIRY_TYPE {
+		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, result)
+	}
+}
+
+func TestGenerics_ExpireNXInvalidKey(t *testing.T) {
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXInvalidKey"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "NX"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_SOURCE_KEY_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, result)
+	}
+}
+
+func TestGenerics_ExpireXXKeyWithNoExpiry(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "XX"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_EXPIRY_TYPE {
+		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, result)
+	}
+}
+
+func TestGenerics_ExpireXXKeyWithExpiry(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "100"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "XX"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+}
+
+func TestGenerics_ExpireXXInvalidKey(t *testing.T) {
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXInvalidKey"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "XX"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_SOURCE_KEY_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, result)
+	}
+}
+
+func TestGenerics_ExpireGTKeyWithNoExpiry(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "GT"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+}
+
+func TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller"},
+		{Typ: common.BULK_TYPE, Bulk: "100"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "GT"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_EXPIRY_TYPE {
+		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, result)
+	}
+}
+
+func TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater"},
+		{Typ: common.BULK_TYPE, Bulk: "100"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater"},
+		{Typ: common.BULK_TYPE, Bulk: "200"},
+		{Typ: common.BULK_TYPE, Bulk: "GT"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+}
+
+func TestGenerics_ExpireGTInvalidKey(t *testing.T) {
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTInvalidKey"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "GT"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_SOURCE_KEY_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, result)
+	}
+}
+
+func TestGenerics_ExpireLTKeyWithNoExpiry(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithNoExpiry"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "LT"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_EXPIRY_TYPE {
+		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, result)
+	}
+}
+
+func TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller"},
+		{Typ: common.BULK_TYPE, Bulk: "100"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "LT"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+}
+
+func TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater(t *testing.T) {
+	set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater"},
+		{Typ: common.BULK_TYPE, Bulk: "100"}})
+	if result.Typ == common.ERROR_TYPE {
+		t.Errorf("Expected no error, got: %s", result.Str)
+	}
+	result = expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater"},
+		{Typ: common.BULK_TYPE, Bulk: "200"},
+		{Typ: common.BULK_TYPE, Bulk: "LT"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_EXPIRY_TYPE {
+		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, result)
+	}
+}
+
+func TestGenerics_ExpireLTInvalidKey(t *testing.T) {
+	result := expire([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTInvalidKey"},
+		{Typ: common.BULK_TYPE, Bulk: "10"},
+		{Typ: common.BULK_TYPE, Bulk: "LT"}})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_SOURCE_KEY_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, result)
+	}
+}

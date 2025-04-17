@@ -53,6 +53,23 @@ func Get[K comparable, V any](key K) (V, bool) {
 	return value.Val.(V), true
 }
 
+func GetWithTTL[K comparable, V any](key K) (V, int64, bool) {
+	store.mutex.RLock()
+	val, ok := store.LRUCache.Get(key)
+	store.mutex.RUnlock()
+	if !ok {
+		var zero V
+		return zero, -1, false
+	}
+	value := val.(*Value)
+	if value.TTL > -1 && value.TTL <= time.Now().Unix() {
+		Delete(key)
+		var zero V
+		return zero, -1, false
+	}
+	return value.Val.(V), value.TTL, true
+}
+
 func Set[K comparable, V any](key K, value V) {
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
