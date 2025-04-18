@@ -68,5 +68,5 @@ def generate_doc_go(commands, output_file_path):
         f.write("*/\n")
         f.write("package main\n")
 
-commands = extract_commands_and_docs("./commands/handler.go")
+commands = extract_commands_and_docs("./internal/commands/handler.go")
 generate_doc_go(commands, "doc.go")
