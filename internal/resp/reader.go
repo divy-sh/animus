@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/internal/common"
 )
 
 type Reader struct {

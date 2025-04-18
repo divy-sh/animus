@@ -4,7 +4,7 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/internal/common"
 )
 
 type Writer struct {

@@ -3,8 +3,8 @@ package hashes
 import (
 	"errors"
 
-	"github.com/divy-sh/animus/common"
-	"github.com/divy-sh/animus/store"
+	"github.com/divy-sh/animus/internal/common"
+	"github.com/divy-sh/animus/internal/store"
 )
 
 func HGet(hash, key string) (string, error) {

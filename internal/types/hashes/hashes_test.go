@@ -3,7 +3,7 @@ package hashes
 import (
 	"testing"
 
-	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/internal/common"
 )
 
 func TestHashEssentia_HSetAndHGet(t *testing.T) {
