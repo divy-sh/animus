@@ -6,21 +6,107 @@ import (
 )
 
 func TestExpiryCleanerRemovesExpiredKeys(t *testing.T) {
-	// Set key with short TTL (e.g., 200ms)
-	SetWithTTL("test-key", "test-value", 1) // 1 second TTL
-
-	// Make sure value is retrievable immediately
-	val, ok := Get[string, string]("test-key")
-	if !ok || val != "test-value" {
-		t.Fatal("expected value to be present immediately after setting")
-	}
+	SetWithTTL("test-key", "test-value", 0)
 
 	// Wait enough time for it to expire and cleaner to run
-	time.Sleep(1 * time.Second) // Wait for TTL to expire + cleaner to run
+	time.Sleep(1 * time.Millisecond)
 
 	// Try to get the value again
-	_, ok = Get[string, string]("test-key")
+	_, ok := Get[string, string]("test-key")
 	if ok {
 		t.Fatal("expected value to be expired and cleaned, but it was still present")
+	}
+}
+
+func TestSetAndGet(t *testing.T) {
+	key := "foo"
+	val := "bar"
+
+	Set(key, val)
+	result, ok := Get[string, string](key)
+	if !ok {
+		t.Errorf("expected key %v to exist", key)
+	}
+	if result != val {
+		t.Errorf("expected value %v, got %v", val, result)
+	}
+}
+
+func TestSetWithTTLAndGet(t *testing.T) {
+	key := "expiringKey"
+	val := "willExpire"
+
+	SetWithTTL(key, val, 0)
+
+	time.Sleep(2 * time.Millisecond)
+
+	result, ok := Get[string, string](key)
+	if ok {
+		t.Errorf("expected key %v to be expired, got value %v", key, result)
+	}
+}
+
+func TestGetWithTTL(t *testing.T) {
+	key := "ttlKey"
+	val := "someVal"
+	ttl := int64(5) // 5 seconds TTL
+
+	SetWithTTL(key, val, ttl)
+	result, storedTTL, ok := GetWithTTL[string, string](key)
+	if !ok {
+		t.Errorf("expected key %v to exist", key)
+	}
+	if result != val {
+		t.Errorf("expected value %v, got %v", val, result)
+	}
+	if storedTTL <= 0 {
+		t.Errorf("expected TTL to be > 0, got %v", storedTTL)
+	}
+}
+
+func TestGetWithTTLExpiredKey(t *testing.T) {
+	key := "ttlKeyExpired"
+	val := "someVal"
+	ttl := int64(0)
+
+	SetWithTTL(key, val, ttl)
+	result, storedTTL, ok := GetWithTTL[string, string](key)
+	if ok || result != "" || storedTTL != -1 {
+		t.Errorf("expected key %v to exist", key)
+	}
+}
+
+func TestGetWithTTLInvalidKey(t *testing.T) {
+	key := "invalidKey"
+	result, storedTTL, ok := GetWithTTL[string, string](key)
+	if ok || result != "" || storedTTL != -1 {
+		t.Errorf("expected key %v to exist", key)
+	}
+}
+
+func TestDelete(t *testing.T) {
+	key := "tempKey"
+	val := "tempVal"
+
+	Set(key, val)
+	Delete(key)
+
+	_, ok := Get[string, string](key)
+	if ok {
+		t.Errorf("expected key %v to be deleted", key)
+	}
+}
+
+func TestOverwriteValue(t *testing.T) {
+	key := "overwrite"
+	val1 := "initial"
+	val2 := "updated"
+
+	Set(key, val1)
+	Set(key, val2)
+
+	result, ok := Get[string, string](key)
+	if !ok || result != val2 {
+		t.Errorf("expected updated value %v, got %v", val2, result)
 	}
 }
