@@ -1,76 +1,79 @@
-package commands
+package genericcmd
 
 import (
 	"testing"
 
+	"github.com/divy-sh/animus/internal/commandhandler/hashcmd"
+	"github.com/divy-sh/animus/internal/commandhandler/listcmd"
+	"github.com/divy-sh/animus/internal/commandhandler/stringcmd"
 	"github.com/divy-sh/animus/internal/common"
 	"github.com/divy-sh/animus/internal/resp"
 )
 
 func TestStringCopy(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestStringCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	copyVal([]resp.Value{
+	CopyVal([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestStringCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestStringCopy2"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestStringCopy2"}}
-	result := get(args)
+	result := stringcmd.Get(args)
 	if result.Typ != common.BULK_TYPE || result.Bulk != "value" {
 		t.Errorf("Expected bulk or null, got %v", result)
 	}
 }
 
 func TestHashCopy(t *testing.T) {
-	hset([]resp.Value{
+	hashcmd.HSet([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	copyVal([]resp.Value{
+	CopyVal([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy2"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy2"},
 		{Typ: common.BULK_TYPE, Bulk: "TestHashCopy1"}}
-	result := hget(args)
+	result := hashcmd.HGet(args)
 	if result.Typ != common.BULK_TYPE || result.Bulk != "value" {
 		t.Errorf("Expected bulk or null, got %v", result)
 	}
 }
 
 func TestListCopy(t *testing.T) {
-	rpush([]resp.Value{
+	listcmd.RPush([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestListCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "value1"},
 		{Typ: common.BULK_TYPE, Bulk: "value2"}})
-	copyVal([]resp.Value{
+	CopyVal([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestListCopy1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestListCopy2"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestListCopy2"}}
-	result := rpop(args)
+	result := listcmd.RPop(args)
 	if result.Typ != "array" || result.Array[0].Bulk != "value2" {
 		t.Errorf("Expected array or null, got %v", result)
 	}
 }
 
 func TestGeneric_Copy_InvalidArgumentsCount(t *testing.T) {
-	copyVal([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "invalidArguemntCount"}})
+	CopyVal([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "invalidArguemntCount"}})
 }
 
 func TestGeneric_Copy_InvalidSourceKey(t *testing.T) {
-	copyVal([]resp.Value{
+	CopyVal([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "InvalidSourceKey"},
 		{Typ: common.BULK_TYPE, Bulk: "InvalidDestinationKey"},
 	})
 }
 
 func TestStringDelete(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestStringDelete1"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	del([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestStringDelete1"}})
+	Del([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestStringDelete1"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestStringDelete1"}}
-	result := get(args)
+	result := stringcmd.Get(args)
 	expected := common.ERR_STRING_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
@@ -78,15 +81,15 @@ func TestStringDelete(t *testing.T) {
 }
 
 func TestHashDelete(t *testing.T) {
-	hset([]resp.Value{
+	hashcmd.HSet([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestHashDelete1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestHashDelete1"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	del([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestHashDelete1"}})
+	Del([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestHashDelete1"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestHashDelete1"},
 		{Typ: common.BULK_TYPE, Bulk: "TestHashDelete1"}}
-	result := hget(args)
+	result := hashcmd.HGet(args)
 	expected := common.ERR_HASH_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
@@ -94,13 +97,13 @@ func TestHashDelete(t *testing.T) {
 }
 
 func TestListDelete(t *testing.T) {
-	rpush([]resp.Value{
+	listcmd.RPush([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestListDelete1"},
 		{Typ: common.BULK_TYPE, Bulk: "value1"},
 		{Typ: common.BULK_TYPE, Bulk: "value2"}})
-	del([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestListDelete1"}})
+	Del([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestListDelete1"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestListDelete2"}}
-	result := rpop(args)
+	result := listcmd.RPop(args)
 	expected := common.ERR_LIST_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
@@ -108,15 +111,15 @@ func TestListDelete(t *testing.T) {
 }
 
 func TestGeneric_Delete_InvalidArgumentsCount(t *testing.T) {
-	del([]resp.Value{})
+	Del([]resp.Value{})
 }
 
 func TestGeneric_Exists(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestExistsKey"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestExistsKey"}}
-	result := exists(args)
+	result := Exists(args)
 	if result.Typ != common.INTEGER_TYPE || result.Num != 1 {
 		t.Errorf("Expected key to exist, got %v", result)
 	}
@@ -124,7 +127,7 @@ func TestGeneric_Exists(t *testing.T) {
 
 func TestGeneric_Exists_InvalidKey(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestExistsInvalidKey"}}
-	result := exists(args)
+	result := Exists(args)
 	if result.Typ != common.INTEGER_TYPE || result.Num != 0 {
 		t.Errorf("Expected key to exist, got %v", result)
 	}
@@ -132,14 +135,14 @@ func TestGeneric_Exists_InvalidKey(t *testing.T) {
 
 func TestGeneric_Exists_InvalidArguments(t *testing.T) {
 	args := []resp.Value{}
-	result := exists(args)
+	result := Exists(args)
 	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
 		t.Errorf("Expected error: %s, got %v", common.ERR_WRONG_ARGUMENT_COUNT, result)
 	}
 }
 
 func TestGenerics_Expire_InvalidArgumentCount1(t *testing.T) {
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"}})
 	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_WRONG_ARGUMENT_COUNT, result)
@@ -147,7 +150,7 @@ func TestGenerics_Expire_InvalidArgumentCount1(t *testing.T) {
 }
 
 func TestGenerics_Expire_InvalidArgumentCount2(t *testing.T) {
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
@@ -158,45 +161,45 @@ func TestGenerics_Expire_InvalidArgumentCount2(t *testing.T) {
 }
 
 func TestGenerics_ExpireNoFlagKeyWithNoExpiry(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "0"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"}})
+	result = stringcmd.Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithNoExpiry"}})
 	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_STRING_NOT_FOUND {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, result)
 	}
 }
 
 func TestGenerics_ExpireNoFlagKeyWithExpiry(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "100"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = expire([]resp.Value{
+	result = Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "0"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"}})
+	result = stringcmd.Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagKeyWithExpiry"}})
 	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_STRING_NOT_FOUND {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, result)
 	}
 }
 
 func TestGenerics_ExpireNoFlagInvalidKey(t *testing.T) {
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNoFlagInvalidKey"},
 		{Typ: common.BULK_TYPE, Bulk: "10"}})
 	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_SOURCE_KEY_NOT_FOUND {
@@ -205,10 +208,10 @@ func TestGenerics_ExpireNoFlagInvalidKey(t *testing.T) {
 }
 
 func TestGenerics_ExpireNXKeyWithNoExpiry(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "NX"}})
@@ -218,16 +221,16 @@ func TestGenerics_ExpireNXKeyWithNoExpiry(t *testing.T) {
 }
 
 func TestGenerics_ExpireNXKeyWithExpiry(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "100"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = expire([]resp.Value{
+	result = Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "NX"}})
@@ -237,7 +240,7 @@ func TestGenerics_ExpireNXKeyWithExpiry(t *testing.T) {
 }
 
 func TestGenerics_ExpireNXInvalidKey(t *testing.T) {
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXInvalidKey"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "NX"}})
@@ -247,10 +250,10 @@ func TestGenerics_ExpireNXInvalidKey(t *testing.T) {
 }
 
 func TestGenerics_ExpireXXKeyWithNoExpiry(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "XX"}})
@@ -260,16 +263,16 @@ func TestGenerics_ExpireXXKeyWithNoExpiry(t *testing.T) {
 }
 
 func TestGenerics_ExpireXXKeyWithExpiry(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "100"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = expire([]resp.Value{
+	result = Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireXXKeyWithExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "XX"}})
@@ -279,7 +282,7 @@ func TestGenerics_ExpireXXKeyWithExpiry(t *testing.T) {
 }
 
 func TestGenerics_ExpireXXInvalidKey(t *testing.T) {
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireNXInvalidKey"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "XX"}})
@@ -289,10 +292,10 @@ func TestGenerics_ExpireXXInvalidKey(t *testing.T) {
 }
 
 func TestGenerics_ExpireGTKeyWithNoExpiry(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "GT"}})
@@ -302,16 +305,16 @@ func TestGenerics_ExpireGTKeyWithNoExpiry(t *testing.T) {
 }
 
 func TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller"},
 		{Typ: common.BULK_TYPE, Bulk: "100"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = expire([]resp.Value{
+	result = Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "GT"}})
@@ -321,16 +324,16 @@ func TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller(t *testing.T) {
 }
 
 func TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater"},
 		{Typ: common.BULK_TYPE, Bulk: "100"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = expire([]resp.Value{
+	result = Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater"},
 		{Typ: common.BULK_TYPE, Bulk: "200"},
 		{Typ: common.BULK_TYPE, Bulk: "GT"}})
@@ -340,7 +343,7 @@ func TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater(t *testing.T) {
 }
 
 func TestGenerics_ExpireGTInvalidKey(t *testing.T) {
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireGTInvalidKey"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "GT"}})
@@ -350,10 +353,10 @@ func TestGenerics_ExpireGTInvalidKey(t *testing.T) {
 }
 
 func TestGenerics_ExpireLTKeyWithNoExpiry(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithNoExpiry"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "LT"}})
@@ -363,16 +366,16 @@ func TestGenerics_ExpireLTKeyWithNoExpiry(t *testing.T) {
 }
 
 func TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller"},
 		{Typ: common.BULK_TYPE, Bulk: "100"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = expire([]resp.Value{
+	result = Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "LT"}})
@@ -382,16 +385,16 @@ func TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller(t *testing.T) {
 }
 
 func TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater(t *testing.T) {
-	set([]resp.Value{
+	stringcmd.Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater"},
 		{Typ: common.BULK_TYPE, Bulk: "100"}})
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = expire([]resp.Value{
+	result = Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater"},
 		{Typ: common.BULK_TYPE, Bulk: "200"},
 		{Typ: common.BULK_TYPE, Bulk: "LT"}})
@@ -401,7 +404,7 @@ func TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater(t *testing.T) {
 }
 
 func TestGenerics_ExpireLTInvalidKey(t *testing.T) {
-	result := expire([]resp.Value{
+	result := Expire([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "TestGenerics_ExpireLTInvalidKey"},
 		{Typ: common.BULK_TYPE, Bulk: "10"},
 		{Typ: common.BULK_TYPE, Bulk: "LT"}})

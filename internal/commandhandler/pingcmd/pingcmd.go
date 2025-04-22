@@ -1,14 +1,20 @@
-package commands
+package pingcmd
 
 import (
+	"github.com/divy-sh/animus/internal/commandhandler"
 	"github.com/divy-sh/animus/internal/common"
 	"github.com/divy-sh/animus/internal/resp"
 )
 
-func ping(args []resp.Value) resp.Value {
+func Ping(args []resp.Value) resp.Value {
 	if len(args) == 0 {
 		return resp.Value{Typ: common.STRING_TYPE, Str: "PONG"}
 	}
 
 	return resp.Value{Typ: common.STRING_TYPE, Str: args[0].Bulk}
+}
+
+func init() {
+	commandhandler.RegisterCommand("PING", Ping, `PING [ARGUMENT]
+	Returns PONG to test server responsiveness.`)
 }

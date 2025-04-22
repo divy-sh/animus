@@ -1,21 +1,13 @@
-package commands
+package hashcmd
 
 import (
+	"github.com/divy-sh/animus/internal/commandhandler"
 	"github.com/divy-sh/animus/internal/common"
 	"github.com/divy-sh/animus/internal/resp"
 	"github.com/divy-sh/animus/internal/types/hashes"
 )
 
-func hset(args []resp.Value) resp.Value {
-	if len(args) != 3 {
-		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
-	}
-
-	hashes.HSet(args[0].Bulk, args[1].Bulk, args[2].Bulk)
-	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
-}
-
-func hget(args []resp.Value) resp.Value {
+func HGet(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
 	}
@@ -25,4 +17,9 @@ func hget(args []resp.Value) resp.Value {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
 	}
 	return resp.Value{Typ: common.BULK_TYPE, Bulk: value}
+}
+
+func init() {
+	commandhandler.RegisterCommand("HGET", HGet, `HGET [KEY] [FIELD]
+	Gets the value of a field in the hash stored at key.`)
 }

@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/divy-sh/animus/internal/commands"
+	"github.com/divy-sh/animus/internal/commandhandler"
 	"github.com/divy-sh/animus/internal/common"
 	"github.com/divy-sh/animus/internal/resp"
 )
@@ -47,14 +47,14 @@ func main() {
 			continue
 		}
 
-		command := strings.ToUpper(value.Array[0].Bulk)
+		cmd := strings.ToUpper(value.Array[0].Bulk)
 		args := value.Array[1:]
 
 		writer := resp.NewWriter(conn)
 
-		handler, ok := commands.Handlers[command]
+		handler, ok := commandhandler.Handlers[cmd]
 		if !ok {
-			log.Print("Invalid command: ", command)
+			log.Print("Invalid command: ", cmd)
 			writer.Write(resp.Value{Typ: common.STRING_TYPE, Str: ""})
 			continue
 		}

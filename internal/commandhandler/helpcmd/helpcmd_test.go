@@ -1,8 +1,9 @@
-package commands
+package helpcmd
 
 import (
 	"testing"
 
+	"github.com/divy-sh/animus/internal/commandhandler"
 	"github.com/divy-sh/animus/internal/common"
 	"github.com/divy-sh/animus/internal/resp"
 )
@@ -15,7 +16,7 @@ func TestHandler_Help_NoArgs(t *testing.T) {
 }
 
 func TestHandler_Help(t *testing.T) {
-	for key, val := range Handlers {
+	for key, val := range commandhandler.Handlers {
 		response := Help([]resp.Value{{Typ: common.BULK_TYPE, Bulk: key}})
 		if response.Typ != common.BULK_TYPE || response.Bulk != key+" - "+val.Doc {
 			t.Errorf("expected response %s for command %s, got %v", val.Doc, key, response)

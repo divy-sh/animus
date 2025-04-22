@@ -1,4 +1,4 @@
-package commands
+package pingcmd
 
 import (
 	"testing"
@@ -8,14 +8,14 @@ import (
 )
 
 func TestPingNoArg(t *testing.T) {
-	result := ping([]resp.Value{})
+	result := Ping([]resp.Value{})
 	if result.Typ != common.STRING_TYPE || result.Str != "PONG" {
 		t.Errorf("expected PONG, got %v", result)
 	}
 }
 
 func TestPingWithArg(t *testing.T) {
-	result := ping([]resp.Value{
+	result := Ping([]resp.Value{
 		{
 			Typ:  common.BULK_TYPE,
 			Bulk: "test",

@@ -1,4 +1,4 @@
-package commands
+package stringcmd
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ func TestAppend(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: " world"}}
-	result := appendCmd(args)
+	result := Append(args)
 	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
@@ -22,7 +22,7 @@ func TestAppendInvalidArgumentCount(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: " world"},
 		{Typ: common.BULK_TYPE, Bulk: " world"}}
-	result := appendCmd(args)
+	result := Append(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
 		t.Errorf("Expected %s, got %v", common.ERR_WRONG_ARGUMENT_COUNT, result)
 	}
@@ -30,7 +30,7 @@ func TestAppendInvalidArgumentCount(t *testing.T) {
 
 func TestDecr(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "counter"}}
-	result := decr(args)
+	result := Decr(args)
 	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
@@ -40,18 +40,18 @@ func TestDecrInvalidArgumentCount(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: " world"}}
-	result := decr(args)
+	result := Decr(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'decr' command, got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'Decr' command, got %v", result)
 	}
 }
 
 func TestDecrInvalidValueEssentia(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: "world"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "hello"}}
-	result := decr(args)
+	result := Decr(args)
 	if result.Typ != "error" || result.Str != "ERR value is not an integer or out of range" {
 		t.Errorf("Expected ERR value is not an integer or out of range, got %v", result)
 	}
@@ -61,7 +61,7 @@ func TestDecrBy(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "counter"},
 		{Typ: common.BULK_TYPE, Bulk: "5"}}
-	result := decrby(args)
+	result := DecrBy(args)
 	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
@@ -69,31 +69,31 @@ func TestDecrBy(t *testing.T) {
 
 func TestDecrByInvalidArgumentCount(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "hello"}}
-	result := decrby(args)
+	result := DecrBy(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'decrby' command, got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'DecrBy' command, got %v", result)
 	}
 }
 
 func TestDecrByInvalidValueEssentia(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: "world"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: "hello"}}
-	result := decrby(args)
+	result := DecrBy(args)
 	if result.Typ != "error" || result.Str != "ERR invalid decrement value" {
-		t.Errorf("Expected error ERR invalid decrement value, got %v", result)
+		t.Errorf("Expected error ERR invalid Decrement value, got %v", result)
 	}
 }
 
 func TestGet(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result := get(args)
+	result := Get(args)
 	if result.Typ != common.BULK_TYPE || result.Bulk != "value" {
 		t.Errorf("Expected bulk or null, got %v", result)
 	}
@@ -101,7 +101,7 @@ func TestGet(t *testing.T) {
 
 func TestGetNonExistingKey(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "non_existing"}}
-	result := get(args)
+	result := Get(args)
 	expected := common.ERR_STRING_NOT_FOUND
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected %s, got %v", expected, result)
@@ -112,7 +112,7 @@ func TestGetInvalidArgsCount(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result := get(args)
+	result := Get(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
 		t.Errorf("Expected ERR wrong number of arguments for 'get' command, got %v", result)
 	}
@@ -120,7 +120,7 @@ func TestGetInvalidArgsCount(t *testing.T) {
 
 func TestGetDel(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result := getdel(args)
+	result := GetDel(args)
 	if result.Typ != common.BULK_TYPE && result.Typ != "null" {
 		t.Errorf("Expected bulk or null, got %v", result)
 	}
@@ -128,7 +128,7 @@ func TestGetDel(t *testing.T) {
 
 func TestGetDelNonExistingKey(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "non_existing"}}
-	result := getdel(args)
+	result := GetDel(args)
 	if result.Typ != "null" {
 		t.Errorf("Expected null, got %v", result)
 	}
@@ -138,20 +138,20 @@ func TestGetDelInvalidArgsCount(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result := getdel(args)
+	result := GetDel(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'getdel' command, got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'GetDel' command, got %v", result)
 	}
 }
 
 func TestGetEx(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "10"}}
-	result := getex(args)
+	result := GetEx(args)
 	if result.Typ != common.BULK_TYPE {
 		t.Errorf("Expected bulk, got %v", result)
 	}
@@ -161,7 +161,7 @@ func TestGetExNonExistingKey(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "non_existing"},
 		{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result := getex(args)
+	result := GetEx(args)
 	if result.Typ != "null" {
 		t.Errorf("Expected null, got %v", result)
 	}
@@ -169,9 +169,9 @@ func TestGetExNonExistingKey(t *testing.T) {
 
 func TestGetExInvalidArgsCount(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result := getex(args)
+	result := GetEx(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'getex' command, got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'GetEx' command, got %v", result)
 	}
 }
 
@@ -180,7 +180,7 @@ func TestGetRange(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "0"},
 		{Typ: common.BULK_TYPE, Bulk: "4"}}
-	result := getrange(args)
+	result := GetRange(args)
 	if result.Typ != common.BULK_TYPE && result.Typ != "null" {
 		t.Errorf("Expected bulk or null, got %v", result)
 	}
@@ -190,9 +190,9 @@ func TestGetRangeInvalidArgsCount(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "0"}}
-	result := getrange(args)
+	result := GetRange(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'getrange' command, got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'GetRange' command, got %v", result)
 	}
 }
 
@@ -201,24 +201,24 @@ func TestGetRangeError(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "non_existing"},
 		{Typ: common.BULK_TYPE, Bulk: "0"},
 		{Typ: common.BULK_TYPE, Bulk: "4"}}
-	result := getrange(args)
+	result := GetRange(args)
 	if result.Typ != "null" {
 		t.Errorf("Expected null, got %v", result)
 	}
 }
 
 func TestGetSet(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "val"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "val1"}}
-	result := getset(args)
+	result := GetSet(args)
 	if result.Typ != common.BULK_TYPE || result.Bulk != "val" {
 		t.Errorf("Expected val: val, got %v", result)
 	}
-	result = get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}})
+	result = Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}})
 	if result.Typ != common.BULK_TYPE || result.Bulk != "val1" {
 		t.Errorf("Expected val: val1, got %v", result)
 	}
@@ -229,7 +229,7 @@ func TestGetSetNonExistingKey(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "non_existing"},
 		{Typ: common.BULK_TYPE, Bulk: "val"}}
 	expected := common.ERR_STRING_NOT_FOUND
-	result := getset(args)
+	result := GetSet(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)
 	}
@@ -238,7 +238,7 @@ func TestGetSetNonExistingKey(t *testing.T) {
 func TestGetSetInvalidArgsCount(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
 	expected := common.ERR_WRONG_ARGUMENT_COUNT
-	result := getset(args)
+	result := GetSet(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error %s, got %v", expected, result)
 	}
@@ -248,7 +248,7 @@ func TestSet(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key"},
 		{Typ: common.BULK_TYPE, Bulk: "value"}}
-	result := set(args)
+	result := Set(args)
 	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
@@ -256,15 +256,15 @@ func TestSet(t *testing.T) {
 
 func TestSetInvalidArgsCount(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result := set(args)
+	result := Set(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'set' command, got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'Set' command, got %v", result)
 	}
 }
 
 func TestIncr(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "counter"}}
-	result := incr(args)
+	result := Incr(args)
 	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
@@ -274,18 +274,18 @@ func TestIncrInvalidArgumentCount(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: " world"}}
-	result := incr(args)
+	result := Incr(args)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'decr' command, got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'Decr' command, got %v", result)
 	}
 }
 
 func TestIncrInvalidValueEssentia(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: "world"}})
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "hello"}}
-	result := incr(args)
+	result := Incr(args)
 	if result.Typ != "error" || result.Str != "ERR value is not an integer or out of range" {
 		t.Errorf("Expected ERR value is not an integer or out of range, got %v", result)
 	}
@@ -295,7 +295,7 @@ func TestIncrBy(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "counter"},
 		{Typ: common.BULK_TYPE, Bulk: "5"}}
-	result := incrby(args)
+	result := IncrBy(args)
 	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
@@ -304,21 +304,21 @@ func TestIncrBy(t *testing.T) {
 func TestIncrByInvalidArgumentCount(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "hello"}}
 	expected := common.ERR_WRONG_ARGUMENT_COUNT
-	result := incrby(args)
+	result := IncrBy(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected ERR %s, got %v", expected, result)
 	}
 }
 
 func TestIncrByInvalidValueEssentia(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: "world"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: "hello"}}
 	expected := "ERR invalid increment value"
-	result := incrby(args)
+	result := IncrBy(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error %s, got %v", expected, result)
 	}
@@ -328,7 +328,7 @@ func TestIncrByFloat(t *testing.T) {
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "counter"},
 		{Typ: common.BULK_TYPE, Bulk: "5"}}
-	result := incrbyfloat(args)
+	result := IncrByFloat(args)
 	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected OK, got %v", result)
 	}
@@ -337,54 +337,54 @@ func TestIncrByFloat(t *testing.T) {
 func TestIncrByInvalidArgumentCountFloat(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "hello"}}
 	expected := common.ERR_WRONG_ARGUMENT_COUNT
-	result := incrbyfloat(args)
+	result := IncrByFloat(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected ERR %s, got %v", expected, result)
 	}
 }
 
 func TestIncrByInvalidValueEssentiaFloat(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: "world"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "hello"},
 		{Typ: common.BULK_TYPE, Bulk: "hello"}}
 	expected := "ERR invalid increment value"
-	result := incrbyfloat(args)
+	result := IncrByFloat(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error %s, got %v", expected, result)
 	}
 }
 
 func TestLcs(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key1"},
 		{Typ: common.BULK_TYPE, Bulk: "lasagna"}})
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key2"},
 		{Typ: common.BULK_TYPE, Bulk: "baigan"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key1"},
 		{Typ: common.BULK_TYPE, Bulk: "key2"}}
-	result := lcs(args)
+	result := LCS(args)
 	if result.Typ == "error" || result.Bulk != "aga" {
 		t.Errorf("Expected value: aga, got %v", result)
 	}
 }
 
 func TestLcsLen(t *testing.T) {
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key1"},
 		{Typ: common.BULK_TYPE, Bulk: "lasagna"}})
-	set([]resp.Value{
+	Set([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key2"},
 		{Typ: common.BULK_TYPE, Bulk: "baigan"}})
 	args := []resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key1"},
 		{Typ: common.BULK_TYPE, Bulk: "key2"},
 		{Typ: common.BULK_TYPE, Bulk: "len"}}
-	result := lcs(args)
+	result := LCS(args)
 	if result.Typ == "error" || result.Bulk != "3" {
 		t.Errorf("Expected value: 3, got %v", result)
 	}
@@ -395,7 +395,7 @@ func TestLcsInvalidFirstKey(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "invalid"},
 		{Typ: common.BULK_TYPE, Bulk: "key2"}}
 	expected := common.ERR_STRING_NOT_FOUND
-	result := lcs(args)
+	result := LCS(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)
 	}
@@ -406,7 +406,7 @@ func TestLcsInvalidSecondtKey(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "key1"},
 		{Typ: common.BULK_TYPE, Bulk: "invalid"}}
 	expected := common.ERR_STRING_NOT_FOUND
-	result := lcs(args)
+	result := LCS(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)
 	}
@@ -415,14 +415,14 @@ func TestLcsInvalidSecondtKey(t *testing.T) {
 func TestLcsInvalidArguments(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key1"}}
 	expected := common.ERR_WRONG_ARGUMENT_COUNT
-	result := lcs(args)
+	result := LCS(args)
 	if result.Typ != "error" || result.Str != expected {
 		t.Errorf("Expected error: %s, got %v", expected, result)
 	}
 }
 
 func TestMGetAndMSet(t *testing.T) {
-	mset([]resp.Value{
+	MSet([]resp.Value{
 		{Typ: common.BULK_TYPE, Bulk: "key2"},
 		{Typ: common.BULK_TYPE, Bulk: "value2"},
 		{Typ: common.BULK_TYPE, Bulk: "key"},
@@ -433,7 +433,7 @@ func TestMGetAndMSet(t *testing.T) {
 		{Typ: common.BULK_TYPE, Bulk: "key2"},
 		{Typ: common.BULK_TYPE, Bulk: "invalid"}}
 	expected := []string{"value", "value2", ""}
-	result := mget(args)
+	result := MGet(args)
 	if result.Typ != "array" {
 		t.Errorf("Expected bulk or null, got %v", result)
 	}
@@ -445,7 +445,7 @@ func TestMGetAndMSet(t *testing.T) {
 }
 func TestMGetInvalidCommands(t *testing.T) {
 	args := []resp.Value{}
-	result := mget(args)
+	result := MGet(args)
 	if result.Typ != "error" {
 		t.Errorf("Expected error got %v", result)
 	}
@@ -453,7 +453,7 @@ func TestMGetInvalidCommands(t *testing.T) {
 
 func TestMSetInvalidCommands(t *testing.T) {
 	args := []resp.Value{}
-	result := mset(args)
+	result := MSet(args)
 	if result.Typ != "error" {
 		t.Errorf("Expected error got %v", result)
 	}
@@ -461,7 +461,7 @@ func TestMSetInvalidCommands(t *testing.T) {
 
 func TestMSetInvalidCommands2(t *testing.T) {
 	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result := mset(args)
+	result := MSet(args)
 	if result.Typ != "error" {
 		t.Errorf("Expected error got %v", result)
 	}

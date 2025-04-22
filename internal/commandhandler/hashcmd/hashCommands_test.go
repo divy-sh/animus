@@ -1,4 +1,4 @@
-package commands
+package hashcmd
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/divy-sh/animus/internal/resp"
 )
 
-func TestHsetAndHget(t *testing.T) {
+func TestHsetAndHGet(t *testing.T) {
 	input := []resp.Value{
 		{
 			Typ:  common.BULK_TYPE,
@@ -22,11 +22,11 @@ func TestHsetAndHget(t *testing.T) {
 			Bulk: "value",
 		},
 	}
-	result := hset(input)
+	result := HSet(input)
 	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
 		t.Errorf("Expected success but got type: %s, value: %s", result.Typ, result.Str)
 	}
-	result = hget([]resp.Value{
+	result = HGet([]resp.Value{
 		{
 			Typ:  common.BULK_TYPE,
 			Bulk: "hash",
@@ -41,8 +41,8 @@ func TestHsetAndHget(t *testing.T) {
 	}
 }
 
-func TestHgetWithoutHset(t *testing.T) {
-	result := hget([]resp.Value{
+func TestHGetWithoutHset(t *testing.T) {
+	result := HGet([]resp.Value{
 		{
 			Typ:  common.BULK_TYPE,
 			Bulk: "not_set",
@@ -69,20 +69,20 @@ func TestHsetInvalidCommandSize(t *testing.T) {
 			Bulk: "key",
 		},
 	}
-	result := hset(input)
+	result := HSet(input)
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'hset' command but got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'Hset' command but got %v", result)
 	}
 }
 
 func TestHGetInvalidCommandSize(t *testing.T) {
-	result := hget([]resp.Value{
+	result := HGet([]resp.Value{
 		{
 			Typ:  common.BULK_TYPE,
 			Bulk: "hash",
 		},
 	})
 	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
-		t.Errorf("Expected ERR wrong number of arguments for 'hget' command but got %v", result)
+		t.Errorf("Expected ERR wrong number of arguments for 'HGet' command but got %v", result)
 	}
 }

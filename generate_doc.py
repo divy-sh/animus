@@ -27,7 +27,7 @@ def determine_command_type(func_name):
     Determines the command type based on the function name.
 
     Args:
-        func_name (str): The name of the function associated with the command.
+        func_name (str): The name of the function associated with the commandhandler.
 
     Returns:
         str: The command type.
