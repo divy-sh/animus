@@ -29,7 +29,7 @@ Key Features:
 	Increments the integer value of a key by the given amount.
   - **INCRBYFLOAT (String)**: INCRBYFLOAT [KEY] [INCREMENT]
 	Increments the float value of a key by the given amount.
-  - **LCS (List)**: LCS [KEY1] [KEY2] LEN
+  - **LCS (String)**: LCS [KEY1] [KEY2] LEN
 	Finds the Longest Common Subsequence between the value of two keys.
 	Send the optional LEN argument to get just the length
   - **MGET (String)**: MGET key [key ...]
