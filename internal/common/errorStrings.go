@@ -9,4 +9,6 @@ const (
 	ERR_SOURCE_KEY_NOT_FOUND = "ERR source key not found, or expired"
 
 	ERR_EXPIRY_TYPE = "ERR expiry flag does not match the actual expiry type"
+
+	ERR_INVALID_REGEX = "ERR regex provided is not valid"
 )

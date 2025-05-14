@@ -85,3 +85,12 @@ func Delete[K comparable](key K) {
 	defer store.mutex.Unlock()
 	store.LRUCache.Remove(key)
 }
+
+func GetKeys[K comparable]() *[]K {
+	keys := store.LRUCache.Keys()
+	kKeys := []K{}
+	for _, key := range keys {
+		kKeys = append(kKeys, key.(K))
+	}
+	return &kKeys
+}

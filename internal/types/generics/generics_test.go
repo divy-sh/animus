@@ -251,3 +251,27 @@ func TestGenerics_ExpireLTInvalidKey(t *testing.T) {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
 	}
 }
+
+func TestGenerics_KeysNoKeys(t *testing.T) {
+	keys, err := Keys("nonExisting")
+	if err != nil || len(*keys) > 0 {
+		t.Errorf("expected no keys, got keys: %v, error: %v", keys, err)
+	}
+}
+
+func TestGenerics_Keys(t *testing.T) {
+	strings.Set("TestGenerics_Keys", "value")
+	hashes.HSet("TestGenerics_Keys1", "a", "b")
+	lists.RPush("non_matching_key", &[]string{"a"})
+	keys, err := Keys("TestGenerics_Key")
+	if err != nil || len(*keys) != 2 {
+		t.Errorf("expected multiple keys, got: %v, error: %v", keys, err)
+	}
+}
+
+func TestGenerics_Keys_invalidRegex(t *testing.T) {
+	_, err := Keys("[a-b")
+	if err == nil || err.Error() != common.ERR_INVALID_REGEX {
+		t.Errorf("expected error: %v, got: %v", common.ERR_INVALID_REGEX, err)
+	}
+}

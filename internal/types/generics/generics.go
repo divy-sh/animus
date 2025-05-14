@@ -2,6 +2,8 @@ package generics
 
 import (
 	"errors"
+	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -64,4 +66,22 @@ func Expire(key, seconds, flag string) error {
 	}
 	store.SetWithTTL(key, val, secs)
 	return nil
+}
+
+func Keys(pattern string) (*[]string, error) {
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		fmt.Println("Error compiling regex:", err)
+		return nil, errors.New(common.ERR_INVALID_REGEX)
+	}
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
+	allKeys := store.GetKeys[string]()
+	matchedKeys := []string{}
+	for _, key := range *allKeys {
+		if re.MatchString(key) {
+			matchedKeys = append(matchedKeys, key)
+		}
+	}
+	return &matchedKeys, nil
 }
