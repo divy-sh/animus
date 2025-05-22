@@ -94,4 +94,10 @@ func init() {
 	XX - Only set timeout if the key has a previous expiry.
 	GT - Only set timeout if the new time is greater than the existing expiry.
 	LT - Only set timeout if the new time is less than the existing expiry.`)
+	RegisterCommand("EXPIREAT", genericcmd.ExpireAt, `EXPIREAT key unix-time-seconds [NX XX GT LT]
+	Sets the timeout of a key to the unix time stamp in seconds. After the timeout, the key gets deleted.
+	NX - Only set timeout if the key has no previous expiry.
+	XX - Only set timeout if the key has a previous expiry.
+	GT - Only set timeout if the new time is greater than the existing expiry.
+	LT - Only set timeout if the new time is less than the existing expiry.`)
 }

@@ -46,6 +46,20 @@ func TestSetWithTTLAndGet(t *testing.T) {
 	}
 }
 
+func TestSetWithTTLAsUnixTimeStampAndGet(t *testing.T) {
+	key := "expiringKey"
+	val := "willExpire"
+
+	SetWithTTLAsUnixTimeStamp(key, val, time.Now().Unix())
+
+	time.Sleep(2 * time.Millisecond)
+
+	result, ok := Get[string, string](key)
+	if ok {
+		t.Errorf("expected key %v to be expired, got value %v", key, result)
+	}
+}
+
 func TestGetWithTTL(t *testing.T) {
 	key := "ttlKey"
 	val := "someVal"
@@ -108,5 +122,16 @@ func TestOverwriteValue(t *testing.T) {
 	result, ok := Get[string, string](key)
 	if !ok || result != val2 {
 		t.Errorf("expected updated value %v, got %v", val2, result)
+	}
+}
+
+func TestGetKeys(t *testing.T) {
+	key := "TestGetKeys"
+	val := "TestGetKeysVal"
+
+	Set(key, val)
+	result := GetKeys[string]()
+	if len(*result) < 1 {
+		t.Errorf("expected atleast 1 key but got no keys")
 	}
 }

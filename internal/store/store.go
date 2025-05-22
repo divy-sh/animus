@@ -80,6 +80,12 @@ func SetWithTTL[K comparable, V any](key K, value V, ttl int64) {
 	store.LRUCache.Add(key, &Value{value, ttl + time.Now().Unix()})
 }
 
+func SetWithTTLAsUnixTimeStamp[K comparable, V any](key K, value V, ttl int64) {
+	store.mutex.Lock()
+	defer store.mutex.Unlock()
+	store.LRUCache.Add(key, &Value{value, ttl})
+}
+
 func Delete[K comparable](key K) {
 	store.mutex.Lock()
 	defer store.mutex.Unlock()

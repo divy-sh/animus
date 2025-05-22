@@ -68,6 +68,30 @@ func Expire(key, seconds, flag string) error {
 	return nil
 }
 
+func ExpireAt(key, unixTimeInSeconds, flag string) error {
+	unixTimeStamp, _ := strconv.ParseInt(unixTimeInSeconds, 10, 64)
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
+	val, ttl, ok := store.GetWithTTL[any, any](key)
+	if !ok {
+		return errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
+	}
+	if ttl == -1 && strings.ToUpper(flag) == common.EXP_XX {
+		return errors.New(common.ERR_EXPIRY_TYPE)
+	}
+	if ttl >= 0 && strings.ToUpper(flag) == common.EXP_NX {
+		return errors.New(common.ERR_EXPIRY_TYPE)
+	}
+	if ttl > unixTimeStamp && strings.ToUpper(flag) == common.EXP_GT {
+		return errors.New(common.ERR_EXPIRY_TYPE)
+	}
+	if ttl < unixTimeStamp && strings.ToUpper(flag) == common.EXP_LT {
+		return errors.New(common.ERR_EXPIRY_TYPE)
+	}
+	store.SetWithTTLAsUnixTimeStamp(key, val, unixTimeStamp)
+	return nil
+}
+
 func Keys(pattern string) (*[]string, error) {
 	re, err := regexp.Compile(pattern)
 	if err != nil {
