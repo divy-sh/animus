@@ -100,4 +100,6 @@ func init() {
 	XX - Only set timeout if the key has a previous expiry.
 	GT - Only set timeout if the new time is greater than the existing expiry.
 	LT - Only set timeout if the new time is less than the existing expiry.`)
+	RegisterCommand("KEYS", genericcmd.Keys, `KEYS
+	Returns the keys that exist in the store.`)
 }
