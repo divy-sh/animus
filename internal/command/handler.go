@@ -68,6 +68,8 @@ func init() {
 	Sets a field in the hash stored at key to a value.`)
 	RegisterCommand("HGET", hashcmd.HGet, `HGET [KEY] [FIELD]
 	Gets the value of a field in the hash stored at key.`)
+	RegisterCommand("HEXISTS", hashcmd.HGet, `HEXISTS [KEY] [FIELD]
+	Checks if the hash and the field combination exists in the store.`)
 
 	// Lists
 	RegisterCommand("RPOP", listcmd.RPop, `RPOP [KEY] [COUNT]

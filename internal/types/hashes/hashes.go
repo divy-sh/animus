@@ -31,3 +31,14 @@ func HSet(hash, key, value string) {
 	}
 	store.Set(hash, hashVal)
 }
+
+func HExists(hash, key string) (int, error) {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
+	_, ok := store.Get[string, map[string]string](hash)
+	if ok {
+		return 1, nil
+	} else {
+		return 0, errors.New(common.ERR_HASH_NOT_FOUND)
+	}
+}
