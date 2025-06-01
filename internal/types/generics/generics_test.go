@@ -444,3 +444,18 @@ func TestGenerics_Keys_invalidRegex(t *testing.T) {
 		t.Errorf("expected error: %v, got: %v", common.ERR_INVALID_REGEX, err)
 	}
 }
+
+func Test_Generics_ExpireTime(t *testing.T) {
+	strings.Set("Test_Generics_ExpireTime", "value")
+	val, err := ExpireTime("Test_Generics_ExpireTime")
+	if err != nil || val != -1 {
+		t.Errorf("expected %d, got value: %d, error: %v", -1, val, err)
+	}
+}
+
+func Test_Generics_ExpireTime_InvalidKey(t *testing.T) {
+	val, err := ExpireTime("Test_Generics_ExpireTime_InvalidKey")
+	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
+		t.Errorf("expected error: %s, got value: %d, error: %v", common.ERR_SOURCE_KEY_NOT_FOUND, val, err)
+	}
+}

@@ -12,7 +12,7 @@ import (
 	"github.com/divy-sh/animus/internal/store"
 )
 
-func Copy(source, destination string) (int, error) {
+func Copy(source, destination string) (int64, error) {
 	store.GlobalLock.Lock()
 	defer store.GlobalLock.Unlock()
 	value, ok := store.Get[any, any](source)
@@ -31,10 +31,10 @@ func Delete(keys *[]string) {
 	}
 }
 
-func Exists(keys *[]string) int {
+func Exists(keys *[]string) int64 {
 	store.GlobalLock.RLock()
 	defer store.GlobalLock.RUnlock()
-	validKeyCount := 0
+	var validKeyCount int64 = 0
 	for _, key := range *keys {
 		_, exists := store.Get[any, any](key)
 		if exists {
@@ -90,6 +90,16 @@ func ExpireAt(key, unixTimeInSeconds, flag string) error {
 	}
 	store.SetWithTTLAsUnixTimeStamp(key, val, unixTimeStamp)
 	return nil
+}
+
+func ExpireTime(key string) (int64, error) {
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
+	_, ttl, exists := store.GetWithTTL[string, string](key)
+	if !exists {
+		return -2, errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
+	}
+	return ttl, nil
 }
 
 func Keys(pattern string) (*[]string, error) {

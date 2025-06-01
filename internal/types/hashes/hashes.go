@@ -32,7 +32,7 @@ func HSet(hash, key, value string) {
 	store.Set(hash, hashVal)
 }
 
-func HExists(hash, key string) (int, error) {
+func HExists(hash, key string) (int64, error) {
 	store.GlobalLock.Lock()
 	defer store.GlobalLock.Unlock()
 	_, ok := store.Get[string, map[string]string](hash)
