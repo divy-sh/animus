@@ -43,6 +43,8 @@ Key Features:
 	Sets a field in the hash stored at key to a value.
   - **HGET (Hash)**: HGET [KEY] [FIELD]
 	Gets the value of a field in the hash stored at key.
+  - **HEXISTS (Hash)**: HEXISTS [KEY] [FIELD]
+	Checks if the hash and the field combination exists in the store.
   - **RPOP (List)**: RPOP [KEY] [COUNT]
 	Removes and returns the last element(s) of the list stored at key.
   - **RPUSH (List)**: RPUSH [KEY] [VALUE] [VALUE ...]
@@ -69,6 +71,12 @@ Key Features:
 	XX - Only set timeout if the key has a previous expiry.
 	GT - Only set timeout if the new time is greater than the existing expiry.
 	LT - Only set timeout if the new time is less than the existing expiry.
+  - **EXPIRETIME (String)**: EXPIRETIME key
+	Returns the expire time of a key in unix epoch seconds.
+	-1 If the key doesn't have an expiry set
+	-2 If the key doesn't exist
+  - **KEYS (String)**: KEYS
+	Returns the keys that exist in the store.
 
 Roadmap:
   - Advanced data structures (Sets, Sorted Sets)
