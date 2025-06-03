@@ -5,6 +5,7 @@ import (
 
 	"github.com/divy-sh/animus/internal/common"
 	"github.com/divy-sh/animus/internal/store"
+	"github.com/divy-sh/animus/internal/types/generics"
 )
 
 func HGet(hash, key string) (string, error) {
@@ -41,4 +42,8 @@ func HExists(hash, key string) (int64, error) {
 	} else {
 		return 0, errors.New(common.ERR_HASH_NOT_FOUND)
 	}
+}
+
+func HExpire(key, seconds, flag string) error {
+	return generics.Expire(key, seconds, flag)
 }

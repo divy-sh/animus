@@ -70,6 +70,12 @@ func init() {
 	Gets the value of a field in the hash stored at key.`)
 	RegisterCommand("HEXISTS", hashcmd.HGet, `HEXISTS [KEY] [FIELD]
 	Checks if the hash and the field combination exists in the store.`)
+	RegisterCommand("HEXPIRE", hashcmd.HExpire, `HEXPIRE key seconds [NX XX GT LT]
+	Sets a timeout on hash key. After the timeout, the key gets deleted.
+	NX - Only set timeout if the key has no previous expiry.
+	XX - Only set timeout if the key has a previous expiry.
+	GT - Only set timeout if the new time is greater than the existing expiry.
+	LT - Only set timeout if the new time is less than the existing expiry.`)
 
 	// Lists
 	RegisterCommand("RPOP", listcmd.RPop, `RPOP [KEY] [COUNT]
