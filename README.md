@@ -38,6 +38,10 @@ go test -v -coverprofile cover.out ./...
 go tool cover -html cover.out -o cover.html
 ```
 
+## Release
+
+Latest releases can be found here - https://pkg.go.dev/github.com/divy-sh/animus
+
 ## Release Notes
 
 ### v0.0.1
