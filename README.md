@@ -9,7 +9,7 @@ To see all the supported commands, go to doc.go file.
 
 # Features
 
-- Expiration Mechanism: Support for TTL (Time-to-Live) and various expiry policies.
+- Expiration Mechanism: Support for TTL (Time-to-Live) and expiry policies.
 - Data Types: Support for strings, lists, hashes, and advanced data structures.
 - Key Management: Automatic key expiration, deletion, and manipulation.
 - Concurrency: Optimized for high concurrency and scalability.
