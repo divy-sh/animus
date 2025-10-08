@@ -85,15 +85,14 @@ func init() {
 
 	// Help
 	RegisterCommand("HELP", Help, `HELP [COMMAND]
-	Shows documentation for available commands.`)
+	Provides details on how to use a command and what the command actually does.`)
 
 	// Generics
 	RegisterCommand("COPY", genericcmd.CopyVal, `COPY [key1] [key2]
 	Copies value(s) of key1 into key2.
-	If key2 doesn't exist, creates key2 and sets its value.`)
+	If key2 doesn't exist, creates key2 and copies the value of key1 into key2.`)
 	RegisterCommand("DEL", genericcmd.Del, `DEL key1 [keys...]
-	Deletes all the keys passes as argument.
-	If a key doesn't exist, it is ignored.`)
+	Deletes all the keys passed as argument. Ignores the keys in the argument that don't exist.`)
 	RegisterCommand("EXISTS", genericcmd.Exists, `EXISTS key1 [keys...]
 	Returns an integer denoting how many of the passed keys exist in the cache.`)
 	RegisterCommand("EXPIRE", genericcmd.Expire, `EXPIRE key seconds [NX XX GT LT]

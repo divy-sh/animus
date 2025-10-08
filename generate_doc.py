@@ -1,4 +1,5 @@
 import re
+import os
 
 def extract_commands_and_docs(file_path):
     """
@@ -70,3 +71,4 @@ def generate_doc_go(commands, output_file_path):
 
 commands = extract_commands_and_docs("./internal/command/handler.go")
 generate_doc_go(commands, "doc.go")
+os.system("go fmt")
