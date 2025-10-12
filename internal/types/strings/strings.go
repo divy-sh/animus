@@ -170,6 +170,17 @@ func Set(key, value string) {
 	store.Set(key, value)
 }
 
+func SetEx(key, value, seconds string) error {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
+	secs, err := strconv.ParseInt(seconds, 10, 64)
+	if err != nil {
+		return errors.New("ERR expiry time is not a number")
+	}
+	store.SetWithTTL(key, value, secs)
+	return nil
+}
+
 func Lcs(key1 string, key2 string, commands []string) (string, error) {
 	store.GlobalLock.RLock()
 	val1, ok1 := store.Get[string, string](key1)

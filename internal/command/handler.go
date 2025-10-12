@@ -60,7 +60,9 @@ func init() {
 	Returns nil for a non-existing key.`)
 	RegisterCommand("MSET", stringcmd.MSet, `MSET key value [key1 value1 ...]
 	Sets the values for all the keys value pair.`)
-	RegisterCommand("SET", stringcmd.Set, `SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
+	RegisterCommand("SET", stringcmd.Set, `SET [KEY] [VALUE]
+	Sets the value of a key.`)
+	RegisterCommand("SETEX", stringcmd.SetEx, `SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
 	Sets the value of a key with optional expiration.`)
 
 	// Hashes
