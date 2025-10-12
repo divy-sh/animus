@@ -37,8 +37,10 @@ Key Features:
     Returns nil for a non-existing key.
   - **MSET (String)**: MSET key value [key1 value1 ...]
     Sets the values for all the keys value pair.
-  - **SET (String)**: SET [KEY] [VALUE] [EX SECONDS|PX MILLISECONDS|KEEPTTL]
-    Sets the value of a key with optional expiration.
+  - **SET (String)**: SET [KEY] [VALUE]
+    Sets the value of a key.
+  - **SETEX (String)**: SET [KEY] [VALUE] [EX SECONDS]
+    Sets the value of a key with expiration in seconds.
   - **HSET (Hash)**: HSET [KEY] [FIELD] [VALUE]
     Sets a field in the hash stored at key to a value.
   - **HGET (Hash)**: HGET [KEY] [FIELD]
