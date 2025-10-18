@@ -2,7 +2,6 @@ package generics
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -105,7 +104,6 @@ func ExpireTime(key string) (int64, error) {
 func Keys(pattern string) (*[]string, error) {
 	re, err := regexp.Compile(pattern)
 	if err != nil {
-		fmt.Println("Error compiling regex:", err)
 		return nil, errors.New(common.ERR_INVALID_REGEX)
 	}
 	store.GlobalLock.RLock()

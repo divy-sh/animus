@@ -1,4 +1,4 @@
-package pingcmd
+package command
 
 import (
 	"github.com/divy-sh/animus/internal/common"

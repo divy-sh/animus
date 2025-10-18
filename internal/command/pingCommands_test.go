@@ -1,4 +1,4 @@
-package pingcmd
+package command
 
 import (
 	"testing"
