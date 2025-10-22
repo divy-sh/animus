@@ -29,3 +29,22 @@ func TestHandler_Help_InvalidCommand(t *testing.T) {
 		t.Errorf("expected error %s, got %v", "Unknown command: INVALID_COMMAND", response)
 	}
 }
+
+func TestPingNoArg(t *testing.T) {
+	result := Ping([]resp.Value{})
+	if result.Typ != common.STRING_TYPE || result.Str != "PONG" {
+		t.Errorf("expected PONG, got %v", result)
+	}
+}
+
+func TestPingWithArg(t *testing.T) {
+	result := Ping([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "test",
+		},
+	})
+	if result.Typ != common.STRING_TYPE || result.Str != "test" {
+		t.Errorf("expected %s, got %v", "test", result)
+	}
+}

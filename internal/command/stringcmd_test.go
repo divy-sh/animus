@@ -1,9 +1,8 @@
-package stringcmd
+package command
 
 import (
 	"testing"
 
-	"github.com/divy-sh/animus/internal/command/genericcmd"
 	"github.com/divy-sh/animus/internal/common"
 	"github.com/divy-sh/animus/internal/resp"
 )
@@ -475,7 +474,7 @@ func TestSetEx(t *testing.T) {
 		t.Errorf("Expected %s got %v", common.STRING_TYPE, result)
 	}
 	args = []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result = genericcmd.ExpireTime(args)
+	result = ExpireTime(args)
 	if result.Typ != common.INTEGER_TYPE || result.Num <= 0 {
 		t.Errorf("Expected expiry time to be set, got %v", result)
 	}

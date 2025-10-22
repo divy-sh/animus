@@ -1,4 +1,4 @@
-package listcmd
+package command
 
 import (
 	"testing"

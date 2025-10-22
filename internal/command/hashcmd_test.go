@@ -1,12 +1,149 @@
-package hashcmd
+package command
 
 import (
 	"testing"
 
-	"github.com/divy-sh/animus/internal/command/stringcmd"
 	"github.com/divy-sh/animus/internal/common"
 	"github.com/divy-sh/animus/internal/resp"
 )
+
+func TestHsetAndHGet(t *testing.T) {
+	input := []resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "key",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "value",
+		},
+	}
+	result := HSet(input)
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
+		t.Errorf("Expected success but got type: %s, value: %s", result.Typ, result.Str)
+	}
+	result = HGet([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "key",
+		},
+	})
+	if result.Typ != common.BULK_TYPE || result.Bulk != "value" {
+		t.Errorf("Expected success but got type: %s, value: %s", result.Typ, result.Str)
+	}
+}
+
+func TestHGetWithoutHset(t *testing.T) {
+	result := HGet([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "not_set",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "not_set",
+		},
+	})
+	expected := common.ERR_HASH_NOT_FOUND
+	if result.Typ != "error" || result.Str != expected {
+		t.Errorf("Expected %s, got %v", expected, result)
+	}
+}
+
+func TestHsetInvalidCommandSize(t *testing.T) {
+	input := []resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "key",
+		},
+	}
+	result := HSet(input)
+	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected ERR wrong number of arguments for 'Hset' command but got %v", result)
+	}
+}
+
+func TestHGetInvalidCommandSize(t *testing.T) {
+	result := HGet([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash",
+		},
+	})
+	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected ERR wrong number of arguments for 'HGet' command but got %v", result)
+	}
+}
+
+func Test_HExists(t *testing.T) {
+	HSet([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "TestHExists",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "TestHExists",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "value",
+		},
+	})
+	result := HExists([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "TestHExists",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "TestHExists",
+		},
+	})
+	if result.Typ != common.INTEGER_TYPE || result.Num != 1 {
+		t.Errorf("Expected hash to exist, got %v", result)
+	}
+}
+
+func Test_HExists_Nope(t *testing.T) {
+	result := HExists([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "Test_HExists_Nope",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "Test_HExists_Nope",
+		},
+	})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("Expected hash to not exist, got %v", result)
+	}
+}
+
+func TestHExistsInvalidCommandSize(t *testing.T) {
+	result := HExists([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash",
+		},
+	})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected ERR wrong number of arguments for 'HGet' command but got %v", result)
+	}
+}
 
 func Test_Hashes_HExpire_InvalidArgumentCount1(t *testing.T) {
 	result := HExpire([]resp.Value{
@@ -38,7 +175,7 @@ func Test_Hashes_HExpireNoFlagKeyWithNoExpiry(t *testing.T) {
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = stringcmd.Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "Test_Hashes_HExpireNoFlagKeyWithNoExpiry"}})
+	result = Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "Test_Hashes_HExpireNoFlagKeyWithNoExpiry"}})
 	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_STRING_NOT_FOUND {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, result)
 	}
@@ -61,7 +198,7 @@ func Test_Hashes_HExpireNoFlagKeyWithExpiry(t *testing.T) {
 	if result.Typ == common.ERROR_TYPE {
 		t.Errorf("Expected no error, got: %s", result.Str)
 	}
-	result = stringcmd.Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "Test_Hashes_HExpireNoFlagKeyWithExpiry"}})
+	result = Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "Test_Hashes_HExpireNoFlagKeyWithExpiry"}})
 	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_STRING_NOT_FOUND {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, result)
 	}
