@@ -175,7 +175,7 @@ func SetEx(key, value, seconds string) error {
 	defer store.GlobalLock.Unlock()
 	secs, err := strconv.ParseInt(seconds, 10, 64)
 	if err != nil {
-		return errors.New("ERR expiry time is not a number")
+		return errors.New(common.ERR_INVALID_TIME_SECONDS)
 	}
 	store.SetWithTTL(key, value, secs)
 	return nil

@@ -468,13 +468,60 @@ func TestMSetInvalidCommands2(t *testing.T) {
 }
 
 func TestSetEx(t *testing.T) {
-	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}, {Typ: common.BULK_TYPE, Bulk: "value"}, {Typ: common.BULK_TYPE, Bulk: "10"}}
-	result := SetEx(args)
-	if result.Typ != common.STRING_TYPE {
-		t.Errorf("Expected %s got %v", common.STRING_TYPE, result)
+	tests := []struct {
+		name     string
+		args     []resp.Value
+		wantType string
+		wantStr  string
+		wantNum  int
+	}{
+		{
+			name: "valid setex call",
+			args: []resp.Value{
+				{Typ: common.BULK_TYPE, Bulk: "key1"},
+				{Typ: common.BULK_TYPE, Bulk: "value1"},
+				{Typ: common.BULK_TYPE, Bulk: "10"},
+			},
+			wantType: common.STRING_TYPE,
+			wantStr:  "OK",
+		},
+		{
+			name: "missing arguments",
+			args: []resp.Value{
+				{Typ: common.BULK_TYPE, Bulk: "key1"},
+			},
+			wantType: common.ERROR_TYPE,
+			wantStr:  common.ERR_WRONG_ARGUMENT_COUNT,
+		},
+		{
+			name: "non-numeric expiry",
+			args: []resp.Value{
+				{Typ: common.BULK_TYPE, Bulk: "key2"},
+				{Typ: common.BULK_TYPE, Bulk: "value2"},
+				{Typ: common.BULK_TYPE, Bulk: "not-a-number"},
+			},
+			wantType: common.ERROR_TYPE,
+		},
 	}
-	args = []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
-	result = ExpireTime(args)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := SetEx(tt.args)
+
+			if result.Typ != tt.wantType {
+				t.Errorf("%s: expected type %s, got %s", tt.name, tt.wantType, result.Typ)
+			}
+			if tt.wantStr != "" && result.Str != tt.wantStr {
+				t.Errorf("%s: expected message '%s', got '%s'", tt.name, tt.wantStr, result.Str)
+			}
+		})
+	}
+
+	// Separate check for ExpireTime after valid SetEx
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "key1"},
+	}
+	result := ExpireTime(args)
 	if result.Typ != common.INTEGER_TYPE || result.Num <= 0 {
 		t.Errorf("Expected expiry time to be set, got %v", result)
 	}

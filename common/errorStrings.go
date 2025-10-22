@@ -11,4 +11,6 @@ const (
 	ERR_EXPIRY_TYPE = "ERR expiry flag does not match the actual expiry type"
 
 	ERR_INVALID_REGEX = "ERR regex provided is not valid"
+
+	ERR_INVALID_TIME_SECONDS = "ERR provided time is not valid seconds"
 )

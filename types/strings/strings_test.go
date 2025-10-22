@@ -430,3 +430,25 @@ func TestMGetAndMSet(t *testing.T) {
 		}
 	}
 }
+
+func TestSetEx(t *testing.T) {
+	strings.SetEx("key1", "value1", "1")
+
+	val, err := strings.Get("key1")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected value1, got %v, err: %v", val, err)
+	}
+	time.Sleep(time.Second)
+	_, err = strings.Get("key1")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestSetExInvalidExpiryTime(t *testing.T) {
+	err := strings.SetEx("TestSetExInvalidExpiryTime", "TestSetExInvalidExpiryTime", "invalid")
+
+	if err == nil || err.Error() != common.ERR_INVALID_TIME_SECONDS {
+		t.Errorf("Expected %s, got %v", common.ERR_INVALID_TIME_SECONDS, err)
+	}
+}
