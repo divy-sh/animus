@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/divy-sh/animus/internal/common"
-	"github.com/divy-sh/animus/internal/store"
+	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/store"
 )
 
 // public functions

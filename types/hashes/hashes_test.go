@@ -3,9 +3,9 @@ package hashes_test
 import (
 	"testing"
 
-	"github.com/divy-sh/animus/internal/common"
-	"github.com/divy-sh/animus/internal/types/hashes"
-	"github.com/divy-sh/animus/internal/types/strings"
+	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/types/hashes"
+	"github.com/divy-sh/animus/types/strings"
 )
 
 func TestHashEssentia_HSetAndHGet(t *testing.T) {

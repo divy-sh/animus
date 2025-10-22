@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/divy-sh/animus/internal/common"
-	"github.com/divy-sh/animus/internal/resp"
+	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/resp"
 )
 
 // CommandCmd implements the Redis COMMAND command.

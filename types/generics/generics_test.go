@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/divy-sh/animus/internal/common"
-	"github.com/divy-sh/animus/internal/types/generics"
-	"github.com/divy-sh/animus/internal/types/hashes"
-	"github.com/divy-sh/animus/internal/types/lists"
-	"github.com/divy-sh/animus/internal/types/strings"
+	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/types/generics"
+	"github.com/divy-sh/animus/types/hashes"
+	"github.com/divy-sh/animus/types/lists"
+	"github.com/divy-sh/animus/types/strings"
 )
 
 func TestStringCopy(t *testing.T) {

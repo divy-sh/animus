@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/divy-sh/animus/internal/common"
-	"github.com/divy-sh/animus/internal/types/strings"
+	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/types/strings"
 )
 
 const float64EqualityThreshold = 1e-9

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/divy-sh/animus/internal/common"
-	"github.com/divy-sh/animus/internal/store"
+	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/store"
 )
 
 func Copy(source, destination string) (int64, error) {

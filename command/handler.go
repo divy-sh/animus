@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/divy-sh/animus/internal/resp"
+	"github.com/divy-sh/animus/resp"
 )
 
 // Command represents a command with an associated function and documentation.

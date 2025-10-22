@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/divy-sh/animus/internal/common"
-	"github.com/divy-sh/animus/internal/store"
+	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/store"
 )
 
 func RPop(key string, count string) ([]string, error) {
