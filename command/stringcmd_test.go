@@ -526,3 +526,32 @@ func TestSetEx(t *testing.T) {
 		t.Errorf("Expected expiry time to be set, got %v", result)
 	}
 }
+
+func TestStrLen(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "key"},
+		{Typ: common.BULK_TYPE, Bulk: "value"}})
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}}
+	result := StrLen(args)
+	if result.Typ != common.INTEGER_TYPE || result.Num != 5 {
+		t.Errorf("Expected length 5, got %v", result)
+	}
+}
+
+func TestStrLenNonExistingKey(t *testing.T) {
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "non_existing"}}
+	result := StrLen(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected length 0, got %v", result)
+	}
+}
+
+func TestStrLenInvalidArgsCount(t *testing.T) {
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "key"},
+		{Typ: common.BULK_TYPE, Bulk: "key"}}
+	result := StrLen(args)
+	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected ERR wrong number of arguments for 'StrLen' command, got %v", result)
+	}
+}

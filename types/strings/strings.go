@@ -262,3 +262,13 @@ func findLcs(str1, str2 string) (string, int) {
 	}
 	return string(lcs), lcsLen
 }
+
+func StrLen(key string) (int64, error) {
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
+	val, ok := store.Get[string, string](key)
+	if !ok {
+		return 0, errors.New(common.ERR_STRING_NOT_FOUND)
+	}
+	return int64(len(val)), nil
+}

@@ -452,3 +452,19 @@ func TestSetExInvalidExpiryTime(t *testing.T) {
 		t.Errorf("Expected %s, got %v", common.ERR_INVALID_TIME_SECONDS, err)
 	}
 }
+
+func TestStrLen(t *testing.T) {
+	strings.Set("key1", "value1")
+
+	length, err := strings.StrLen("key1")
+	if err != nil || length != 6 {
+		t.Errorf("Expected length 6, got %v, err: %v", length, err)
+	}
+}
+
+func TestStrLenInvalidKey(t *testing.T) {
+	_, err := strings.StrLen("invalid_key")
+	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected error: %v, got: %v", common.ERR_STRING_NOT_FOUND, err)
+	}
+}

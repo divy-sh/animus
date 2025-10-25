@@ -71,6 +71,8 @@ func init() {
 	Sets the value of a key.`, []string{}, -3, 0, 0, 0)
 	RegisterCommand("SETEX", SetEx, `SET [KEY] [VALUE] [EX SECONDS]
 	Sets the value of a key with expiration in seconds.`, []string{}, 4, 0, 0, 0)
+	RegisterCommand("STRLEN", StrLen, `STRLEN [KEY]
+	Returns the length of the string value stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
 
 	// Hashes
 	RegisterCommand("HSET", HSet, `HSET [KEY] [FIELD] [VALUE]

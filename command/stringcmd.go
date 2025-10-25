@@ -198,3 +198,15 @@ func SetEx(args []resp.Value) resp.Value {
 	}
 	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
 }
+
+func StrLen(args []resp.Value) resp.Value {
+	if len(args) != 1 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+
+	length, err := strings.StrLen(args[0].Bulk)
+	if err != nil {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
+	}
+	return resp.Value{Typ: common.INTEGER_TYPE, Num: length}
+}
