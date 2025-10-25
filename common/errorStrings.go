@@ -3,6 +3,7 @@ package common
 const (
 	ERR_STRING_NOT_FOUND = "ERR string does not exist"
 	ERR_HASH_NOT_FOUND   = "ERR hash does not exist"
+	ERR_KEY_NOT_FOUND    = "ERR key does not exist"
 	ERR_LIST_NOT_FOUND   = "ERR list does not exist"
 
 	ERR_WRONG_ARGUMENT_COUNT = "ERR wrong number of arguments"

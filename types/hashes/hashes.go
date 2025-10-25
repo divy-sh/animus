@@ -47,3 +47,24 @@ func HExists(hash, key string) (int64, error) {
 func HExpire(key, seconds, flag string) error {
 	return generics.Expire(key, seconds, flag)
 }
+
+func HDel(hash, key string) error {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
+	hashVal, ok := store.Get[string, map[string]string](hash)
+	if !ok {
+		return errors.New(common.ERR_HASH_NOT_FOUND)
+	}
+
+	if _, ok := hashVal[key]; !ok {
+		return errors.New(common.ERR_KEY_NOT_FOUND)
+	}
+	delete(hashVal, key)
+	if len(hashVal) == 0 {
+		store.Delete(hash)
+		return nil
+	} else {
+		store.Set(hash, hashVal)
+	}
+	return nil
+}

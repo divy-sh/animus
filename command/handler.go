@@ -87,6 +87,8 @@ func init() {
 	XX - Only set timeout if the key has a previous expiry.
 	GT - Only set timeout if the new time is greater than the existing expiry.
 	LT - Only set timeout if the new time is less than the existing expiry.`, []string{}, 3, 0, 0, 0)
+	RegisterCommand("HDEL", HDel, `HDEL [KEY] [FIELD]
+	Deletes a field from the hash stored at key.`, []string{}, 3, 0, 0, 0)
 
 	// Lists
 	RegisterCommand("RPOP", RPop, `RPOP [KEY] [COUNT]

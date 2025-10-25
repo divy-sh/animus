@@ -428,3 +428,74 @@ func Test_Hashes_HExpireLTInvalidKey(t *testing.T) {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, result)
 	}
 }
+
+func Test_HDel(t *testing.T) {
+	HSet([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash_to_delete",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "key_to_delete",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "value",
+		},
+	})
+	result := HDel([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash_to_delete",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "key_to_delete",
+		},
+	})
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
+		t.Errorf("Expected success but got type: %s, value: %s", result.Typ, result.Str)
+	}
+	getResult := HGet([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash_to_delete",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "key_to_delete",
+		},
+	})
+	if getResult.Typ != common.ERROR_TYPE || getResult.Str != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("Expected hash not found error but got type: %s, value: %s", getResult.Typ, getResult.Str)
+	}
+}
+
+func Test_HDel_NonExistentHash(t *testing.T) {
+	result := HDel([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "non_existent_hash",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "some_key",
+		},
+	})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("Expected hash not found error but got type: %s, value: %s", result.Typ, result.Str)
+	}
+}
+
+func Test_HDel_InvalidCommandSize(t *testing.T) {
+	result := HDel([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash_only",
+		},
+	})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected ERR wrong number of arguments for 'HDel' command but got %v", result)
+	}
+}

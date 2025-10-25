@@ -239,3 +239,47 @@ func Test_Hashes_ExpireLTInvalidKey(t *testing.T) {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
 	}
 }
+
+func Test_HashDelete(t *testing.T) {
+	hashes.HSet("Test_HashDelete", "Test_HashDelete", "value")
+	err := hashes.HDel("Test_HashDelete", "Test_HashDelete")
+	if err != nil {
+		t.Errorf("Expected no error, got: %s", err.Error())
+	}
+	_, err = hashes.HGet("Test_HashDelete", "Test_HashDelete")
+	if err == nil || err.Error() != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_HASH_NOT_FOUND, err)
+	}
+}
+
+func Test_HashDelete_MultipleValuesInHash(t *testing.T) {
+	hashes.HSet("Test_HashDelete", "Test_HashDelete", "value")
+	hashes.HSet("Test_HashDelete", "Test_HashDelete2", "value")
+	err := hashes.HDel("Test_HashDelete", "Test_HashDelete")
+	if err != nil {
+		t.Errorf("Expected no error, got: %s", err.Error())
+	}
+	_, err = hashes.HGet("Test_HashDelete", "Test_HashDelete")
+	if err == nil || err.Error() != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_HASH_NOT_FOUND, err)
+	}
+	val, err := hashes.HGet("Test_HashDelete", "Test_HashDelete2")
+	if err != nil || val != "value" {
+		t.Errorf("Expected value: %s, got: %v, %v", "value", val, err)
+	}
+}
+
+func Test_HashDelete_NonExistentKey(t *testing.T) {
+	err := hashes.HDel("Test_HashDelete_NonExistentKey", "Test_HashDelete_NonExistentKey")
+	if err == nil || err.Error() != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_HASH_NOT_FOUND, err)
+	}
+}
+
+func Test_HashDelete_NonExistentField(t *testing.T) {
+	hashes.HSet("Test_HashDelete_NonExistentField", "existing_field", "value")
+	err := hashes.HDel("Test_HashDelete_NonExistentField", "non_existent_field")
+	if err == nil || err.Error() != common.ERR_KEY_NOT_FOUND {
+		t.Errorf("Expected error: %s, got: %v", common.ERR_KEY_NOT_FOUND, err)
+	}
+}
