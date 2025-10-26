@@ -499,3 +499,86 @@ func Test_HDel_InvalidCommandSize(t *testing.T) {
 		t.Errorf("Expected ERR wrong number of arguments for 'HDel' command but got %v", result)
 	}
 }
+
+func TestHGetAll(t *testing.T) {
+	HSet([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "myhash",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "field1",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "value1",
+		},
+	})
+	HSet([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "myhash",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "field2",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "value2",
+		},
+	})
+
+	result := HGetAll([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "myhash",
+		},
+	})
+	if result.Typ != common.ARRAY_TYPE {
+		t.Errorf("Expected ARRAY TYPE but got %s", result.Typ)
+	}
+	expectedFields := map[string]string{
+		"field1": "value1",
+		"field2": "value2",
+	}
+	if len(result.Array) != len(expectedFields)*2 {
+		t.Errorf("Expected %d elements but got %d", len(expectedFields)*2, len(result.Array))
+	}
+	for i := 0; i < len(result.Array); i += 2 {
+		field := result.Array[i].Bulk
+		value := result.Array[i+1].Bulk
+		if expectedValue, ok := expectedFields[field]; !ok || expectedValue != value {
+			t.Errorf("Expected field %s to have value %s but got %s", field, expectedValue, value)
+		}
+	}
+}
+
+func TestHGetAll_NonExistentHash(t *testing.T) {
+	result := HGetAll([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "non_existent_hash",
+		},
+	})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("Expected hash not found error but got type: %s, value: %s", result.Typ, result.Str)
+	}
+}
+
+func TestHGetAll_InvalidCommandSize(t *testing.T) {
+	result := HGetAll([]resp.Value{
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "hash1",
+		},
+		{
+			Typ:  common.BULK_TYPE,
+			Bulk: "extra_arg",
+		},
+	})
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected ERR wrong number of arguments for 'HGetAll' command but got %v", result)
+	}
+}

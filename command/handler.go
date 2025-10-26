@@ -89,6 +89,8 @@ func init() {
 	LT - Only set timeout if the new time is less than the existing expiry.`, []string{}, 3, 0, 0, 0)
 	RegisterCommand("HDEL", HDel, `HDEL [KEY] [FIELD]
 	Deletes a field from the hash stored at key.`, []string{}, 3, 0, 0, 0)
+	RegisterCommand("HGETALL", HGetAll, `HGETALL [KEY]
+	Returns all fields and values of the hash stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
 
 	// Lists
 	RegisterCommand("RPOP", RPop, `RPOP [KEY] [COUNT]

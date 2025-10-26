@@ -68,3 +68,13 @@ func HDel(hash, key string) error {
 	}
 	return nil
 }
+
+func HGetAll(key string) (map[string]string, error) {
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
+	hashVal, ok := store.Get[string, map[string]string](key)
+	if !ok {
+		return nil, errors.New(common.ERR_HASH_NOT_FOUND)
+	}
+	return hashVal, nil
+}

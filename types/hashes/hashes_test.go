@@ -283,3 +283,50 @@ func Test_HashDelete_NonExistentField(t *testing.T) {
 		t.Errorf("Expected error: %s, got: %v", common.ERR_KEY_NOT_FOUND, err)
 	}
 }
+
+func Test_HGetAll(t *testing.T) {
+	hash := "Test_HGetAll"
+	field1 := "field1"
+	value1 := "value1"
+	field2 := "field2"
+	value2 := "value2"
+
+	hashes.HSet(hash, field1, value1)
+	hashes.HSet(hash, field2, value2)
+
+	result, err := hashes.HGetAll(hash)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	if len(result) != 2 {
+		t.Errorf("expected 2 fields, got %d", len(result))
+	}
+	if result[field1] != value1 {
+		t.Errorf("expected %s for %s, got %s", value1, field1, result[field1])
+	}
+	if result[field2] != value2 {
+		t.Errorf("expected %s for %s, got %s", value2, field2, result[field2])
+	}
+}
+
+func Test_HGetAll_NonExistentHash(t *testing.T) {
+	_, err := hashes.HGetAll("NonExistentHash")
+	if err == nil || err.Error() != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("expected error 'ERR hash does not exist', got %v", err)
+	}
+}
+
+func Test_HGetAll_EmptyHash(t *testing.T) {
+	hash := "EmptyHash"
+	hashes.HSet(hash, "field", "value")
+	hashes.HDel(hash, "field")
+
+	result, err := hashes.HGetAll(hash)
+	if err == nil || err.Error() != common.ERR_HASH_NOT_FOUND {
+		t.Errorf("expected error 'ERR hash does not exist', got %v", err)
+	}
+	if len(result) != 0 {
+		t.Errorf("expected 0 fields, got %d", len(result))
+	}
+}

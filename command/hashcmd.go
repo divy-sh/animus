@@ -67,3 +67,22 @@ func HDel(args []resp.Value) resp.Value {
 	}
 	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
 }
+
+func HGetAll(args []resp.Value) resp.Value {
+	if len(args) != 1 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+
+	result, err := hashes.HGetAll(args[0].Bulk)
+	if err != nil {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
+	}
+
+	values := make([]resp.Value, 0, len(result)*2)
+	for field, value := range result {
+		values = append(values, resp.Value{Typ: common.BULK_TYPE, Bulk: field})
+		values = append(values, resp.Value{Typ: common.BULK_TYPE, Bulk: value})
+	}
+
+	return resp.Value{Typ: common.ARRAY_TYPE, Array: values}
+}
