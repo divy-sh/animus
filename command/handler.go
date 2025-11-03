@@ -69,6 +69,7 @@ func init() {
 	Sets the values for all the keys value pair.`, []string{}, -3, 0, 0, 0)
 	RegisterCommand("SET", Set, `SET [KEY] [VALUE]
 	Sets the value of a key.`, []string{}, -3, 0, 0, 0)
+	RegisterCommand("SETRANGE", SetRange, `SETRANGE key offset value`, []string{}, -3, 0, 0, 0)
 	RegisterCommand("SETEX", SetEx, `SET [KEY] [VALUE] [EX SECONDS]
 	Sets the value of a key with expiration in seconds.`, []string{}, 4, 0, 0, 0)
 	RegisterCommand("STRLEN", StrLen, `STRLEN [KEY]

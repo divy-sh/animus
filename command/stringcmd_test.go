@@ -555,3 +555,31 @@ func TestStrLenInvalidArgsCount(t *testing.T) {
 		t.Errorf("Expected ERR wrong number of arguments for 'StrLen' command, got %v", result)
 	}
 }
+
+func TestSetRange(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "key"},
+		{Typ: common.BULK_TYPE, Bulk: "Hello World"}})
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "key"},
+		{Typ: common.BULK_TYPE, Bulk: "6"},
+		{Typ: common.BULK_TYPE, Bulk: "Animus"}}
+	result := SetRange(args)
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "key"}})
+	if val.Bulk != "Hello Animus" {
+		t.Errorf("Expected 'Hello Animus', got %v", val.Bulk)
+	}
+}
+
+func TestSetRangeInvalidArgsCount(t *testing.T) {
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "key"},
+		{Typ: common.BULK_TYPE, Bulk: "6"}}
+	result := SetRange(args)
+	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected ERR wrong number of arguments for 'SetRange' command, got %v", result)
+	}
+}

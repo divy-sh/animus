@@ -468,3 +468,69 @@ func TestStrLenInvalidKey(t *testing.T) {
 		t.Errorf("Expected error: %v, got: %v", common.ERR_STRING_NOT_FOUND, err)
 	}
 }
+
+func TestSetRange(t *testing.T) {
+	strings.Set("key1", "Hello World")
+
+	err := strings.SetRange("key1", "5", ",")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, err := strings.Get("key1")
+	if err != nil || val != "Hello,World" {
+		t.Errorf("Expected 'Hello,World', got '%v', err: %v", val, err)
+	}
+}
+
+func TestSetRangeNewKey(t *testing.T) {
+	err := strings.SetRange("TestSetRangeNewKey", "5", "World")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, err := strings.Get("TestSetRangeNewKey")
+	if err != nil || val != "\x00\x00\x00\x00\x00World" {
+		t.Errorf("Expected '\\x00\\x00\\x00\\x00\\x00World', got '%v', err: %v", val, err)
+	}
+}
+
+func TestSetRangeInvalidOffset(t *testing.T) {
+	strings.Set("key1", "HelloWorld")
+
+	err := strings.SetRange("key1", "-1", "Test")
+	expected := "ERR offset is not an integer or out of range"
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected error: %v, got: %v", expected, err)
+	}
+
+	err = strings.SetRange("key1", "invalid_offset", "Test")
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected error: %v, got: %v", expected, err)
+	}
+}
+
+func TestSetRangeOffsetExceedsLength(t *testing.T) {
+	strings.Set("key1", "Hello")
+	err := strings.SetRange("key1", "10", "World")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, err := strings.Get("key1")
+	if err != nil || val != "Hello\x00\x00\x00\x00\x00World" {
+		t.Errorf("Expected 'Hello\\x00\\x00\\x00\\x00\\x00World', got '%v', err: %v", val, err)
+	}
+}
+
+func TestSetRangeInvalidKey(t *testing.T) {
+	err := strings.SetRange("TestSetRangeInvalidKey", "0", "Test")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	val, err := strings.Get("TestSetRangeInvalidKey")
+	if err != nil || val != "Test" {
+		t.Errorf("Expected 'Test', got '%v', err: %v", val, err)
+	}
+}

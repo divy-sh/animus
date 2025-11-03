@@ -181,6 +181,28 @@ func SetEx(key, value, seconds string) error {
 	return nil
 }
 
+func SetRange(key, offsetStr, value string) error {
+	store.GlobalLock.Lock()
+	defer store.GlobalLock.Unlock()
+	offset, err := strconv.ParseInt(offsetStr, 10, 64)
+	if err != nil || offset < 0 {
+		return errors.New("ERR offset is not an integer or out of range")
+	}
+	currentVal, ok := store.Get[string, string](key)
+	if !ok {
+		currentVal = ""
+	}
+	if int64(len(currentVal)) < offset {
+		currentVal = currentVal + strings.Repeat("\x00", int(offset)-len(currentVal))
+	}
+	newVal := currentVal[:offset] + value
+	if int64(len(currentVal)) > offset+int64(len(value)) {
+		newVal += currentVal[offset+int64(len(value)):]
+	}
+	store.Set(key, newVal)
+	return nil
+}
+
 func Lcs(key1 string, key2 string, commands []string) (string, error) {
 	store.GlobalLock.RLock()
 	val1, ok1 := store.Get[string, string](key1)
