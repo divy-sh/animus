@@ -3,8 +3,8 @@ package resp
 import (
 	"bufio"
 	"io"
-	"log"
 	"strconv"
+	"strings"
 
 	"github.com/divy-sh/animus/common"
 )
@@ -18,18 +18,17 @@ func NewReader(rd io.Reader) *Reader {
 }
 
 func (r *Reader) Read() (Value, error) {
-	valEssentia, err := r.reader.ReadByte()
+	valEssentia, err := r.reader.Peek(1)
 	if err != nil {
 		return Value{}, err
 	}
-	switch valEssentia {
+	switch valEssentia[0] {
 	case ARRAY:
 		return r.readArray()
 	case BULK:
 		return r.readBulk()
 	default:
-		log.Printf("Unknown type: %v", valEssentia)
-		return Value{}, nil
+		return r.readInline()
 	}
 }
 
@@ -90,4 +89,17 @@ func (r *Reader) readLine() (line []byte, n int, err error) {
 		}
 	}
 	return line[:len(line)-2], len(line), nil
+}
+
+func (r *Reader) readInline() (Value, error) {
+	line, _, err := r.readLine()
+	if err != nil {
+		return Value{}, err
+	}
+	parts := strings.Fields(string(line))
+	arr := make([]Value, len(parts))
+	for i, p := range parts {
+		arr[i] = Value{Typ: "bulk", Bulk: p}
+	}
+	return Value{Typ: "array", Array: arr}, nil
 }

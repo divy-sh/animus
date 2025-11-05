@@ -52,9 +52,10 @@ func CommandCmd(args []resp.Value) resp.Value {
 
 // A simple in-memory config store
 var serverConfig = map[string]string{
-	"maxmemory": "0",
-	"timeout":   "0",
-	"save":      "3600 1 300 100 60 10000", // simulate default Redis RDB save points
+	"maxmemory":  "0",
+	"timeout":    "0",
+	"save":       "", // simulate default Redis RDB save points
+	"appendonly": "no",
 }
 
 // This is here just so that redis-benchmark doesn't complain.

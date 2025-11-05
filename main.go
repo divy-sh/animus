@@ -29,30 +29,29 @@ func Handle() {
 			log.Print(err)
 			return
 		}
-		defer conn.Close()
-		go handleRequests(conn)
+		// Handle each connection in its own goroutine and ensure it is closed
+		go func(c net.Conn) {
+			defer c.Close()
+			handleRequests(c)
+		}(conn)
 	}
 }
 
 func handleRequests(conn net.Conn) {
+	reader := resp.NewReader(conn)
+	writer := resp.NewWriter(conn)
 	for {
-		reader := resp.NewReader(conn)
 		value, err := reader.Read()
 		if err != nil {
-			log.Print(err)
+			log.Print("Error reading request:", err)
 			return
 		}
-		if value.Typ != "array" {
+		if value.Typ != "array" || len(value.Array) == 0 {
 			log.Print("Invalid request, expected array")
-			continue
-		}
-		if len(value.Array) == 0 {
-			log.Print("Invalid request, expected array length > 0")
 			continue
 		}
 		cmd := strings.ToUpper(value.Array[0].Bulk)
 		args := value.Array[1:]
-		writer := resp.NewWriter(conn)
 		if cmd == "QUIT" {
 			writer.Write(resp.Value{Typ: common.STRING_TYPE, Str: "OK"})
 			return
