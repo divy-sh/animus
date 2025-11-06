@@ -18,16 +18,19 @@ func NewReader(rd io.Reader) *Reader {
 }
 
 func (r *Reader) Read() (Value, error) {
-	valEssentia, err := r.reader.Peek(1)
+	firstByte, err := r.reader.ReadByte()
 	if err != nil {
 		return Value{}, err
 	}
-	switch valEssentia[0] {
+
+	switch firstByte {
 	case ARRAY:
 		return r.readArray()
 	case BULK:
 		return r.readBulk()
 	default:
+		// Put back the byte for inline reading since it's part of the content
+		r.reader.UnreadByte()
 		return r.readInline()
 	}
 }
