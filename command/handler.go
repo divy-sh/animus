@@ -102,7 +102,7 @@ func init() {
 	// Sets
 	RegisterCommand("SADD", Sadd, `SADD [KEY] [MEMBER] [MEMBER ...]
 	Adds one or more members to the set stored at key.`, []string{}, -3, 0, 0, 0)
-	RegisterCommand("Scard", Scard, `SCARD [KEY]
+	RegisterCommand("SCARD", Scard, `SCARD [KEY]
 	Returns the number of members in the set stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
 
 	// Help
