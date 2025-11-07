@@ -14,4 +14,6 @@ const (
 	ERR_INVALID_REGEX = "ERR regex provided is not valid"
 
 	ERR_INVALID_TIME_SECONDS = "ERR provided time is not valid seconds"
+
+	ERR_OUT_OF_RANGE = "ERR value is out of range"
 )

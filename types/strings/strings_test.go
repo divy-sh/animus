@@ -499,14 +499,13 @@ func TestSetRangeInvalidOffset(t *testing.T) {
 	strings.Set("key1", "HelloWorld")
 
 	err := strings.SetRange("key1", "-1", "Test")
-	expected := "ERR offset is not an integer or out of range"
-	if err == nil || err.Error() != expected {
-		t.Errorf("Expected error: %v, got: %v", expected, err)
+	if err == nil || err.Error() != common.ERR_OUT_OF_RANGE {
+		t.Errorf("Expected error: %v, got: %v", common.ERR_OUT_OF_RANGE, err)
 	}
 
 	err = strings.SetRange("key1", "invalid_offset", "Test")
-	if err == nil || err.Error() != expected {
-		t.Errorf("Expected error: %v, got: %v", expected, err)
+	if err == nil || err.Error() != common.ERR_OUT_OF_RANGE {
+		t.Errorf("Expected error: %v, got: %v", common.ERR_OUT_OF_RANGE, err)
 	}
 }
 

@@ -583,3 +583,14 @@ func TestSetRangeInvalidArgsCount(t *testing.T) {
 		t.Errorf("Expected ERR wrong number of arguments for 'SetRange' command, got %v", result)
 	}
 }
+
+func TestSetRangeInvalidRange(t *testing.T) {
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "key"},
+		{Typ: common.BULK_TYPE, Bulk: "-6"},
+		{Typ: common.BULK_TYPE, Bulk: "Animus"}}
+	result := SetRange(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_OUT_OF_RANGE {
+		t.Errorf("Expected ERR wrong number of arguments for 'SetRange' command, got %v", result)
+	}
+}

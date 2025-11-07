@@ -186,7 +186,7 @@ func SetRange(key, offsetStr, value string) error {
 	defer store.GlobalLock.Unlock()
 	offset, err := strconv.ParseInt(offsetStr, 10, 64)
 	if err != nil || offset < 0 {
-		return errors.New("ERR offset is not an integer or out of range")
+		return errors.New(common.ERR_OUT_OF_RANGE)
 	}
 	currentVal, ok := store.Get[string, string](key)
 	if !ok {
