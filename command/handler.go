@@ -99,6 +99,12 @@ func init() {
 	RegisterCommand("RPUSH", RPush, `RPUSH [KEY] [VALUE] [VALUE ...]
 	Inserts one or more elements at the end of the list stored at key.`, []string{}, -3, 0, 0, 0)
 
+	// Sets
+	RegisterCommand("SADD", Sadd, `SADD [KEY] [MEMBER] [MEMBER ...]
+	Adds one or more members to the set stored at key.`, []string{}, -3, 0, 0, 0)
+	RegisterCommand("Scard", Scard, `SCARD [KEY]
+	Returns the number of members in the set stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
+
 	// Help
 	RegisterCommand("HELP", Help, `HELP [COMMAND]
 	Provides details on how to use a command and what the command actually does.`, []string{"readonly", "fast"}, -1, 0, 0, 0)
