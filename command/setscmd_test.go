@@ -85,3 +85,57 @@ func TestScardInvalidArgs(t *testing.T) {
 		t.Errorf("Expected ERROR_TYPE for insufficient arguments, got %v", result.Typ)
 	}
 }
+
+func TestSismember(t *testing.T) {
+	key := "TestSismember"
+
+	// Add elements to the set
+	addArgs := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key},
+		{Typ: common.BULK_TYPE, Bulk: "elem1"},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+	}
+	Sadd(addArgs)
+
+	// Test membership for an existing element
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key},
+		{Typ: common.BULK_TYPE, Bulk: "elem1"},
+	}
+	result := Sismember(args)
+	if result.Typ != common.INTEGER_TYPE {
+		t.Errorf("Expected INTEGER_TYPE, got %v", result.Typ)
+	}
+	if result.Num != 1 {
+		t.Errorf("Expected membership 1, got %d", result.Num)
+	}
+
+	// Test membership for a non-existing element
+	args[1] = resp.Value{Typ: common.BULK_TYPE, Bulk: "elem3"}
+	result = Sismember(args)
+	if result.Typ != common.INTEGER_TYPE {
+		t.Errorf("Expected INTEGER_TYPE, got %v", result.Typ)
+	}
+	if result.Num != 0 {
+		t.Errorf("Expected membership 0, got %d", result.Num)
+	}
+}
+
+func TestSismemberInvalidArgs(t *testing.T) {
+	// Test with insufficient arguments
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "onlykey"}}
+	result := Sismember(args)
+	if result.Typ != common.ERROR_TYPE {
+		t.Errorf("Expected ERROR_TYPE for insufficient arguments, got %v", result.Typ)
+	}
+	// Test with too many arguments
+	args = []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "key"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"},
+		{Typ: common.BULK_TYPE, Bulk: "value2"},
+	}
+	result = Sismember(args)
+	if result.Typ != common.ERROR_TYPE {
+		t.Errorf("Expected ERROR_TYPE for too many arguments, got %v", result.Typ)
+	}
+}

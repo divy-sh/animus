@@ -35,3 +35,14 @@ func Scard(key string) int64 {
 	}
 	return int64(len(hashVal))
 }
+
+func Sismember(key string, value string) bool {
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
+	hashVal, ok := store.Get[string, map[string]bool](key)
+	if !ok {
+		return false
+	}
+	_, exists := hashVal[value]
+	return exists
+}

@@ -27,3 +27,19 @@ func Scard(args []resp.Value) resp.Value {
 	count := sets.Scard(key)
 	return resp.Value{Typ: common.INTEGER_TYPE, Num: count}
 }
+
+func Sismember(args []resp.Value) resp.Value {
+	if len(args) != 2 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+	key := args[0].Bulk
+	value := args[1].Bulk
+	isMember := sets.Sismember(key, value)
+	var num int64
+	if isMember {
+		num = 1
+	} else {
+		num = 0
+	}
+	return resp.Value{Typ: common.INTEGER_TYPE, Num: num}
+}

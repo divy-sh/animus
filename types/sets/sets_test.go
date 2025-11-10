@@ -39,3 +39,36 @@ func TestScard(t *testing.T) {
 		t.Errorf("Expected set cardinality to be 3, got %d", count)
 	}
 }
+
+func TestSismember(t *testing.T) {
+	key := "TestSismember"
+	values := []string{"value1", "value2", "value3"}
+
+	// Add elements to the set
+	Sadd(key, values)
+
+	// Test membership for existing elements
+	for _, val := range values {
+		isMember := Sismember(key, val)
+		if !isMember {
+			t.Errorf("Expected %s to be a member of the set", val)
+		}
+	}
+
+	// Test membership for a non-existing element
+	nonMember := "value4"
+	isMember := Sismember(key, nonMember)
+	if isMember {
+		t.Errorf("Expected %s to not be a member of the set", nonMember)
+	}
+}
+
+func TestSismemberEmptySet(t *testing.T) {
+	key := "EmptySet"
+	value := "somevalue"
+
+	isMember := Sismember(key, value)
+	if isMember {
+		t.Errorf("Expected %s to not be a member of the empty set", value)
+	}
+}
