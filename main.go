@@ -48,6 +48,7 @@ func handleRequests(conn net.Conn) {
 		}
 		if value.Typ != "array" || len(value.Array) == 0 {
 			log.Print("Invalid request, expected array")
+			writer.Write(resp.Value{Typ: common.STRING_TYPE, Str: "Invalid request"})
 			continue
 		}
 		cmd := strings.ToUpper(value.Array[0].Bulk)
@@ -59,7 +60,7 @@ func handleRequests(conn net.Conn) {
 		handler, ok := command.Handlers[cmd]
 		if !ok {
 			log.Print("Invalid command: ", cmd)
-			writer.Write(resp.Value{Typ: common.STRING_TYPE, Str: ""})
+			writer.Write(resp.Value{Typ: common.STRING_TYPE, Str: "Invalid command"})
 			continue
 		}
 		result := handler.Func(args)
