@@ -88,337 +88,392 @@ func TestExistsInvalidKey(t *testing.T) {
 	}
 }
 
-func TestGenerics_ExpireNoFlagKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireNoFlagKeyWithNoExpiry", "value")
-	err := generics.Expire("TestGenerics_ExpireNoFlagKeyWithNoExpiry", "0", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
+func TestGenerics_Expire(t *testing.T) {
+	tests := []struct {
+		name          string
+		key           string
+		setupExpiry   string
+		expiry        string
+		flag          string
+		initialValue  string
+		expectedError string
+		checkExists   bool
+	}{
+		// No flag tests
+		{
+			name:          "NoFlag_KeyWithNoExpiry",
+			key:           "NoFlag_KeyWithNoExpiry",
+			expiry:        "0",
+			flag:          "",
+			initialValue:  "value",
+			expectedError: "",
+			checkExists:   true,
+		},
+		{
+			name:          "NoFlag_KeyWithExpiry",
+			key:           "NoFlag_KeyWithExpiry",
+			setupExpiry:   "100",
+			expiry:        "0",
+			flag:          "",
+			initialValue:  "value",
+			expectedError: "",
+			checkExists:   true,
+		},
+		{
+			name:          "NoFlag_InvalidKey",
+			key:           "NoFlag_InvalidKey",
+			expiry:        "10",
+			flag:          "",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
+
+		// NX tests
+		{
+			name:          "NX_KeyWithNoExpiry",
+			key:           "NX_KeyWithNoExpiry",
+			expiry:        "10",
+			flag:          "NX",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "NX_KeyWithExpiry",
+			key:           "NX_KeyWithExpiry",
+			setupExpiry:   "100",
+			expiry:        "10",
+			flag:          "NX",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "NX_InvalidKey",
+			key:           "NX_InvalidKey",
+			expiry:        "10",
+			flag:          "NX",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
+
+		// XX tests
+		{
+			name:          "XX_KeyWithNoExpiry",
+			key:           "XX_KeyWithNoExpiry",
+			expiry:        "10",
+			flag:          "XX",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "XX_KeyWithExpiry",
+			key:           "XX_KeyWithExpiry",
+			setupExpiry:   "100",
+			expiry:        "10",
+			flag:          "XX",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "XX_InvalidKey",
+			key:           "XX_InvalidKey",
+			expiry:        "10",
+			flag:          "XX",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
+
+		// GT tests
+		{
+			name:          "GT_KeyWithNoExpiry",
+			key:           "GT_KeyWithNoExpiry",
+			expiry:        "10",
+			flag:          "GT",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "GT_KeyWithExpiryNewTimeSmaller",
+			key:           "GT_KeyWithExpiryNewTimeSmaller",
+			setupExpiry:   "100",
+			expiry:        "10",
+			flag:          "GT",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "GT_KeyWithExpiryNewTimeGreater",
+			key:           "GT_KeyWithExpiryNewTimeGreater",
+			setupExpiry:   "100",
+			expiry:        "200",
+			flag:          "GT",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "GT_InvalidKey",
+			key:           "GT_InvalidKey",
+			expiry:        "10",
+			flag:          "GT",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
+
+		// LT tests
+		{
+			name:          "LT_KeyWithNoExpiry",
+			key:           "LT_KeyWithNoExpiry",
+			expiry:        "10",
+			flag:          "LT",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "LT_KeyWithExpiryNewTimeSmaller",
+			key:           "LT_KeyWithExpiryNewTimeSmaller",
+			setupExpiry:   "100",
+			expiry:        "10",
+			flag:          "LT",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "LT_KeyWithExpiryNewTimeGreater",
+			key:           "LT_KeyWithExpiryNewTimeGreater",
+			setupExpiry:   "100",
+			expiry:        "200",
+			flag:          "LT",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "LT_InvalidKey",
+			key:           "LT_InvalidKey",
+			expiry:        "10",
+			flag:          "LT",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
 	}
-	val, err := strings.Get("TestGenerics_ExpireNoFlagKeyWithNoExpiry")
-	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, val)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.initialValue != "" {
+				strings.Set(tt.key, tt.initialValue)
+				if tt.setupExpiry != "" {
+					err := generics.Expire(tt.key, tt.setupExpiry, "")
+					if err != nil {
+						t.Errorf("Failed to setup expiry: %s", err.Error())
+						return
+					}
+				}
+			}
+
+			err := generics.Expire(tt.key, tt.expiry, tt.flag)
+
+			if tt.expectedError == "" && err != nil {
+				t.Errorf("Expected no error, got: %s", err.Error())
+				return
+			}
+			if tt.expectedError != "" && (err == nil || err.Error() != tt.expectedError) {
+				t.Errorf("Expected error: %s, got: %v", tt.expectedError, err)
+				return
+			}
+
+			if tt.checkExists {
+				val, err := strings.Get(tt.key)
+				if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
+					t.Errorf("Expected error: %s, got value: %v", common.ERR_STRING_NOT_FOUND, val)
+				}
+			}
+		})
 	}
 }
 
-func TestGenerics_ExpireNoFlagKeyWithExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireNoFlagKeyWithExpiry", "value")
-	err := generics.Expire("TestGenerics_ExpireNoFlagKeyWithExpiry", "100", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
+func TestGenerics_ExpireAt(t *testing.T) {
+	currentTime := time.Now().Unix()
+	tests := []struct {
+		name          string
+		key           string
+		setupExpiry   string
+		expiry        string
+		flag          string
+		initialValue  string
+		expectedError string
+		checkExists   bool
+	}{
+		// No flag tests
+		{
+			name:          "NoFlag_KeyWithNoExpiry",
+			key:           "TestGenerics_ExpireAt_NoFlag_KeyWithNoExpiry",
+			expiry:        "0",
+			flag:          "",
+			initialValue:  "value",
+			expectedError: "",
+			checkExists:   true,
+		},
+		{
+			name:          "NoFlag_KeyWithExpiry",
+			key:           "TestGenerics_ExpireAt_NoFlag_KeyWithExpiry",
+			setupExpiry:   fmt.Sprint(currentTime + 100),
+			expiry:        "0",
+			flag:          "",
+			initialValue:  "value",
+			expectedError: "",
+			checkExists:   true,
+		},
+		{
+			name:          "NoFlag_InvalidKey",
+			key:           "TestGenerics_ExpireAt_NoFlag_InvalidKey",
+			expiry:        "10",
+			flag:          "",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
+		// NX tests
+		{
+			name:          "NX_KeyWithNoExpiry",
+			key:           "TestGenerics_ExpireAt_NX_KeyWithNoExpiry",
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "NX",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "NX_KeyWithExpiry",
+			key:           "TestGenerics_ExpireAt_NX_KeyWithExpiry",
+			setupExpiry:   fmt.Sprint(currentTime + 100),
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "NX",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "NX_InvalidKey",
+			key:           "TestGenerics_ExpireAt_NX_InvalidKey",
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "NX",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
+		// XX tests
+		{
+			name:          "XX_KeyWithNoExpiry",
+			key:           "TestGenerics_ExpireAt_XX_KeyWithNoExpiry",
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "XX",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "XX_KeyWithExpiry",
+			key:           "TestGenerics_ExpireAt_XX_KeyWithExpiry",
+			setupExpiry:   fmt.Sprint(currentTime + 100),
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "XX",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "XX_InvalidKey",
+			key:           "TestGenerics_ExpireAt_XX_InvalidKey",
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "XX",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
+		// GT tests
+		{
+			name:          "GT_KeyWithNoExpiry",
+			key:           "TestGenerics_ExpireAt_GT_KeyWithNoExpiry",
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "GT",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "GT_KeyWithExpiryNewTimeSmaller",
+			key:           "TestGenerics_ExpireAt_GT_KeyWithExpiryNewTimeSmaller",
+			setupExpiry:   fmt.Sprint(currentTime + 100),
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "GT",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "GT_KeyWithExpiryNewTimeGreater",
+			key:           "TestGenerics_ExpireAt_GT_KeyWithExpiryNewTimeGreater",
+			setupExpiry:   fmt.Sprint(currentTime + 100),
+			expiry:        fmt.Sprint(currentTime + 200),
+			flag:          "GT",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "GT_InvalidKey",
+			key:           "TestGenerics_ExpireAt_GT_InvalidKey",
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "GT",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
+		// LT tests
+		{
+			name:          "LT_KeyWithNoExpiry",
+			key:           "TestGenerics_ExpireAt_LT_KeyWithNoExpiry",
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "LT",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "LT_KeyWithExpiryNewTimeSmaller",
+			key:           "TestGenerics_ExpireAt_LT_KeyWithExpiryNewTimeSmaller",
+			setupExpiry:   fmt.Sprint(currentTime + 100),
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "LT",
+			initialValue:  "value",
+			expectedError: "",
+		},
+		{
+			name:          "LT_KeyWithExpiryNewTimeGreater",
+			key:           "TestGenerics_ExpireAt_LT_KeyWithExpiryNewTimeGreater",
+			setupExpiry:   fmt.Sprint(currentTime + 100),
+			expiry:        fmt.Sprint(currentTime + 200),
+			flag:          "LT",
+			initialValue:  "value",
+			expectedError: common.ERR_EXPIRY_TYPE,
+		},
+		{
+			name:          "LT_InvalidKey",
+			key:           "TestGenerics_ExpireAt_LT_InvalidKey",
+			expiry:        fmt.Sprint(currentTime + 10),
+			flag:          "LT",
+			expectedError: common.ERR_SOURCE_KEY_NOT_FOUND,
+		},
 	}
-	err = generics.Expire("TestGenerics_ExpireNoFlagKeyWithExpiry", "0", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	val, err := strings.Get("TestGenerics_ExpireNoFlagKeyWithExpiry")
-	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, val)
-	}
-}
 
-func TestGenerics_ExpireNoFlagInvalidKey(t *testing.T) {
-	err := generics.Expire("TestGenerics_ExpireNoFlagInvalidKey", "10", "")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.initialValue != "" {
+				strings.Set(tt.key, tt.initialValue)
+				if tt.setupExpiry != "" {
+					err := generics.ExpireAt(tt.key, tt.setupExpiry, "")
+					if err != nil {
+						t.Errorf("Failed to setup expiry: %s", err.Error())
+						return
+					}
+				}
+			}
 
-func TestGenerics_ExpireNXKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireNXKeyWithNoExpiry", "value")
-	err := generics.Expire("TestGenerics_ExpireNXKeyWithNoExpiry", "10", "NX")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
+			err := generics.ExpireAt(tt.key, tt.expiry, tt.flag)
 
-func TestGenerics_ExpireNXKeyWithExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireNXKeyWithExpiry", "value")
-	err := generics.Expire("TestGenerics_ExpireNXKeyWithExpiry", "100", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireNXKeyWithExpiry", "10", "NX")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
+			if tt.expectedError == "" && err != nil {
+				t.Errorf("Expected no error, got: %s", err.Error())
+				return
+			}
+			if tt.expectedError != "" && (err == nil || err.Error() != tt.expectedError) {
+				t.Errorf("Expected error: %s, got: %v", tt.expectedError, err)
+				return
+			}
 
-func TestGenerics_ExpireNXInvalidKey(t *testing.T) {
-	err := generics.Expire("TestGenerics_ExpireNXInvalidKey", "10", "NX")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
-
-func TestGenerics_ExpireXXKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireXXKeyWithNoExpiry", "value")
-	err := generics.Expire("TestGenerics_ExpireXXKeyWithNoExpiry", "10", "XX")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireXXKeyWithExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireXXKeyWithExpiry", "value")
-	err := generics.Expire("TestGenerics_ExpireXXKeyWithExpiry", "100", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireXXKeyWithExpiry", "10", "XX")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireXXInvalidKey(t *testing.T) {
-	err := generics.Expire("TestGenerics_ExpireNXInvalidKey", "10", "XX")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
-
-func TestGenerics_ExpireGTKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireGTKeyWithNoExpiry", "value")
-	err := generics.Expire("TestGenerics_ExpireGTKeyWithNoExpiry", "10", "GT")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller(t *testing.T) {
-	strings.Set("TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller", "value")
-	err := generics.Expire("TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller", "100", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireGTKeyWithExpiryNewTimeSmaller", "10", "GT")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater(t *testing.T) {
-	strings.Set("TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater", "value")
-	err := generics.Expire("TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater", "100", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireGTKeyWithExpiryNewTimeGreater", "200", "GT")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireGTInvalidKey(t *testing.T) {
-	err := generics.Expire("TestGenerics_ExpireGTInvalidKey", "10", "GT")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
-
-func TestGenerics_ExpireLTKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireLTKeyWithNoExpiry", "value")
-	err := generics.Expire("TestGenerics_ExpireLTKeyWithNoExpiry", "10", "LT")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller(t *testing.T) {
-	strings.Set("TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller", "value")
-	err := generics.Expire("TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller", "100", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireLTKeyWithExpiryNewTimeSmaller", "10", "LT")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater(t *testing.T) {
-	strings.Set("TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater", "value")
-	err := generics.Expire("TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater", "100", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireLTKeyWithExpiryNewTimeGreater", "200", "LT")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireLTInvalidKey(t *testing.T) {
-	err := generics.Expire("TestGenerics_ExpireLTInvalidKey", "10", "LT")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
-
-func TestGenerics_ExpireAtNoFlagKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtNoFlagKeyWithNoExpiry", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtNoFlagKeyWithNoExpiry", "0", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	val, err := strings.Get("TestGenerics_ExpireAtNoFlagKeyWithNoExpiry")
-	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, val)
-	}
-}
-
-func TestGenerics_ExpireAtNoFlagKeyWithExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtNoFlagKeyWithExpiry", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtNoFlagKeyWithExpiry", fmt.Sprint(time.Now().Unix()+100), "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireAtNoFlagKeyWithExpiry", "0", "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	val, err := strings.Get("TestGenerics_ExpireAtNoFlagKeyWithExpiry")
-	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_STRING_NOT_FOUND, val)
-	}
-}
-
-func TestGenerics_ExpireAtNoFlagInvalidKey(t *testing.T) {
-	err := generics.ExpireAt("TestGenerics_ExpireAtNoFlagInvalidKey", "10", "")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
-
-func TestGenerics_ExpireAtNXKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtNXKeyWithNoExpiry", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtNXKeyWithNoExpiry", "10", "NX")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireAtNXKeyWithExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtNXKeyWithExpiry", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtNXKeyWithExpiry", fmt.Sprint(time.Now().Unix()+100), "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireAtNXKeyWithExpiry", "10", "NX")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireAtNXInvalidKey(t *testing.T) {
-	err := generics.ExpireAt("TestGenerics_ExpireAtNXInvalidKey", "10", "NX")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
-
-func TestGenerics_ExpireAtXXKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtXXKeyWithNoExpiry", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtXXKeyWithNoExpiry", "10", "XX")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireAtXXKeyWithExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtXXKeyWithExpiry", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtXXKeyWithExpiry", fmt.Sprint(time.Now().Unix()+100), "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireAtXXKeyWithExpiry", "10", "XX")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireAtXXInvalidKey(t *testing.T) {
-	err := generics.ExpireAt("TestGenerics_ExpireAtNXInvalidKey", "10", "XX")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
-
-func TestGenerics_ExpireAtGTKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtGTKeyWithNoExpiry", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtGTKeyWithNoExpiry", "10", "GT")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireAtGTKeyWithExpiryNewTimeSmaller(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtGTKeyWithExpiryNewTimeSmaller", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtGTKeyWithExpiryNewTimeSmaller", fmt.Sprint(time.Now().Unix()+100), "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireAtGTKeyWithExpiryNewTimeSmaller", "10", "GT")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireAtGTKeyWithExpiryNewTimeGreater(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtGTKeyWithExpiryNewTimeGreater", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtGTKeyWithExpiryNewTimeGreater", fmt.Sprint(time.Now().Unix()+100), "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireAtGTKeyWithExpiryNewTimeGreater", "200", "GT")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireAtGTInvalidKey(t *testing.T) {
-	err := generics.ExpireAt("TestGenerics_ExpireAtGTInvalidKey", "10", "GT")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
-	}
-}
-
-func TestGenerics_ExpireAtLTKeyWithNoExpiry(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtLTKeyWithNoExpiry", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtLTKeyWithNoExpiry", "10", "LT")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireAtLTKeyWithExpiryNewTimeSmaller(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtLTKeyWithExpiryNewTimeSmaller", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtLTKeyWithExpiryNewTimeSmaller", fmt.Sprint(time.Now().Unix()+100), "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireAtLTKeyWithExpiryNewTimeSmaller", "10", "LT")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-}
-
-func TestGenerics_ExpireAtLTKeyWithExpiryNewTimeGreater(t *testing.T) {
-	strings.Set("TestGenerics_ExpireAtLTKeyWithExpiryNewTimeGreater", "value")
-	err := generics.ExpireAt("TestGenerics_ExpireAtLTKeyWithExpiryNewTimeGreater", fmt.Sprint(time.Now().Unix()+100), "")
-	if err != nil {
-		t.Errorf("Expected no error, got: %s", err.Error())
-	}
-	err = generics.Expire("TestGenerics_ExpireAtLTKeyWithExpiryNewTimeGreater", "200", "LT")
-	if err == nil || err.Error() != common.ERR_EXPIRY_TYPE {
-		t.Errorf("Expected error: %s, got %v", common.ERR_EXPIRY_TYPE, err)
-	}
-}
-
-func TestGenerics_ExpireAtLTInvalidKey(t *testing.T) {
-	err := generics.ExpireAt("TestGenerics_ExpireAtLTInvalidKey", "10", "LT")
-	if err == nil || err.Error() != common.ERR_SOURCE_KEY_NOT_FOUND {
-		t.Errorf("Expected error: %s, got: %v", common.ERR_SOURCE_KEY_NOT_FOUND, err)
+			if tt.checkExists {
+				val, err := strings.Get(tt.key)
+				if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
+					t.Errorf("Expected error: %s, got value: %v", common.ERR_STRING_NOT_FOUND, val)
+				}
+			}
+		})
 	}
 }
 
