@@ -16,4 +16,6 @@ const (
 	ERR_INVALID_TIME_SECONDS = "ERR provided time is not valid seconds"
 
 	ERR_OUT_OF_RANGE = "ERR value is out of range"
+
+	ERR_INVALID_INTEGER = "ERR value is not an integer or out of range"
 )

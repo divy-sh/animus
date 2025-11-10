@@ -49,9 +49,6 @@ func cleanExpiredKeys() {
 	store.mutex.RLock()
 	allKeys := store.LRUCache.Keys()
 	store.mutex.RUnlock()
-	if len(allKeys) == 0 {
-		return
-	}
 	for iteration := 0; iteration < maxIterations; iteration++ {
 		keysToCheck := sampleRandomKeys(allKeys, sampleSize)
 		if len(keysToCheck) == 0 {
@@ -74,9 +71,6 @@ func cleanExpiredKeys() {
 				store.mutex.Unlock()
 			}
 		}
-		if len(keysToCheck) == 0 {
-			return
-		}
 		expiryPercentage := float64(expiredCount) / float64(len(keysToCheck)) * 100
 		if expiryPercentage < targetPercent {
 			return
@@ -86,7 +80,7 @@ func cleanExpiredKeys() {
 
 func sampleRandomKeys(keys []any, sampleSize int) []any {
 	if len(keys) == 0 {
-		return nil
+		return []any{}
 	}
 	if len(keys) <= sampleSize {
 		return keys

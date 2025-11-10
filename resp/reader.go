@@ -2,6 +2,7 @@ package resp
 
 import (
 	"bufio"
+	"errors"
 	"io"
 	"strconv"
 	"strings"
@@ -75,7 +76,7 @@ func (r *Reader) readInt() (val int, err error) {
 	}
 	i64, err := strconv.ParseInt(string(line), 10, 64)
 	if err != nil {
-		return 0, err
+		return 0, errors.New(common.ERR_INVALID_INTEGER)
 	}
 	return int(i64), nil
 }

@@ -55,7 +55,22 @@ func TestExpiryCleanerAutoWithSampling(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	cleanExpiredKeys()
 	if store.LRUCache.Len() > 0 {
-		t.Errorf("cleanExpiredKeys shoul've cleared the expired keys")
+		t.Errorf("cleanExpiredKeys should've cleared the expired keys")
+	}
+}
+
+func TestExpiryCleanerAutoWithEmptyStore(t *testing.T) {
+	// Clear store before testing
+	store.mutex.Lock()
+	store.LRUCache.Purge()
+	store.mutex.Unlock()
+
+	if store.LRUCache.Len() > 0 {
+		t.Errorf("store should be empty before testing TestExpiryCleanerAutoWithEmptyStore")
+	}
+	cleanExpiredKeys()
+	if store.LRUCache.Len() > 0 {
+		t.Errorf("cleanExpiredKeys should've cleared the expired keys")
 	}
 }
 
