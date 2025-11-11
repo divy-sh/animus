@@ -2,6 +2,7 @@ package resp_test
 
 import (
 	"bytes"
+	"strconv"
 	"testing"
 
 	"github.com/divy-sh/animus/common"
@@ -11,6 +12,18 @@ import (
 func TestMarshalInt(t *testing.T) {
 	v := resp.Value{Typ: common.INTEGER_TYPE, Num: 42}
 	expected := []byte{resp.INTEGER, byte(42), '\r', '\n'}
+	result := v.Marshal()
+
+	if !bytes.Equal(result, expected) {
+		t.Errorf("Expected %q, got %q", expected, result)
+	}
+}
+
+func TestMarshalIntByteOverflow(t *testing.T) {
+	v := resp.Value{Typ: common.INTEGER_TYPE, Num: 256}
+	expected := []byte{resp.INTEGER}
+	expected = append(expected, []byte(strconv.Itoa(256))...)
+	expected = append(expected, '\r', '\n')
 	result := v.Marshal()
 
 	if !bytes.Equal(result, expected) {

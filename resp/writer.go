@@ -37,7 +37,7 @@ func (v Value) Marshal() []byte {
 func (v Value) marshalInt() []byte {
 	var bytes []byte
 	bytes = append(bytes, INTEGER)
-	bytes = append(bytes, byte(v.Num))
+	bytes = append(bytes, []byte(strconv.FormatInt(v.Num, 10))...)
 	bytes = append(bytes, '\r', '\n')
 
 	return bytes
