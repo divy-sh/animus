@@ -28,6 +28,22 @@ func Scard(args []resp.Value) resp.Value {
 	return resp.Value{Typ: common.INTEGER_TYPE, Num: count}
 }
 
+func Sdiff(args []resp.Value) resp.Value {
+	if len(args) < 2 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+	keys := []string{}
+	for _, arg := range args {
+		keys = append(keys, arg.Bulk)
+	}
+	diffValues := sets.Sdiff(keys)
+	arrayValues := []resp.Value{}
+	for _, val := range diffValues {
+		arrayValues = append(arrayValues, resp.Value{Typ: common.BULK_TYPE, Bulk: val})
+	}
+	return resp.Value{Typ: common.ARRAY_TYPE, Array: arrayValues}
+}
+
 func Sismember(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}

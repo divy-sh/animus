@@ -86,6 +86,88 @@ func TestScardInvalidArgs(t *testing.T) {
 	}
 }
 
+func TestSdiff(t *testing.T) {
+	key1 := "TestSdiff1"
+	key2 := "TestSdiff2"
+
+	// Add elements to the first set
+	addArgs1 := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: "elem1"},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+	}
+	Sadd(addArgs1)
+
+	// Add elements to the second set
+	addArgs2 := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key2},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+		{Typ: common.BULK_TYPE, Bulk: "elem3"},
+	}
+	Sadd(addArgs2)
+
+	// Test set difference
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: key2},
+	}
+	result := Sdiff(args)
+	if result.Typ != common.ARRAY_TYPE {
+		t.Errorf("Expected ARRAY_TYPE, got %v", result.Typ)
+	}
+	expectedDiff := map[string]bool{"elem1": true}
+	if len(result.Array) != len(expectedDiff) {
+		t.Errorf("Expected %d elements in difference, got %d", len(expectedDiff), len(result.Array))
+	}
+	for _, val := range result.Array {
+		if !expectedDiff[val.Bulk] {
+			t.Errorf("Unexpected element in difference: %s", val.Bulk)
+		}
+	}
+}
+
+func TestSdiffInvalidArgs(t *testing.T) {
+	// Test with insufficient arguments
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "onlykey"}}
+	result := Sdiff(args)
+	if result.Typ != common.ERROR_TYPE {
+		t.Errorf("Expected ERROR_TYPE for insufficient arguments, got %v", result.Typ)
+	}
+}
+
+func TestSdiffNoDifference(t *testing.T) {
+	key1 := "TestSdiffNoDiff1"
+	key2 := "TestSdiffNoDiff2"
+
+	// Add identical elements to both sets
+	addArgs1 := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: "elem1"},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+	}
+	Sadd(addArgs1)
+
+	addArgs2 := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key2},
+		{Typ: common.BULK_TYPE, Bulk: "elem1"},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+	}
+	Sadd(addArgs2)
+
+	// Test set difference
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: key2},
+	}
+	result := Sdiff(args)
+	if result.Typ != common.ARRAY_TYPE {
+		t.Errorf("Expected ARRAY_TYPE, got %v", result.Typ)
+	}
+	if len(result.Array) != 0 {
+		t.Errorf("Expected 0 elements in difference, got %d", len(result.Array))
+	}
+}
+
 func TestSismember(t *testing.T) {
 	key := "TestSismember"
 

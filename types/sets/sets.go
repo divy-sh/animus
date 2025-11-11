@@ -36,6 +36,36 @@ func Scard(key string) int64 {
 	return int64(len(hashVal))
 }
 
+func Sdiff(keys []string) []string {
+	store.GlobalLock.RLock()
+	defer store.GlobalLock.RUnlock()
+	if len(keys) == 0 {
+		return []string{}
+	}
+	baseSet, ok := store.Get[string, map[string]bool](keys[0])
+	if !ok {
+		return []string{}
+	}
+	resultSet := map[string]bool{}
+	for k := range baseSet {
+		resultSet[k] = true
+	}
+	for _, key := range keys[1:] {
+		otherSet, ok := store.Get[string, map[string]bool](key)
+		if !ok {
+			continue
+		}
+		for k := range otherSet {
+			delete(resultSet, k)
+		}
+	}
+	diffValues := []string{}
+	for k := range resultSet {
+		diffValues = append(diffValues, k)
+	}
+	return diffValues
+}
+
 func Sismember(key string, value string) bool {
 	store.GlobalLock.RLock()
 	defer store.GlobalLock.RUnlock()
