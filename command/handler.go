@@ -104,6 +104,10 @@ func init() {
 	Adds one or more members to the set stored at key.`, []string{}, -3, 0, 0, 0)
 	RegisterCommand("SCARD", Scard, `SCARD [KEY]
 	Returns the number of members in the set stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
+	RegisterCommand("SDIFF", Sdiff, `SDIFF [KEY] [KEY ...]
+	Returns the members of the set resulting from the difference between the first set and all the successive sets.`, []string{"readonly", "fast"}, -2, 0, 0, 0)
+	RegisterCommand("SISMEMBER", Sismember, `SISMEMBER [KEY] [MEMBER]
+	Returns if member is a member of the set stored at key.`, []string{"readonly", "fast"}, 3, 0, 0, 0)
 
 	// Help
 	RegisterCommand("HELP", Help, `HELP [COMMAND]
