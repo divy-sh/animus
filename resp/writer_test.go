@@ -11,7 +11,7 @@ import (
 
 func TestMarshalInt(t *testing.T) {
 	v := resp.Value{Typ: common.INTEGER_TYPE, Num: 42}
-	expected := []byte{resp.INTEGER, byte(42), '\r', '\n'}
+	expected := []byte{resp.INTEGER, '4', '2', '\r', '\n'}
 	result := v.Marshal()
 
 	if !bytes.Equal(result, expected) {

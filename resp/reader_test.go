@@ -2,7 +2,6 @@ package resp_test
 
 import (
 	"bytes"
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -114,8 +113,7 @@ func TestReadInline(t *testing.T) {
 func TestReadIntNoValue(t *testing.T) {
 	input := "*"
 	r := resp.NewReader(bytes.NewBufferString(input))
-	val, err := r.Read()
-	fmt.Println(val)
+	_, err := r.Read()
 	if err == nil || err.Error() != "EOF" {
 		t.Fatalf("Unexpected error: %v", err)
 	}
