@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/divy-sh/animus/command"
 	"github.com/divy-sh/animus/common"
@@ -14,22 +15,54 @@ func main() {
 	Handle()
 }
 
+// retry executes a function up to maxRetries times with a delay between attempts
+func retry(maxRetries int, delay time.Duration, fn func() error) error {
+	var err error
+	for i := 0; i < maxRetries; i++ {
+		err = fn()
+		if err == nil {
+			return nil
+		}
+		log.Printf("Attempt %d/%d failed: %v", i+1, maxRetries, err)
+		time.Sleep(delay)
+	}
+	return err
+}
+
 func Handle() {
 	log.Print("Listening on port :6379")
-	// Create a new server
-	l, err := net.Listen("tcp", ":6379")
+
+	var l net.Listener
+
+	// Retry listener creation
+	err := retry(5, 2*time.Second, func() error {
+		var err error
+		l, err = net.Listen("tcp", ":6379")
+		return err
+	})
+
 	if err != nil {
-		log.Print(err)
+		log.Printf("Failed to start server after retries: %v", err)
 		return
 	}
+	defer l.Close()
+	log.Print("Server started successfully")
+
 	for {
-		// Listen for connections
-		conn, err := l.Accept()
+		var conn net.Conn
+
+		// Retry accepting connection
+		err := retry(5, 2*time.Second, func() error {
+			var err error
+			conn, err = l.Accept()
+			return err
+		})
+
 		if err != nil {
-			log.Print(err)
-			return
+			log.Printf("Failed to accept connection after retries: %v", err)
+			continue
 		}
-		// Handle each connection in its own goroutine and ensure it is closed
+
 		go func(c net.Conn) {
 			defer c.Close()
 			handleRequests(c)
@@ -43,7 +76,7 @@ func handleRequests(conn net.Conn) {
 	for {
 		value, err := reader.Read()
 		if err != nil {
-			log.Print("Error reading request:", err)
+			// log.Print("Error reading request:", err)
 			return
 		}
 		if value.Typ != "array" || len(value.Array) == 0 {
@@ -59,7 +92,7 @@ func handleRequests(conn net.Conn) {
 		}
 		handler, ok := command.Handlers[cmd]
 		if !ok {
-			log.Print("Invalid command: ", cmd)
+			// log.Print("Invalid command: ", cmd)
 			writer.Write(resp.Value{Typ: common.STRING_TYPE, Str: "Invalid command"})
 			continue
 		}
