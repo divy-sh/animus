@@ -17,5 +17,7 @@ const (
 
 	ERR_OUT_OF_RANGE = "ERR value is out of range"
 
+	ERR_INDEX_OUT_OF_RANGE = "ERR index out of range"
+
 	ERR_INVALID_INTEGER = "ERR value is not an integer or out of range"
 )

@@ -3,8 +3,9 @@ package sets
 import "github.com/divy-sh/animus/store"
 
 func Sadd(key string, values []string) int64 {
-	store.GlobalLock.Lock()
-	defer store.GlobalLock.Unlock()
+	store.LockKeys(key)
+	defer store.UnlockKeys(key)
+
 	hashVal, ok := store.Get[string, map[string]bool](key)
 	count := 0
 	if !ok {
@@ -27,8 +28,9 @@ func Sadd(key string, values []string) int64 {
 }
 
 func Scard(key string) int64 {
-	store.GlobalLock.RLock()
-	defer store.GlobalLock.RUnlock()
+	store.RLockKeys(key)
+	defer store.RUnlockKeys(key)
+
 	hashVal, ok := store.Get[string, map[string]bool](key)
 	if !ok {
 		return 0
@@ -37,8 +39,9 @@ func Scard(key string) int64 {
 }
 
 func Sdiff(keys []string) []string {
-	store.GlobalLock.RLock()
-	defer store.GlobalLock.RUnlock()
+	store.RLockKeys(keys...)
+	defer store.RUnlockKeys(keys...)
+
 	if len(keys) == 0 {
 		return []string{}
 	}
@@ -67,8 +70,9 @@ func Sdiff(keys []string) []string {
 }
 
 func Sismember(key string, value string) bool {
-	store.GlobalLock.RLock()
-	defer store.GlobalLock.RUnlock()
+	store.RLockKeys(key)
+	defer store.RUnlockKeys(key)
+
 	hashVal, ok := store.Get[string, map[string]bool](key)
 	if !ok {
 		return false

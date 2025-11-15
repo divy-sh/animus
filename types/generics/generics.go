@@ -12,8 +12,8 @@ import (
 )
 
 func Copy(source, destination string) (int64, error) {
-	store.GlobalLock.Lock()
-	defer store.GlobalLock.Unlock()
+	store.LockKeys(source, destination)
+	defer store.UnlockKeys(source, destination)
 	value, ok := store.Get[any, any](source)
 	if !ok {
 		return 0, errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
@@ -23,16 +23,16 @@ func Copy(source, destination string) (int64, error) {
 }
 
 func Delete(keys *[]string) {
-	store.GlobalLock.Lock()
-	defer store.GlobalLock.Unlock()
+	store.LockKeys(*keys...)
+	defer store.UnlockKeys(*keys...)
 	for _, key := range *keys {
 		store.Delete(key)
 	}
 }
 
 func Exists(keys *[]string) int64 {
-	store.GlobalLock.RLock()
-	defer store.GlobalLock.RUnlock()
+	store.RLockKeys(*keys...)
+	defer store.RUnlockKeys(*keys...)
 	var validKeyCount int64 = 0
 	for _, key := range *keys {
 		_, exists := store.Get[any, any](key)
@@ -45,8 +45,8 @@ func Exists(keys *[]string) int64 {
 
 func Expire(key, seconds, flag string) error {
 	secs, _ := strconv.ParseInt(seconds, 10, 64)
-	store.GlobalLock.Lock()
-	defer store.GlobalLock.Unlock()
+	store.LockKeys(key)
+	defer store.UnlockKeys(key)
 	val, ttl, ok := store.GetWithTTL[any, any](key)
 	if !ok {
 		return errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
@@ -69,8 +69,8 @@ func Expire(key, seconds, flag string) error {
 
 func ExpireAt(key, unixTimeInSeconds, flag string) error {
 	unixTimeStamp, _ := strconv.ParseInt(unixTimeInSeconds, 10, 64)
-	store.GlobalLock.Lock()
-	defer store.GlobalLock.Unlock()
+	store.LockKeys(key)
+	defer store.UnlockKeys(key)
 	val, ttl, ok := store.GetWithTTL[any, any](key)
 	if !ok {
 		return errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
@@ -92,8 +92,8 @@ func ExpireAt(key, unixTimeInSeconds, flag string) error {
 }
 
 func ExpireTime(key string) (int64, error) {
-	store.GlobalLock.RLock()
-	defer store.GlobalLock.RUnlock()
+	store.RLockKeys(key)
+	defer store.RUnlockKeys(key)
 	_, ttl, exists := store.GetWithTTL[string, string](key)
 	if !exists {
 		return -2, errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
@@ -106,8 +106,6 @@ func Keys(pattern string) (*[]string, error) {
 	if err != nil {
 		return nil, errors.New(common.ERR_INVALID_REGEX)
 	}
-	store.GlobalLock.RLock()
-	defer store.GlobalLock.RUnlock()
 	allKeys := store.GetKeys[string]()
 	matchedKeys := []string{}
 	for _, key := range *allKeys {

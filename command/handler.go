@@ -98,6 +98,20 @@ func init() {
 	Removes and returns the last element(s) of the list stored at key.`, []string{}, -2, 0, 0, 0)
 	RegisterCommand("RPUSH", RPush, `RPUSH [KEY] [VALUE] [VALUE ...]
 	Inserts one or more elements at the end of the list stored at key.`, []string{}, -3, 0, 0, 0)
+	RegisterCommand("LINDEX", LIndex, `LINDEX [KEY] [INDEX]
+	Returns the element at index INDEX in the list stored at key.`, []string{"readonly", "fast"}, 3, 0, 0, 0)
+	RegisterCommand("LINSERT", LInsert, `LINSERT [KEY] [BEFORE|AFTER] [PIVOT] [VALUE]
+	Inserts VALUE in the list stored at KEY either before or after the PIVOT element.`, []string{}, 5, 0, 0, 0)
+	RegisterCommand("LMOVE", LMove, `LMOVE [SOURCE] [DESTINATION] [LEFT|RIGHT]
+	Removes an element from the source list and pushes it to the destination list from the specified direction.`, []string{}, 4, 0, 0, 0)
+	RegisterCommand("LRANGE", LRange, `LRANGE [KEY] [START] [END]
+	Returns the specified elements of the list stored at key.`, []string{"readonly", "fast"}, 4, 0, 0, 0)
+	RegisterCommand("LLEN", LLen, `LLEN [KEY]
+	Returns the length of the list stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
+	RegisterCommand("LPOP", LPop, `LPOP [KEY] [COUNT]
+	Removes and returns the first element(s) of the list stored at key.`, []string{}, -2, 0, 0, 0)
+	RegisterCommand("LPUSH", LPush, `LPUSH [KEY] [VALUE] [VALUE ...]
+	Inserts one or more elements at the beginning of the list stored at key.`, []string{}, -3, 0, 0, 0)
 
 	// Sets
 	RegisterCommand("SADD", Sadd, `SADD [KEY] [MEMBER] [MEMBER ...]

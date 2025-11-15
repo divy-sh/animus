@@ -9,8 +9,8 @@ import (
 )
 
 func HGet(hash, key string) (string, error) {
-	store.GlobalLock.RLock()
-	defer store.GlobalLock.RUnlock()
+	store.RLockKeys(hash)
+	defer store.RUnlockKeys(hash)
 	value, ok := store.Get[string, map[string]string](hash)
 	if !ok {
 		return "", errors.New(common.ERR_HASH_NOT_FOUND)
@@ -22,8 +22,8 @@ func HGet(hash, key string) (string, error) {
 }
 
 func HSet(hash, key, value string) {
-	store.GlobalLock.Lock()
-	defer store.GlobalLock.Unlock()
+	store.LockKeys(hash)
+	defer store.UnlockKeys(hash)
 	hashVal, ok := store.Get[string, map[string]string](hash)
 	if ok {
 		hashVal[key] = value
@@ -34,8 +34,8 @@ func HSet(hash, key, value string) {
 }
 
 func HExists(hash, key string) (int64, error) {
-	store.GlobalLock.Lock()
-	defer store.GlobalLock.Unlock()
+	store.LockKeys(hash)
+	defer store.UnlockKeys(hash)
 	_, ok := store.Get[string, map[string]string](hash)
 	if ok {
 		return 1, nil
@@ -49,8 +49,8 @@ func HExpire(key, seconds, flag string) error {
 }
 
 func HDel(hash, key string) error {
-	store.GlobalLock.Lock()
-	defer store.GlobalLock.Unlock()
+	store.LockKeys(hash)
+	defer store.UnlockKeys(hash)
 	hashVal, ok := store.Get[string, map[string]string](hash)
 	if !ok {
 		return errors.New(common.ERR_HASH_NOT_FOUND)
@@ -70,8 +70,8 @@ func HDel(hash, key string) error {
 }
 
 func HGetAll(key string) (map[string]string, error) {
-	store.GlobalLock.RLock()
-	defer store.GlobalLock.RUnlock()
+	store.RLockKeys(key)
+	defer store.RUnlockKeys(key)
 	hashVal, ok := store.Get[string, map[string]string](key)
 	if !ok {
 		return nil, errors.New(common.ERR_HASH_NOT_FOUND)

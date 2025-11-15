@@ -74,8 +74,8 @@ func TestRPopMultiple(t *testing.T) {
 
 	if result.Typ != "array" ||
 		len(result.Array) != 2 ||
-		result.Array[0].Bulk != "val2" ||
-		result.Array[1].Bulk != "val3" {
+		result.Array[0].Bulk != "val3" ||
+		result.Array[1].Bulk != "val2" {
 		t.Errorf("Expected [val3 val2], got %v", result)
 	}
 }
