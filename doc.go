@@ -7,6 +7,12 @@ such as expiration handling (TTL, LRU), and basic commands.
 Key Features:
   - **PING (String)**: PING [ARGUMENT]
     Returns PONG to test server responsiveness.
+  - **COMMAND (String)**: COMMAND
+    Returns metadata about all registered commands.
+  - **INFO (String)**: INFO
+    Returns information and statistics about the server.
+  - **CONFIG (String)**: CONFIG
+    command to handle server configuration
   - **APPEND (String)**: APPEND [KEY] [VALUE]
     Appends a value to a key and returns the new length of the string.
   - **DECR (String)**: DECR [KEY]
@@ -39,24 +45,53 @@ Key Features:
     Sets the values for all the keys value pair.
   - **SET (String)**: SET [KEY] [VALUE]
     Sets the value of a key.
+  - **SETRANGE (String)**: SETRANGE key offset value
   - **SETEX (String)**: SET [KEY] [VALUE] [EX SECONDS]
     Sets the value of a key with expiration in seconds.
-  - **HSET (Hash)**: HSET [KEY] [FIELD] [VALUE]
+  - **STRLEN (String)**: STRLEN [KEY]
+    Returns the length of the string value stored at key.
+  - **HSET (String)**: HSET [KEY] [FIELD] [VALUE]
     Sets a field in the hash stored at key to a value.
-  - **HGET (Hash)**: HGET [KEY] [FIELD]
+  - **HGET (String)**: HGET [KEY] [FIELD]
     Gets the value of a field in the hash stored at key.
-  - **HEXISTS (Hash)**: HEXISTS [KEY] [FIELD]
+  - **HEXISTS (String)**: HEXISTS [KEY] [FIELD]
     Checks if the hash and the field combination exists in the store.
-  - **HEXPIRE (Hash)**: HEXPIRE key seconds [NX XX GT LT]
+  - **HEXPIRE (String)**: HEXPIRE key seconds [NX XX GT LT]
     Sets a timeout on hash key. After the timeout, the key gets deleted.
     NX - Only set timeout if the key has no previous expiry.
     XX - Only set timeout if the key has a previous expiry.
     GT - Only set timeout if the new time is greater than the existing expiry.
     LT - Only set timeout if the new time is less than the existing expiry.
-  - **RPOP (List)**: RPOP [KEY] [COUNT]
+  - **HDEL (String)**: HDEL [KEY] [FIELD]
+    Deletes a field from the hash stored at key.
+  - **HGETALL (String)**: HGETALL [KEY]
+    Returns all fields and values of the hash stored at key.
+  - **RPOP (String)**: RPOP [KEY] [COUNT]
     Removes and returns the last element(s) of the list stored at key.
-  - **RPUSH (List)**: RPUSH [KEY] [VALUE] [VALUE ...]
+  - **RPUSH (String)**: RPUSH [KEY] [VALUE] [VALUE ...]
     Inserts one or more elements at the end of the list stored at key.
+  - **LINDEX (String)**: LINDEX [KEY] [INDEX]
+    Returns the element at index INDEX in the list stored at key.
+  - **LINSERT (String)**: LINSERT [KEY] [BEFORE|AFTER] [PIVOT] [VALUE]
+    Inserts VALUE in the list stored at KEY either before or after the PIVOT element.
+  - **LMOVE (String)**: LMOVE [SOURCE] [DESTINATION] [LEFT|RIGHT]
+    Removes an element from the source list and pushes it to the destination list from the specified direction.
+  - **LRANGE (String)**: LRANGE [KEY] [START] [END]
+    Returns the specified elements of the list stored at key.
+  - **LLEN (String)**: LLEN [KEY]
+    Returns the length of the list stored at key.
+  - **LPOP (String)**: LPOP [KEY] [COUNT]
+    Removes and returns the first element(s) of the list stored at key.
+  - **LPUSH (String)**: LPUSH [KEY] [VALUE] [VALUE ...]
+    Inserts one or more elements at the beginning of the list stored at key.
+  - **SADD (String)**: SADD [KEY] [MEMBER] [MEMBER ...]
+    Adds one or more members to the set stored at key.
+  - **SCARD (String)**: SCARD [KEY]
+    Returns the number of members in the set stored at key.
+  - **SDIFF (String)**: SDIFF [KEY] [KEY ...]
+    Returns the members of the set resulting from the difference between the first set and all the successive sets.
+  - **SISMEMBER (String)**: SISMEMBER [KEY] [MEMBER]
+    Returns if member is a member of the set stored at key.
   - **HELP (Help)**: HELP [COMMAND]
     Provides details on how to use a command and what the command actually does.
   - **COPY (String)**: COPY [key1] [key2]

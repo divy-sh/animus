@@ -10,7 +10,7 @@ def extract_commands_and_docs(file_path):
     with open(file_path, 'r') as f:
         content = f.read()
 
-    register_command_pattern = re.compile(r'RegisterCommand\("([^"]+)",\s*([^,]+),\s*`([^`]+)`\)')
+    register_command_pattern = re.compile(r'RegisterCommand\("([^"]+)",\s*([^,]+),\s*`([^`]+)`,.*\)')
     matches = register_command_pattern.findall(content)
 
     for command, func_name, doc in matches:
@@ -69,6 +69,6 @@ def generate_doc_go(commands, output_file_path):
         f.write("*/\n")
         f.write("package main\n")
 
-commands = extract_commands_and_docs("./internal/command/handler.go")
+commands = extract_commands_and_docs("./command/handler.go")
 generate_doc_go(commands, "doc.go")
 os.system("go fmt")
