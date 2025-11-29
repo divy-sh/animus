@@ -75,3 +75,28 @@ func TestLindex(t *testing.T) {
 		t.Errorf("Expected 'c', got '%s'", val)
 	}
 }
+
+func Test_LindexUnderflow(t *testing.T) {
+	key := "testListIndexUnderflow"
+	values := []string{"a", "b", "c", "d"}
+	RPush(key, &values)
+
+	val, err := Lindex(key, -1)
+	if err != nil {
+		t.Errorf("Expected no error for valid LIndex")
+	}
+	if val != "d" {
+		t.Errorf("Expected 'd', got '%s'", val)
+	}
+}
+
+func Test_LindexOverflow(t *testing.T) {
+	key := "testListIndexOverflow"
+	values := []string{"a", "b", "c", "d"}
+	RPush(key, &values)
+
+	_, err := Lindex(key, 10)
+	if err == nil {
+		t.Errorf("Expected error for out-of-bounds index")
+	}
+}
