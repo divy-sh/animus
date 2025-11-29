@@ -61,3 +61,17 @@ func TestRPopNonExistentKey(t *testing.T) {
 		t.Errorf("Expected error for non-existent key")
 	}
 }
+
+func TestLindex(t *testing.T) {
+	key := "testListIndex"
+	values := []string{"a", "b", "c", "d"}
+	RPush(key, &values)
+
+	val, err := Lindex(key, 2)
+	if err != nil {
+		t.Errorf("Expected no error for valid LIndex")
+	}
+	if val != "c" {
+		t.Errorf("Expected 'c', got '%s'", val)
+	}
+}
