@@ -204,3 +204,43 @@ func Test_LInsert(t *testing.T) {
 		})
 	}
 }
+
+func Test_LMove(t *testing.T) {
+	sourceKey := "sourceList"
+	destKey := "destList"
+	values := []string{"a", "b", "c", "d"}
+	RPush(sourceKey, &values)
+
+	movedValue, err := Lmove(sourceKey, destKey, "RIGHT")
+	if err != nil {
+		t.Errorf("Expected no error for valid LMove")
+	}
+	if movedValue != "d" {
+		t.Errorf("Expected moved value 'd', got '%s'", movedValue)
+	}
+
+	newSourceLen, _ := LLen(sourceKey)
+	if newSourceLen != 3 {
+		t.Errorf("Expected source list length 3, got %d", newSourceLen)
+	}
+
+	newDestLen, _ := LLen(destKey)
+	if newDestLen != 1 {
+		t.Errorf("Expected destination list length 1, got %d", newDestLen)
+	}
+
+	destValue, _ := Lindex(destKey, 0)
+	if destValue != "d" {
+		t.Errorf("Expected destination list first element 'd', got '%s'", destValue)
+	}
+}
+
+func Test_LMove_EmptySource(t *testing.T) {
+	sourceKey := "emptySourceList"
+	destKey := "destList"
+
+	_, err := Lmove(sourceKey, destKey, "RIGHT")
+	if err == nil {
+		t.Errorf("Expected error for LMove from empty source list")
+	}
+}
