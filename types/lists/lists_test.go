@@ -244,3 +244,24 @@ func Test_LMove_EmptySource(t *testing.T) {
 		t.Errorf("Expected error for LMove from empty source list")
 	}
 }
+
+func Test_RPushX(t *testing.T) {
+	key := "testRPushX"
+	values := []string{"a", "b"}
+	RPush(key, &values)
+
+	err := RPushx(key, &[]string{"d", "e"})
+	if err != nil {
+		t.Errorf("Expected no error for valid RPushX")
+	}
+
+	length, _ := LLen(key)
+	if length != 4 {
+		t.Errorf("Expected list length 3 after RPushX, got %d", length)
+	}
+
+	err = RPushx("nonExistentKey", &[]string{"d", "e"})
+	if err == nil {
+		t.Errorf("Expected error for RPushX on non-existent key")
+	}
+}
