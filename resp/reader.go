@@ -45,7 +45,7 @@ func (r *Reader) readArray() (Value, error) {
 		Typ:   "array",
 		Array: make([]Value, len),
 	}
-	for i := 0; i < len; i++ {
+	for i := range len {
 		val, err := r.Read()
 		if err != nil {
 			return v, err
