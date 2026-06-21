@@ -69,6 +69,19 @@ func Sdiff(keys []string) []string {
 	return diffValues
 }
 
+func SdiffStore(destKey string, keys []string) int64 {
+	diffValues := Sdiff(keys)
+	store.LockKeys(destKey)
+	defer store.UnlockKeys(destKey)
+
+	hashVal := map[string]bool{}
+	for _, value := range diffValues {
+		hashVal[value] = true
+	}
+	store.Set(destKey, hashVal)
+	return int64(len(diffValues))
+}
+
 func Sismember(key string, value string) bool {
 	store.RLockKeys(key)
 	defer store.RUnlockKeys(key)

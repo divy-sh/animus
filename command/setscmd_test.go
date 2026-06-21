@@ -46,6 +46,110 @@ func TestSaddInvalidArgs(t *testing.T) {
 	}
 }
 
+func TestSDiffStore(t *testing.T) {
+	destKey := "TestSdiffStoreDest"
+	key1 := "TestSdiffStore1"
+	key2 := "TestSdiffStore2"
+
+	// Add elements to the first set
+	addArgs1 := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: "elem1"},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+	}
+	Sadd(addArgs1)
+
+	// Add elements to the second set
+	addArgs2 := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key2},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+		{Typ: common.BULK_TYPE, Bulk: "elem3"},
+	}
+	Sadd(addArgs2)
+
+	// Test set difference store
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: destKey},
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: key2},
+	}
+	result := SdiffStore(args)
+	if result.Typ != common.INTEGER_TYPE {
+		t.Errorf("Expected INTEGER_TYPE, got %v", result.Typ)
+	}
+	if result.Num != 1 {
+		t.Errorf("Expected 1 new element in destination set, got %d", result.Num)
+	}
+
+	// Verify the contents of the destination set
+	diffResult := Sdiff([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: key2},
+	})
+	if diffResult.Typ != common.ARRAY_TYPE {
+		t.Errorf("Expected ARRAY_TYPE, got %v", diffResult.Typ)
+	}
+	if len(diffResult.Array) != 1 {
+		t.Errorf("Expected 0 elements in destination set, got %d", len(diffResult.Array))
+	}
+}
+
+func TestSDiffStoreInvalidArgs(t *testing.T) {
+	// Test with insufficient arguments
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "onlydest"}}
+	result := SdiffStore(args)
+	if result.Typ != common.ERROR_TYPE {
+		t.Errorf("Expected ERROR_TYPE for insufficient arguments, got %v", result.Typ)
+	}
+}
+
+func TestSDiffStoreNoDifference(t *testing.T) {
+	destKey := "TestSdiffStoreNoDiffDest"
+	key1 := "TestSdiffStoreNoDiff1"
+	key2 := "TestSdiffStoreNoDiff2"
+
+	// Add identical elements to both sets
+	addArgs1 := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: "elem1"},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+	}
+	Sadd(addArgs1)
+
+	addArgs2 := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key2},
+		{Typ: common.BULK_TYPE, Bulk: "elem1"},
+		{Typ: common.BULK_TYPE, Bulk: "elem2"},
+	}
+	Sadd(addArgs2)
+
+	// Test set difference store
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: destKey},
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: key2},
+	}
+	result := SdiffStore(args)
+	if result.Typ != common.INTEGER_TYPE {
+		t.Errorf("Expected INTEGER_TYPE, got %v", result.Typ)
+	}
+	if result.Num != 0 {
+		t.Errorf("Expected 0 new elements in destination set, got %d", result.Num)
+	}
+
+	// Verify the contents of the destination set
+	diffResult := Sdiff([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: key1},
+		{Typ: common.BULK_TYPE, Bulk: key2},
+	})
+	if diffResult.Typ != common.ARRAY_TYPE {
+		t.Errorf("Expected ARRAY_TYPE, got %v", diffResult.Typ)
+	}
+	if len(diffResult.Array) != 0 {
+		t.Errorf("Expected 0 elements in destination set, got %d", len(diffResult.Array))
+	}
+}
+
 func TestScard(t *testing.T) {
 	key := "TestScard"
 

@@ -44,6 +44,19 @@ func Sdiff(args []resp.Value) resp.Value {
 	return resp.Value{Typ: common.ARRAY_TYPE, Array: arrayValues}
 }
 
+func SdiffStore(args []resp.Value) resp.Value {
+	if len(args) < 3 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+	destKey := args[0].Bulk
+	keys := []string{}
+	for _, arg := range args[1:] {
+		keys = append(keys, arg.Bulk)
+	}
+	count := sets.SdiffStore(destKey, keys)
+	return resp.Value{Typ: common.INTEGER_TYPE, Num: count}
+}
+
 func Sismember(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}

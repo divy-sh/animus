@@ -20,6 +20,87 @@ func TestSadd(t *testing.T) {
 	}
 }
 
+func TestSDiffStore(t *testing.T) {
+	key1 := "TestSDiffStore1"
+	key2 := "TestSDiffStore2"
+	destKey := "TestSDiffStoreDest"
+	values1 := []string{"value1", "value2", "value3"}
+	values2 := []string{"value2", "value4"}
+
+	// Add elements to both sets
+	Sadd(key1, values1)
+	Sadd(key2, values2)
+
+	// Compute the difference and store it in destKey
+	count := SdiffStore(destKey, []string{key1, key2})
+	if count != 2 {
+		t.Errorf("Expected 2 new elements added to destKey, got %d", count)
+	}
+
+	// Verify the contents of destKey
+	diffValues := Sdiff([]string{destKey})
+	expectedDiff := map[string]bool{"value1": true, "value3": true}
+
+	if len(diffValues) != len(expectedDiff) {
+		t.Errorf("Expected %d elements in destKey, got %d", len(expectedDiff), len(diffValues))
+	}
+
+	for _, val := range diffValues {
+		if !expectedDiff[val] {
+			t.Errorf("Unexpected value in destKey: %s", val)
+		}
+	}
+}
+
+func TestSdiffStoreNonExistingSet(t *testing.T) {
+	destKey := "TestSDiffStoreNonExistingDest"
+
+	// Compute the difference with non-existing sets and store it in destKey
+	count := SdiffStore(destKey, []string{"NonExistingSet1", "NonExistingSet2"})
+	if count != 0 {
+		t.Errorf("Expected 0 new elements added to destKey for non-existing sets, got %d", count)
+	}
+}
+
+func TestSdiffStoreNoKeys(t *testing.T) {
+	destKey := "TestSDiffStoreNoKeysDest"
+
+	// Compute the difference with no keys and store it in destKey
+	count := SdiffStore(destKey, []string{})
+	if count != 0 {
+		t.Errorf("Expected 0 new elements added to destKey for no keys, got %d", count)
+	}
+}
+
+func TestSdiffStoreWithEmptySet(t *testing.T) {
+	key1 := "TestSDiffStoreWithEmptySet1"
+	destKey := "TestSDiffStoreWithEmptySetDest"
+	values1 := []string{"value1", "value2", "value3"}
+
+	// Add elements to the first set
+	Sadd(key1, values1)
+
+	// Compute the difference with an empty set and store it in destKey
+	count := SdiffStore(destKey, []string{key1, "EmptySet"})
+	if count != 3 {
+		t.Errorf("Expected 3 new elements added to destKey, got %d", count)
+	}
+
+	// Verify the contents of destKey
+	diffValues := Sdiff([]string{destKey})
+	expectedDiff := map[string]bool{"value1": true, "value2": true, "value3": true}
+
+	if len(diffValues) != len(expectedDiff) {
+		t.Errorf("Expected %d elements in destKey, got %d", len(expectedDiff), len(diffValues))
+	}
+
+	for _, val := range diffValues {
+		if !expectedDiff[val] {
+			t.Errorf("Unexpected value in destKey: %s", val)
+		}
+	}
+}
+
 func TestScard(t *testing.T) {
 	key := "TestScard"
 	values := []string{"value1", "value2", "value3"}
