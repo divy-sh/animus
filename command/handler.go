@@ -36,6 +36,10 @@ func init() {
 	RegisterCommand("CONFIG", ConfigCmd, `CONFIG
 	command to handle server configuration`, []string{"readonly", "fast"}, -1, 0, 0, 0)
 
+	// Arrays
+	RegisterCommand("ARCOUNT", ArCount, `ARCOUNT [KEY]
+	Returns the number of elements in the array stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
+
 	// Strings
 	RegisterCommand("APPEND", Append, `APPEND [KEY] [VALUE]
 	Appends a value to a key and returns the new length of the string.`, []string{}, 3, 0, 0, 0)

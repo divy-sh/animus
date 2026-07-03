@@ -48,7 +48,11 @@ func Get[K comparable, V any](key K) (V, bool) {
 		var zero V
 		return zero, false
 	}
-	return value.Val.(V), true
+	if typedVal, ok := value.Val.(V); ok {
+		return typedVal, true
+	}
+	var zero V
+	return zero, false
 }
 
 func GetWithTTL[K comparable, V any](key K) (V, int64, bool) {
@@ -65,7 +69,11 @@ func GetWithTTL[K comparable, V any](key K) (V, int64, bool) {
 		var zero V
 		return zero, -1, false
 	}
-	return value.Val.(V), value.TTL, true
+	if typedVal, ok := value.Val.(V); ok {
+		return typedVal, value.TTL, true
+	}
+	var zero V
+	return zero, -1, false
 }
 
 func Set[K comparable, V any](key K, value V) {
