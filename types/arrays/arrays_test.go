@@ -141,3 +141,40 @@ func TestArDel_ExpiredKey(t *testing.T) {
 		t.Fatalf("Expected an error for expired key, got nil")
 	}
 }
+
+func TestArDelRange(t *testing.T) {
+	// Test case 1: Array exists and range is valid
+	key := "testArrayDelRange"
+	store.Set(key, []any{1, 2, 3, 4, 5})
+
+	err := arrays.ArDelRange(key, 1, 3) // Delete elements from index 1 to 3 (values 2, 3, 4)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	count, _ := arrays.ArCount(key)
+	if count != 2 {
+		t.Fatalf("Expected count to be 2 after deletion, got %d", count)
+	}
+
+	// Test case 2: Array does not exist
+	nonExistentKey := "nonExistentArrayDelRange"
+	err = arrays.ArDelRange(nonExistentKey, 0, 1)
+
+	if err == nil {
+		t.Fatalf("Expected an error for non-existent array, got nil")
+	}
+
+	// Test case 3: Range out of bounds
+	err = arrays.ArDelRange(key, 0, 10)
+
+	if err == nil {
+		t.Fatalf("Expected an error for range out of bounds, got nil")
+	}
+
+	// Test case 4: Start index greater than end index
+	err = arrays.ArDelRange(key, 3, 1)
+	if err == nil {
+		t.Fatalf("Expected an error for start index greater than end index, got nil")
+	}
+}

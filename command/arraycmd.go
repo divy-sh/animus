@@ -34,3 +34,19 @@ func ArDel(args []resp.Value) resp.Value {
 	}
 	return resp.Value{Typ: common.BULK_TYPE, Bulk: "OK"}
 }
+
+func ArDelRange(args []resp.Value) resp.Value {
+	if len(args) != 3 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+
+	key := args[0].Bulk
+	start := args[1].Num
+	end := args[2].Num
+
+	err := arrays.ArDelRange(key, start, end)
+	if err != nil {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
+	}
+	return resp.Value{Typ: common.BULK_TYPE, Bulk: "OK"}
+}

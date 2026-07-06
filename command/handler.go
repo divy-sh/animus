@@ -39,6 +39,10 @@ func init() {
 	// Arrays
 	RegisterCommand("ARCOUNT", ArCount, `ARCOUNT [KEY]
 	Returns the number of elements in the array stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
+	RegisterCommand("ARDEL", ArDel, `ARDEL [KEY] [INDEX]
+	Deletes the element at the specified index from the array stored at key.`, []string{}, 3, 0, 0, 0)
+	RegisterCommand("ARDELRANGE", ArDelRange, `ARDELRANGE [KEY] [START] [END]
+	Deletes elements in the specified range from the array stored at key.`, []string{}, 4, 0, 0, 0)
 
 	// Strings
 	RegisterCommand("APPEND", Append, `APPEND [KEY] [VALUE]
