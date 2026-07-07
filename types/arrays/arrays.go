@@ -56,3 +56,19 @@ func ArDelRange(key string, start, end int64) error {
 
 	return nil
 }
+
+func ArGet(key string, index int64) (any, error) {
+	store.LockKeys(key)
+	defer store.UnlockKeys(key)
+
+	arr, ok := store.Get[string, []any](key)
+	if !ok {
+		return nil, errors.New(common.ERR_ARRAY_NOT_FOUND)
+	}
+
+	if index < 0 || index >= int64(len(arr)) {
+		return nil, errors.New(common.ERR_INDEX_OUT_OF_BOUNDS)
+	}
+
+	return arr[index], nil
+}

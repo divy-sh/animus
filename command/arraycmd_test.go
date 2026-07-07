@@ -245,3 +245,69 @@ func TestArDelRange(t *testing.T) {
 		}
 	})
 }
+
+func TestArGet(t *testing.T) {
+	t.Run("returns the value at a valid index", func(t *testing.T) {
+		key := "testArrayGet"
+		store.Set(key, []any{1, 2, 3, 4, 5})
+
+		args := []resp.Value{
+			{Typ: common.BULK_TYPE, Bulk: key},
+			{Typ: common.INTEGER_TYPE, Num: 2},
+		}
+
+		result := command.ArGet(args)
+		if result.Typ == common.ERROR_TYPE {
+			t.Fatalf("Expected no error, got %v", result.Str)
+		}
+		if result.Bulk != "3" {
+			t.Fatalf("Expected value to be '3', got '%s'", result.Bulk)
+		}
+	})
+
+	t.Run("returns an error for a missing array", func(t *testing.T) {
+		args := []resp.Value{
+			{Typ: common.BULK_TYPE, Bulk: "missingArray"},
+			{Typ: common.INTEGER_TYPE, Num: 0},
+		}
+
+		result := command.ArGet(args)
+		if result.Typ != common.ERROR_TYPE {
+			t.Fatalf("Expected an error for non-existent array, got nil")
+		}
+		if result.Str != common.ERR_ARRAY_NOT_FOUND {
+			t.Fatalf("Expected error message '%s', got '%s'", common.ERR_ARRAY_NOT_FOUND, result.Str)
+		}
+	})
+
+	t.Run("returns an error for an out-of-bounds index", func(t *testing.T) {
+		key := "outOfBoundsArray"
+		store.Set(key, []any{1, 2, 3})
+
+		args := []resp.Value{
+			{Typ: common.BULK_TYPE, Bulk: key},
+			{Typ: common.INTEGER_TYPE, Num: 5},
+		}
+
+		result := command.ArGet(args)
+		if result.Typ != common.ERROR_TYPE {
+			t.Fatalf("Expected an error for out-of-bounds index, got nil")
+		}
+		if result.Str != common.ERR_INDEX_OUT_OF_BOUNDS {
+			t.Fatalf("Expected error message '%s', got '%s'", common.ERR_INDEX_OUT_OF_BOUNDS, result.Str)
+		}
+	})
+
+	t.Run("returns an error for wrong argument count", func(t *testing.T) {
+		args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "someKey"}}
+
+		result := command.ArGet(args)
+		if result.Typ != common.ERROR_TYPE {
+			t.Fatalf("Expected an error for wrong argument count, got nil")
+		}
+		if result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+			t.Fatalf("Expected error message '%s', got '%s'", common.ERR_WRONG_ARGUMENT_COUNT, result.Str)
+		}
+	})
+}
+
