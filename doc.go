@@ -13,6 +13,14 @@ Key Features:
     Returns information and statistics about the server.
   - **CONFIG (String)**: CONFIG
     command to handle server configuration
+  - **ARCOUNT (String)**: ARCOUNT [KEY]
+    Returns the number of elements in the array stored at key.
+  - **ARDEL (String)**: ARDEL [KEY] [INDEX]
+    Deletes the element at the specified index from the array stored at key.
+  - **ARDELRANGE (String)**: ARDELRANGE [KEY] [START] [END]
+    Deletes elements in the specified range from the array stored at key.
+  - **ARGET (String)**: ARGET [KEY] [INDEX]
+    Returns the element at the specified index from the array stored at key.
   - **APPEND (String)**: APPEND [KEY] [VALUE]
     Appends a value to a key and returns the new length of the string.
   - **DECR (String)**: DECR [KEY]
@@ -90,6 +98,8 @@ Key Features:
     Returns the number of members in the set stored at key.
   - **SDIFF (String)**: SDIFF [KEY] [KEY ...]
     Returns the members of the set resulting from the difference between the first set and all the successive sets.
+  - **SDIFFSTORE (String)**: SDIFFSTORE [DESTINATION] [KEY] [KEY ...]
+    Stores the result of the difference between the first set and all the successive sets in the destination set.
   - **SISMEMBER (String)**: SISMEMBER [KEY] [MEMBER]
     Returns if member is a member of the set stored at key.
   - **HELP (Help)**: HELP [COMMAND]
