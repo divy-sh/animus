@@ -147,7 +147,84 @@ func TestArDel_WrongArgumentCount(t *testing.T) {
 		t.Fatalf("Expected error message '%s', got '%s'", common.ERR_WRONG_ARGUMENT_COUNT, result.Str)
 	}
 }
+func TestArGetRange(t *testing.T) {
+	t.Run("returns the values in the requested range", func(t *testing.T) {
+		key := "testArrayGetRange"
+		store.Set(key, []any{1, 2, 3, 4, 5})
 
+		args := []resp.Value{
+			{Typ: common.BULK_TYPE, Bulk: key},
+			{Typ: common.INTEGER_TYPE, Num: 1},
+			{Typ: common.INTEGER_TYPE, Num: 3},
+		}
+
+		result := command.ArGetRange(args)
+		if result.Typ == common.ERROR_TYPE {
+			t.Fatalf("Expected no error, got %v", result.Str)
+		}
+		if result.Typ != common.ARRAY_TYPE {
+			t.Fatalf("Expected result type ARRAY_TYPE, got %v", result.Typ)
+		}
+		if len(result.Array) != 3 {
+			t.Fatalf("Expected 3 values, got %d", len(result.Array))
+		}
+		got := []string{result.Array[0].Bulk, result.Array[1].Bulk, result.Array[2].Bulk}
+		expected := []string{"2", "3", "4"}
+		if !reflect.DeepEqual(got, expected) {
+			t.Fatalf("Expected values %v, got %v", expected, got)
+		}
+	})
+
+	t.Run("returns an error for a missing array", func(t *testing.T) {
+		args := []resp.Value{
+			{Typ: common.BULK_TYPE, Bulk: "missingArray"},
+			{Typ: common.INTEGER_TYPE, Num: 0},
+			{Typ: common.INTEGER_TYPE, Num: 1},
+		}
+
+		result := command.ArGetRange(args)
+		if result.Typ != common.ERROR_TYPE {
+			t.Fatalf("Expected an error for non-existent array, got nil")
+		}
+		if result.Str != common.ERR_ARRAY_NOT_FOUND {
+			t.Fatalf("Expected error message '%s', got '%s'", common.ERR_ARRAY_NOT_FOUND, result.Str)
+		}
+	})
+
+	t.Run("returns an error for out-of-bounds range", func(t *testing.T) {
+		key := "outOfBoundsRangeArray"
+		store.Set(key, []any{1, 2, 3})
+
+		args := []resp.Value{
+			{Typ: common.BULK_TYPE, Bulk: key},
+			{Typ: common.INTEGER_TYPE, Num: 1},
+			{Typ: common.INTEGER_TYPE, Num: 5},
+		}
+
+		result := command.ArGetRange(args)
+		if result.Typ != common.ERROR_TYPE {
+			t.Fatalf("Expected an error for out-of-bounds range, got nil")
+		}
+		if result.Str != common.ERR_INDEX_OUT_OF_BOUNDS {
+			t.Fatalf("Expected error message '%s', got '%s'", common.ERR_INDEX_OUT_OF_BOUNDS, result.Str)
+		}
+	})
+
+	t.Run("returns an error for wrong argument count", func(t *testing.T) {
+		args := []resp.Value{
+			{Typ: common.BULK_TYPE, Bulk: "someKey"},
+			{Typ: common.INTEGER_TYPE, Num: 0},
+		}
+
+		result := command.ArGetRange(args)
+		if result.Typ != common.ERROR_TYPE {
+			t.Fatalf("Expected an error for wrong argument count, got nil")
+		}
+		if result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+			t.Fatalf("Expected error message '%s', got '%s'", common.ERR_WRONG_ARGUMENT_COUNT, result.Str)
+		}
+	})
+}
 func TestArDelRange(t *testing.T) {
 	t.Run("deletes a range successfully", func(t *testing.T) {
 		key := "testArrayRange"
@@ -310,4 +387,3 @@ func TestArGet(t *testing.T) {
 		}
 	})
 }
-

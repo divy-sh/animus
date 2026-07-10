@@ -72,3 +72,19 @@ func ArGet(key string, index int64) (any, error) {
 
 	return arr[index], nil
 }
+
+func ArGetRange(key string, start, end int64) ([]any, error) {
+	store.LockKeys(key)
+	defer store.UnlockKeys(key)
+
+	arr, ok := store.Get[string, []any](key)
+	if !ok {
+		return nil, errors.New(common.ERR_ARRAY_NOT_FOUND)
+	}
+
+	if start < 0 || end >= int64(len(arr)) || start > end {
+		return nil, errors.New(common.ERR_INDEX_OUT_OF_BOUNDS)
+	}
+
+	return arr[start : end+1], nil
+}
