@@ -195,3 +195,258 @@ func TestArGetRange(t *testing.T) {
 		}
 	})
 }
+
+func TestArGrep(t *testing.T) {
+	t.Run("matches array values with asterisk wildcard", func(t *testing.T) {
+		key := "testArrayGrepAsterisk"
+		store.Set(key, []any{"hello", "world", "hallo", "hi", "help"})
+
+		values, err := arrays.ArGrep(key, "h*")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"hello", "hallo", "hi", "help"}) {
+			t.Fatalf("Expected values [hello hallo hi help], got %v", values)
+		}
+	})
+
+	t.Run("matches array values with asterisk wildcard in middle", func(t *testing.T) {
+		key := "testArrayGrepAsteriskMiddle"
+		store.Set(key, []any{"cat", "car", "card", "dog", "cast"})
+
+		values, err := arrays.ArGrep(key, "ca*")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"cat", "car", "card", "cast"}) {
+			t.Fatalf("Expected values [cat car card cast], got %v", values)
+		}
+	})
+
+	t.Run("matches array values with question mark wildcard", func(t *testing.T) {
+		key := "testArrayGrepQuestion"
+		store.Set(key, []any{"cat", "cot", "cut", "dog", "ca"})
+
+		values, err := arrays.ArGrep(key, "c?t")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"cat", "cot", "cut"}) {
+			t.Fatalf("Expected values [cat cot cut], got %v", values)
+		}
+	})
+
+	t.Run("matches array values with multiple question marks", func(t *testing.T) {
+		key := "testArrayGrepMultipleQuestion"
+		store.Set(key, []any{"ab", "abc", "abcd", "a", "acd"})
+
+		values, err := arrays.ArGrep(key, "a??")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"abc", "acd"}) {
+			t.Fatalf("Expected values [abc acd], got %v", values)
+		}
+	})
+
+	t.Run("matches array values with character class", func(t *testing.T) {
+		key := "testArrayGrepCharClass"
+		store.Set(key, []any{"cat", "cot", "cut", "dog", "cbt"})
+
+		values, err := arrays.ArGrep(key, "c[ao]t")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"cat", "cot"}) {
+			t.Fatalf("Expected values [cat cot], got %v", values)
+		}
+	})
+
+	t.Run("matches array values with character range in class", func(t *testing.T) {
+		key := "testArrayGrepCharRange"
+		store.Set(key, []any{"cat", "cot", "cut", "cet", "dog"})
+
+		values, err := arrays.ArGrep(key, "c[a-o]t")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if len(values) != 3 || !contains(values, "cat") || !contains(values, "cet") || !contains(values, "cot") {
+			t.Fatalf("Expected values to contain [cat cet cot], got %v", values)
+		}
+	})
+
+	t.Run("matches array values with negated character class", func(t *testing.T) {
+		key := "testArrayGrepNegatedClass"
+		store.Set(key, []any{"cat", "cot", "cut", "c1t", "c#t"})
+
+		values, err := arrays.ArGrep(key, "c[^ao]t")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"cut", "c1t", "c#t"}) {
+			t.Fatalf("Expected values [cut c1t c#t], got %v", values)
+		}
+	})
+
+	t.Run("matches array values with escaped asterisk", func(t *testing.T) {
+		key := "testArrayGrepEscapedAsterisk"
+		store.Set(key, []any{"a*b", "aab", "abb", "a*c"})
+
+		values, err := arrays.ArGrep(key, "a\\*b")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"a*b"}) {
+			t.Fatalf("Expected values [a*b], got %v", values)
+		}
+	})
+
+	t.Run("matches array values with escaped question mark", func(t *testing.T) {
+		key := "testArrayGrepEscapedQuestion"
+		store.Set(key, []any{"a?b", "aab", "abb", "a?c"})
+
+		values, err := arrays.ArGrep(key, "a\\?b")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"a?b"}) {
+			t.Fatalf("Expected values [a?b], got %v", values)
+		}
+	})
+
+	t.Run("matches with complex pattern combining wildcards and classes", func(t *testing.T) {
+		key := "testArrayGrepComplex"
+		store.Set(key, []any{"test1.go", "test2.go", "hello.go", "test_a.go", "testing.py"})
+
+		values, err := arrays.ArGrep(key, "test?.go")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"test1.go", "test2.go"}) {
+			t.Fatalf("Expected values [test1.go test2.go], got %v", values)
+		}
+	})
+
+	t.Run("returns empty result when no matches found", func(t *testing.T) {
+		key := "testArrayGrepNoMatch"
+		store.Set(key, []any{"hello", "world", "foo"})
+
+		values, err := arrays.ArGrep(key, "z*")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if values != nil && len(values) != 0 {
+			t.Fatalf("Expected empty result, got %v", values)
+		}
+	})
+
+	t.Run("returns empty result for empty array", func(t *testing.T) {
+		key := "testArrayGrepEmpty"
+		store.Set(key, []any{})
+
+		values, err := arrays.ArGrep(key, "h*")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if values != nil && len(values) != 0 {
+			t.Fatalf("Expected empty result, got %v", values)
+		}
+	})
+
+	t.Run("skips non-string elements in array", func(t *testing.T) {
+		key := "testArrayGrepMixedTypes"
+		store.Set(key, []any{"hello", 42, "hallo", 3.14, "hi", true})
+
+		values, err := arrays.ArGrep(key, "h*")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"hello", "hallo", "hi"}) {
+			t.Fatalf("Expected values [hello hallo hi], got %v", values)
+		}
+	})
+
+	t.Run("returns error for non-existent array", func(t *testing.T) {
+		_, err := arrays.ArGrep("nonExistentArray", "h*")
+		if err == nil {
+			t.Fatalf("Expected an error for non-existent array, got nil")
+		}
+		if err.Error() != common.ERR_ARRAY_NOT_FOUND {
+			t.Fatalf("Expected error message '%s', got '%s'", common.ERR_ARRAY_NOT_FOUND, err.Error())
+		}
+	})
+
+	t.Run("matches exact strings", func(t *testing.T) {
+		key := "testArrayGrepExact"
+		store.Set(key, []any{"exact", "exacto", "exact match", "notexact"})
+
+		values, err := arrays.ArGrep(key, "exact")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"exact"}) {
+			t.Fatalf("Expected values [exact], got %v", values)
+		}
+	})
+
+	t.Run("matches with asterisk at end", func(t *testing.T) {
+		key := "testArrayGrepAsteriskEnd"
+		store.Set(key, []any{"testing", "test", "tested", "tasting", "tea"})
+
+		values, err := arrays.ArGrep(key, "test*")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"testing", "test", "tested"}) {
+			t.Fatalf("Expected values [testing test tested], got %v", values)
+		}
+	})
+
+	t.Run("matches with asterisk at start", func(t *testing.T) {
+		key := "testArrayGrepAsteriskStart"
+		store.Set(key, []any{"testing", "parsing", "working", "coding"})
+
+		values, err := arrays.ArGrep(key, "*ing")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"testing", "parsing", "working", "coding"}) {
+			t.Fatalf("Expected values [testing parsing working coding], got %v", values)
+		}
+	})
+
+	t.Run("matches with multiple asterisks", func(t *testing.T) {
+		key := "testArrayGrepMultipleAsterisk"
+		store.Set(key, []any{"a1b2c", "a1b", "ac", "a1c", "axbxc"})
+
+		values, err := arrays.ArGrep(key, "a*b*c")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"a1b2c", "axbxc"}) {
+			t.Fatalf("Expected values [a1b2c axbxc], got %v", values)
+		}
+	})
+
+	t.Run("matches with negated character class using exclamation", func(t *testing.T) {
+		key := "testArrayGrepNegatedExclamation"
+		store.Set(key, []any{"cat", "cot", "cut", "c1t", "c#t"})
+
+		values, err := arrays.ArGrep(key, "c[!ao]t")
+		if err != nil {
+			t.Fatalf("Expected no error, got %v", err)
+		}
+		if !reflect.DeepEqual(values, []any{"cut", "c1t", "c#t"}) {
+			t.Fatalf("Expected values [cut c1t c#t], got %v", values)
+		}
+	})
+}
+
+func contains(slice []any, value string) bool {
+	for _, v := range slice {
+		if str, ok := v.(string); ok && str == value {
+			return true
+		}
+	}
+	return false
+}
