@@ -21,6 +21,8 @@ Key Features:
     Deletes elements in the specified range from the array stored at key.
   - **ARGET (String)**: ARGET [KEY] [INDEX]
     Returns the element at the specified index from the array stored at key.
+  - **ARGREP (String)**: ARGREP [KEY] [PATTERN]
+    Returns elements from the array stored at key that match the specified pattern.
   - **APPEND (String)**: APPEND [KEY] [VALUE]
     Appends a value to a key and returns the new length of the string.
   - **DECR (String)**: DECR [KEY]
