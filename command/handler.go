@@ -46,7 +46,9 @@ func init() {
 	RegisterCommand("ARGET", ArGet, `ARGET [KEY] [INDEX]
 	Returns the element at the specified index from the array stored at key.`, []string{"readonly", "fast"}, 3, 0, 0, 0)
 	RegisterCommand("ARGETRANGE", ArGetRange, `ARGETRANGE [KEY] [START] [END]
-		Gets elements in the specified range from the array stored at key.`, []string{}, 4, 0, 0, 0)
+	Gets elements in the specified range from the array stored at key.`, []string{}, 4, 0, 0, 0)
+	RegisterCommand("ARGREP", ArGrep, `ARGREP [KEY] [PATTERN]
+	Returns elements from the array stored at key that match the specified pattern.`, []string{"readonly", "fast"}, 3, 0, 0, 0)
 
 	// Strings
 	RegisterCommand("APPEND", Append, `APPEND [KEY] [VALUE]
