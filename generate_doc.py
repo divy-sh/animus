@@ -1,11 +1,12 @@
 import re
-import os
+import subprocess
+
 
 def extract_commands_and_docs(file_path):
     """
     Extracts command names, documentation, and types from handler.go file.
     """
-    
+
     commands = []
     with open(file_path, 'r') as f:
         content = f.read()
@@ -23,6 +24,7 @@ def extract_commands_and_docs(file_path):
 
     return commands
 
+
 def determine_command_type(func_name):
     """
     Determines the command type based on the function name.
@@ -35,12 +37,13 @@ def determine_command_type(func_name):
     """
     if func_name.startswith("h"):
         return "Hash"
-    elif func_name.startswith("r") or func_name.startswith("l"):
+    elif func_name.startswith(("r", "l")):
         return "List"
     elif func_name == "Help":
         return "Help"
     else:
         return "String"
+
 
 def generate_doc_go(commands, output_file_path):
     """
@@ -57,8 +60,10 @@ def generate_doc_go(commands, output_file_path):
         f.write("such as expiration handling (TTL, LRU), and basic commands.\n\n")
         f.write("Key Features:\n")
 
-        for command in commands:
-            f.write(f"  - **{command['name']} ({command['type']})**: {command['doc']}\n")
+        f.writelines(
+            f"  - **{command['name']} ({command['type']})**: {command['doc']}\n"
+            for command in commands
+        )
 
         f.write("\nRoadmap:\n")
         f.write("  - Advanced data structures (Sets, Sorted Sets)\n")
@@ -69,6 +74,7 @@ def generate_doc_go(commands, output_file_path):
         f.write("*/\n")
         f.write("package main\n")
 
+
 commands = extract_commands_and_docs("./command/handler.go")
 generate_doc_go(commands, "doc.go")
-os.system("go fmt")
+subprocess.run(["go", "fmt", "./..."], check=False)

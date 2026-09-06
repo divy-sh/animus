@@ -1,5 +1,13 @@
-import argparse, socket, threading, time, binascii
-from datetime import datetime
+import argparse
+import binascii
+import logging
+import socket
+import threading
+from datetime import datetime, timezone
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
+
 
 def hexdump(data):
     hexs = binascii.hexlify(data).decode('ascii')
@@ -8,27 +16,31 @@ def hexdump(data):
     ascii_repr = ''.join((chr(int(b,16)) if 32 <= int(b,16) < 127 else '.') for b in pairs)
     return ' '.join(pairs), ascii_repr
 
+
 def relay(src, dst, label):
     try:
         while True:
             data = src.recv(4096)
             if not data:
                 break
-            t = datetime.now().isoformat(timespec='milliseconds')
+            t = datetime.now(timezone.utc).isoformat(timespec='milliseconds')
             hexs, ascii_repr = hexdump(data)
             print(f"[{t}] -> {label} ({len(data)} bytes)\nHEX: {hexs}\nASCII: {ascii_repr}\n")
             dst.sendall(data)
-    except Exception as e:
+    except OSError as e:
         print(f"[!] relay {label} error: {e}")
     finally:
-        try: dst.shutdown(socket.SHUT_WR)
-        except: pass
+        try:
+            dst.shutdown(socket.SHUT_WR)
+        except OSError:
+            logger.debug("Failed to shut down socket for %s", label, exc_info=True)
+
 
 def handle_client(client_sock, remote_host, remote_port, addr):
     try:
         server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_sock.connect((remote_host, remote_port))
-    except Exception as e:
+    except OSError as e:
         print(f"[!] Cannot connect to remote {remote_host}:{remote_port}: {e}")
         client_sock.close()
         return
@@ -40,7 +52,8 @@ def handle_client(client_sock, remote_host, remote_port, addr):
     # wait until both finish
     t1.join(); t2.join()
     client_sock.close(); server_sock.close()
-    print(f"[{datetime.now().isoformat(timespec='seconds')}] Connection from {addr} closed\n")
+    print(f"[{datetime.now(timezone.utc).isoformat(timespec='seconds')}] Connection from {addr} closed\n")
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -58,12 +71,13 @@ def main():
     try:
         while True:
             cl, addr = sock.accept()
-            print(f"[{datetime.now().isoformat(timespec='seconds')}] Accepted connection from {addr}")
+            print(f"[{datetime.now(timezone.utc).isoformat(timespec='seconds')}] Accepted connection from {addr}")
             threading.Thread(target=handle_client, args=(cl, args.remote, args.rport, addr), daemon=True).start()
     except KeyboardInterrupt:
         print("Shutting down.")
     finally:
         sock.close()
+
 
 if __name__ == "__main__":
     main()
