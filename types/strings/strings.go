@@ -1,6 +1,8 @@
 package strings
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
@@ -46,6 +48,56 @@ func DecrBy(key, value string) error {
 	}
 	store.Set(key, fmt.Sprint(intVal-decrVal))
 	return nil
+}
+
+func DelEx(key, expression, value string) error {
+	store.LockKeys(key)
+	defer store.UnlockKeys(key)
+
+	stringVal, ok := store.Get[string, string](key)
+	if !ok {
+		return errors.New(common.ERR_STRING_NOT_FOUND)
+	}
+
+	switch strings.ToUpper(expression) {
+	case "":
+		store.Delete(key)
+	case "IFEQ":
+		if stringVal == value {
+			store.Delete(key)
+		} else {
+			return errors.New("ERR condition not met")
+		}
+	case "IFNE":
+		if stringVal != value {
+			store.Delete(key)
+		} else {
+			return errors.New("ERR condition not met")
+		}
+	case "IFDEQ":
+		if Digest(stringVal) == value {
+			store.Delete(key)
+		} else {
+			return errors.New("ERR condition not met")
+		}
+	case "IFDNE":
+		if Digest(stringVal) != value {
+			store.Delete(key)
+		} else {
+			return errors.New("ERR condition not met")
+		}
+	default:
+		return errors.New("ERR invalid expression")
+	}
+	return nil
+}
+
+// Digest returns the hex-encoded SHA-256 hash digest of value.
+// It is used to compare string values without needing to compare
+// the full string content, e.g. for DelEx's IFDEQ/IFDNE conditions.
+func Digest(value string) string {
+	sum := sha256.Sum256([]byte(value))
+	return hex.EncodeToString(sum[:])
 }
 
 func Get(key string) (string, error) {

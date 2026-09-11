@@ -57,6 +57,8 @@ func init() {
 	Decrements the integer value of a key by one.`, []string{}, 2, 0, 0, 0)
 	RegisterCommand("DECRBY", DecrBy, `DECRBY [KEY] [DECREMENT]
 	Decrements the integer value of a key by the given amount.`, []string{}, 3, 0, 0, 0)
+	RegisterCommand("DELEX", DelEx, `DELEX [KEY]
+		Conditionally removes the specified key based on value or hash digest comparison.`, []string{}, 2, 0, 0, 0)
 	RegisterCommand("GET", Get, `GET [KEY]
 	Gets the value of a key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
 	RegisterCommand("GETDEL", GetDel, `GETDEL [KEY]

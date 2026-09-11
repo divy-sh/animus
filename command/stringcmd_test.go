@@ -5,6 +5,7 @@ import (
 
 	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/resp"
+	"github.com/divy-sh/animus/types/strings"
 )
 
 func TestAppend(t *testing.T) {
@@ -592,5 +593,217 @@ func TestSetRangeInvalidRange(t *testing.T) {
 	result := SetRange(args)
 	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_OUT_OF_RANGE {
 		t.Errorf("Expected ERR wrong number of arguments for 'SetRange' command, got %v", result)
+	}
+}
+
+func TestDelEx(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelEx"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelEx"}}
+	result := DelEx(args)
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelEx"}})
+	if val.Typ != common.ERROR_TYPE || val.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected key to be deleted, got %v", val)
+	}
+}
+
+func TestDelExInvalidArgsCount(t *testing.T) {
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExInvalidArgsCount"},
+		{Typ: common.BULK_TYPE, Bulk: "IFEQ"}}
+	result := DelEx(args)
+	if result.Typ != "error" || result.Str != common.ERR_WRONG_ARGUMENT_COUNT {
+		t.Errorf("Expected %s, got %v", common.ERR_WRONG_ARGUMENT_COUNT, result)
+	}
+}
+
+func TestDelExKeyNotFound(t *testing.T) {
+	args := []resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExKeyNotFound"}}
+	result := DelEx(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected %s, got %v", common.ERR_STRING_NOT_FOUND, result)
+	}
+}
+
+func TestDelExIfEqMatch(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfEqMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfEqMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "IFEQ"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}}
+	result := DelEx(args)
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExIfEqMatch"}})
+	if val.Typ != common.ERROR_TYPE || val.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected key to be deleted, got %v", val)
+	}
+}
+
+func TestDelExIfEqNoMatch(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfEqNoMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfEqNoMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "IFEQ"},
+		{Typ: common.BULK_TYPE, Bulk: "value2"}}
+	result := DelEx(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != "ERR condition not met" {
+		t.Errorf("Expected 'ERR condition not met', got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExIfEqNoMatch"}})
+	if val.Typ != common.BULK_TYPE || val.Bulk != "value1" {
+		t.Errorf("Expected key to remain untouched, got %v", val)
+	}
+}
+
+func TestDelExIfNeMatch(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfNeMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfNeMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "IFNE"},
+		{Typ: common.BULK_TYPE, Bulk: "value2"}}
+	result := DelEx(args)
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExIfNeMatch"}})
+	if val.Typ != common.ERROR_TYPE || val.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected key to be deleted, got %v", val)
+	}
+}
+
+func TestDelExIfNeNoMatch(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfNeNoMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfNeNoMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "IFNE"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}}
+	result := DelEx(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != "ERR condition not met" {
+		t.Errorf("Expected 'ERR condition not met', got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExIfNeNoMatch"}})
+	if val.Typ != common.BULK_TYPE || val.Bulk != "value1" {
+		t.Errorf("Expected key to remain untouched, got %v", val)
+	}
+}
+
+func TestDelExIfdEqMatch(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdEqMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdEqMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "IFDEQ"},
+		{Typ: common.BULK_TYPE, Bulk: strings.Digest("value1")}}
+	result := DelEx(args)
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdEqMatch"}})
+	if val.Typ != common.ERROR_TYPE || val.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected key to be deleted, got %v", val)
+	}
+}
+
+func TestDelExIfdEqNoMatch(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdEqNoMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	// Passing the raw value instead of its digest must not match, proving
+	// that IFDEQ compares hash digests rather than raw values.
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdEqNoMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "IFDEQ"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}}
+	result := DelEx(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != "ERR condition not met" {
+		t.Errorf("Expected 'ERR condition not met', got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdEqNoMatch"}})
+	if val.Typ != common.BULK_TYPE || val.Bulk != "value1" {
+		t.Errorf("Expected key to remain untouched, got %v", val)
+	}
+}
+
+func TestDelExIfdNeMatch(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdNeMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdNeMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "IFDNE"},
+		{Typ: common.BULK_TYPE, Bulk: strings.Digest("value2")}}
+	result := DelEx(args)
+	if result.Typ != common.STRING_TYPE || result.Str != "OK" {
+		t.Errorf("Expected OK, got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdNeMatch"}})
+	if val.Typ != common.ERROR_TYPE || val.Str != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected key to be deleted, got %v", val)
+	}
+}
+
+func TestDelExIfdNeNoMatch(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdNeNoMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdNeNoMatch"},
+		{Typ: common.BULK_TYPE, Bulk: "IFDNE"},
+		{Typ: common.BULK_TYPE, Bulk: strings.Digest("value1")}}
+	result := DelEx(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != "ERR condition not met" {
+		t.Errorf("Expected 'ERR condition not met', got %v", result)
+	}
+
+	val := Get([]resp.Value{{Typ: common.BULK_TYPE, Bulk: "TestDelExIfdNeNoMatch"}})
+	if val.Typ != common.BULK_TYPE || val.Bulk != "value1" {
+		t.Errorf("Expected key to remain untouched, got %v", val)
+	}
+}
+
+func TestDelExInvalidExpression(t *testing.T) {
+	Set([]resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExInvalidExpression"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}})
+
+	args := []resp.Value{
+		{Typ: common.BULK_TYPE, Bulk: "TestDelExInvalidExpression"},
+		{Typ: common.BULK_TYPE, Bulk: "INVALID"},
+		{Typ: common.BULK_TYPE, Bulk: "value1"}}
+	result := DelEx(args)
+	if result.Typ != common.ERROR_TYPE || result.Str != "ERR invalid expression" {
+		t.Errorf("Expected 'ERR invalid expression', got %v", result)
 	}
 }

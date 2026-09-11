@@ -533,3 +533,187 @@ func TestSetRangeInvalidKey(t *testing.T) {
 		t.Errorf("Expected 'Test', got '%v', err: %v", val, err)
 	}
 }
+
+func TestDigest(t *testing.T) {
+	d1 := strings.Digest("value1")
+	d2 := strings.Digest("value1")
+	d3 := strings.Digest("value2")
+
+	if d1 != d2 {
+		t.Errorf("Expected digest of the same value to be equal, got %v and %v", d1, d2)
+	}
+	if d1 == d3 {
+		t.Errorf("Expected digest of different values to differ, got %v for both", d1)
+	}
+	if d1 == "" {
+		t.Errorf("Expected non-empty digest")
+	}
+}
+
+func TestDelExNoExpression(t *testing.T) {
+	strings.Set("TestDelExNoExpression", "value1")
+
+	err := strings.DelEx("TestDelExNoExpression", "", "")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	_, err = strings.Get("TestDelExNoExpression")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestDelExKeyNotFound(t *testing.T) {
+	err := strings.DelEx("TestDelExKeyNotFound", "", "")
+	if err == nil || err.Error() != common.ERR_STRING_NOT_FOUND {
+		t.Errorf("Expected error: %v, got: %v", common.ERR_STRING_NOT_FOUND, err)
+	}
+}
+
+func TestDelExInvalidExpression(t *testing.T) {
+	strings.Set("TestDelExInvalidExpression", "value1")
+
+	err := strings.DelEx("TestDelExInvalidExpression", "INVALID", "value1")
+	if err == nil || err.Error() != "ERR invalid expression" {
+		t.Errorf("Expected error: %v, got: %v", "ERR invalid expression", err)
+	}
+
+	val, err := strings.Get("TestDelExInvalidExpression")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected key to remain untouched, got val: %v, err: %v", val, err)
+	}
+}
+
+func TestDelExIfEqMatch(t *testing.T) {
+	strings.Set("TestDelExIfEqMatch", "value1")
+
+	err := strings.DelEx("TestDelExIfEqMatch", "IFEQ", "value1")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	_, err = strings.Get("TestDelExIfEqMatch")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestDelExIfEqNoMatch(t *testing.T) {
+	strings.Set("TestDelExIfEqNoMatch", "value1")
+
+	err := strings.DelEx("TestDelExIfEqNoMatch", "IFEQ", "value2")
+	if err == nil || err.Error() != "ERR condition not met" {
+		t.Errorf("Expected error: %v, got: %v", "ERR condition not met", err)
+	}
+
+	val, err := strings.Get("TestDelExIfEqNoMatch")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected key to remain untouched, got val: %v, err: %v", val, err)
+	}
+}
+
+func TestDelExIfNeMatch(t *testing.T) {
+	strings.Set("TestDelExIfNeMatch", "value1")
+
+	err := strings.DelEx("TestDelExIfNeMatch", "IFNE", "value2")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	_, err = strings.Get("TestDelExIfNeMatch")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestDelExIfNeNoMatch(t *testing.T) {
+	strings.Set("TestDelExIfNeNoMatch", "value1")
+
+	err := strings.DelEx("TestDelExIfNeNoMatch", "IFNE", "value1")
+	if err == nil || err.Error() != "ERR condition not met" {
+		t.Errorf("Expected error: %v, got: %v", "ERR condition not met", err)
+	}
+
+	val, err := strings.Get("TestDelExIfNeNoMatch")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected key to remain untouched, got val: %v, err: %v", val, err)
+	}
+}
+
+func TestDelExIfdEqMatch(t *testing.T) {
+	strings.Set("TestDelExIfdEqMatch", "value1")
+
+	err := strings.DelEx("TestDelExIfdEqMatch", "IFDEQ", strings.Digest("value1"))
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	_, err = strings.Get("TestDelExIfdEqMatch")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestDelExIfdEqNoMatch(t *testing.T) {
+	strings.Set("TestDelExIfdEqNoMatch", "value1")
+
+	// Passing the raw value instead of its digest must not match, proving
+	// that IFDEQ compares hash digests rather than raw values.
+	err := strings.DelEx("TestDelExIfdEqNoMatch", "IFDEQ", "value1")
+	if err == nil || err.Error() != "ERR condition not met" {
+		t.Errorf("Expected error: %v, got: %v", "ERR condition not met", err)
+	}
+
+	val, err := strings.Get("TestDelExIfdEqNoMatch")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected key to remain untouched, got val: %v, err: %v", val, err)
+	}
+
+	err = strings.DelEx("TestDelExIfdEqNoMatch", "IFDEQ", strings.Digest("value2"))
+	if err == nil || err.Error() != "ERR condition not met" {
+		t.Errorf("Expected error: %v, got: %v", "ERR condition not met", err)
+	}
+}
+
+func TestDelExIfdNeMatch(t *testing.T) {
+	strings.Set("TestDelExIfdNeMatch", "value1")
+
+	err := strings.DelEx("TestDelExIfdNeMatch", "IFDNE", strings.Digest("value2"))
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	_, err = strings.Get("TestDelExIfdNeMatch")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}
+
+func TestDelExIfdNeNoMatch(t *testing.T) {
+	strings.Set("TestDelExIfdNeNoMatch", "value1")
+
+	err := strings.DelEx("TestDelExIfdNeNoMatch", "IFDNE", strings.Digest("value1"))
+	if err == nil || err.Error() != "ERR condition not met" {
+		t.Errorf("Expected error: %v, got: %v", "ERR condition not met", err)
+	}
+
+	val, err := strings.Get("TestDelExIfdNeNoMatch")
+	if err != nil || val != "value1" {
+		t.Errorf("Expected key to remain untouched, got val: %v, err: %v", val, err)
+	}
+}
+
+func TestDelExCaseInsensitiveExpression(t *testing.T) {
+	strings.Set("TestDelExCaseInsensitiveExpression", "value1")
+
+	err := strings.DelEx("TestDelExCaseInsensitiveExpression", "ifeq", "value1")
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	_, err = strings.Get("TestDelExCaseInsensitiveExpression")
+	if err == nil {
+		t.Errorf("Expected error for deleted key, but got none")
+	}
+}

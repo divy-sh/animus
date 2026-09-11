@@ -38,6 +38,26 @@ func Decr(args []resp.Value) resp.Value {
 	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
 }
 
+func DelEx(args []resp.Value) resp.Value {
+	if len(args) != 1 && len(args) != 3 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+
+	key := args[0].Bulk
+	expression := ""
+	value := ""
+
+	if len(args) == 3 {
+		expression = args[1].Bulk
+		value = args[2].Bulk
+	}
+	err := strings.DelEx(key, expression, value)
+	if err != nil {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
+	}
+	return resp.Value{Typ: common.STRING_TYPE, Str: "OK"}
+}
+
 func Get(args []resp.Value) resp.Value {
 	if len(args) != 1 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
