@@ -2,8 +2,10 @@ package lists
 
 import (
 	"testing"
+	"time"
 
 	"github.com/divy-sh/animus/common"
+	"github.com/divy-sh/animus/store"
 )
 
 func TestRPush(t *testing.T) {
@@ -263,5 +265,134 @@ func Test_RPushX(t *testing.T) {
 	err = RPushx("nonExistentKey", &[]string{"d", "e"})
 	if err == nil {
 		t.Errorf("Expected error for RPushX on non-existent key")
+	}
+}
+
+func Test_BLmoveDirections(t *testing.T) {
+	tests := []struct {
+		name                 string
+		sourceDirection      string
+		destinationDirection string
+		moved                string
+		expectedDestination  []string
+	}{
+		{"left to left", "LEFT", "LEFT", "a", []string{"a", "x"}},
+		{"left to right", "LEFT", "RIGHT", "a", []string{"x", "a"}},
+		{"right to left", "RIGHT", "LEFT", "b", []string{"b", "x"}},
+		{"right to right", "RIGHT", "RIGHT", "b", []string{"x", "b"}},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			sourceKey := "blmove-source-" + t.Name()
+			destinationKey := "blmove-destination-" + t.Name()
+			t.Cleanup(func() {
+				store.Delete(sourceKey)
+				store.Delete(destinationKey)
+			})
+
+			RPush(sourceKey, &[]string{"a", "b"})
+			RPush(destinationKey, &[]string{"x"})
+
+			moved, ok, err := BLmove(sourceKey, destinationKey, tc.sourceDirection, tc.destinationDirection, 1)
+			if err != nil {
+				t.Fatalf("BLmove returned unexpected error: %v", err)
+			}
+			if !ok || moved != tc.moved {
+				t.Fatalf("BLmove returned (%q, %t), want (%q, true)", moved, ok, tc.moved)
+			}
+
+			destination, err := Lrange(destinationKey, 0, -1)
+			if err != nil {
+				t.Fatalf("Lrange destination: %v", err)
+			}
+			if len(destination) != len(tc.expectedDestination) {
+				t.Fatalf("destination = %v, want %v", destination, tc.expectedDestination)
+			}
+			for i := range destination {
+				if destination[i] != tc.expectedDestination[i] {
+					t.Fatalf("destination = %v, want %v", destination, tc.expectedDestination)
+				}
+			}
+		})
+	}
+}
+
+func Test_BLmoveBlocksUntilSourceHasValue(t *testing.T) {
+	sourceKey := "blmove-blocking-source"
+	destinationKey := "blmove-blocking-destination"
+	t.Cleanup(func() {
+		store.Delete(sourceKey)
+		store.Delete(destinationKey)
+	})
+
+	result := make(chan struct {
+		value string
+		ok    bool
+		err   error
+	}, 1)
+	go func() {
+		value, ok, err := BLmove(sourceKey, destinationKey, "LEFT", "RIGHT", 1)
+		result <- struct {
+			value string
+			ok    bool
+			err   error
+		}{value, ok, err}
+	}()
+
+	time.Sleep(20 * time.Millisecond)
+	RPush(sourceKey, &[]string{"ready"})
+
+	select {
+	case got := <-result:
+		if got.err != nil || !got.ok || got.value != "ready" {
+			t.Fatalf("BLmove returned (%q, %t, %v), want (ready, true, nil)", got.value, got.ok, got.err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("BLmove did not unblock after a value was pushed")
+	}
+}
+
+func Test_BLmoveAllowsSameSourceAndDestination(t *testing.T) {
+	key := "blmove-same-key"
+	t.Cleanup(func() {
+		store.Delete(key)
+	})
+	RPush(key, &[]string{"a", "b"})
+
+	moved, ok, err := BLmove(key, key, "LEFT", "RIGHT", 1)
+	if err != nil || !ok || moved != "a" {
+		t.Fatalf("BLmove returned (%q, %t, %v), want (a, true, nil)", moved, ok, err)
+	}
+	values, err := Lrange(key, 0, -1)
+	if err != nil {
+		t.Fatalf("Lrange: %v", err)
+	}
+	if len(values) != 2 || values[0] != "b" || values[1] != "a" {
+		t.Fatalf("list after same-key move = %v, want [b a]", values)
+	}
+}
+
+func Test_BLmoveTimeoutAndInvalidArguments(t *testing.T) {
+	sourceKey := "blmove-timeout-source"
+	destinationKey := "blmove-timeout-destination"
+	t.Cleanup(func() {
+		store.Delete(sourceKey)
+		store.Delete(destinationKey)
+	})
+
+	_, moved, err := BLmove(sourceKey, destinationKey, "LEFT", "RIGHT", 0.02)
+	if err != nil || moved {
+		t.Fatalf("BLmove on an empty source returned moved=%t, err=%v; want false, nil", moved, err)
+	}
+	if _, err := LLen(destinationKey); err == nil {
+		t.Fatal("BLmove created the destination after timing out")
+	}
+
+	if _, _, err := BLmove(sourceKey, destinationKey, "UP", "RIGHT", 0); err == nil {
+		t.Fatal("BLmove accepted an invalid source direction")
+	}
+	if _, _, err := BLmove(sourceKey, destinationKey, "LEFT", "RIGHT", -1); err == nil {
+		t.Fatal("BLmove accepted a negative timeout")
 	}
 }

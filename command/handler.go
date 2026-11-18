@@ -110,6 +110,8 @@ func init() {
 	Returns all fields and values of the hash stored at key.`, []string{"readonly", "fast"}, 2, 0, 0, 0)
 
 	// Lists
+	RegisterCommand("BLMOVE", BLMove, `BLMOVE [SOURCE] [DESTINATION] [LEFT|RIGHT] [LEFT|RIGHT] [TIMEOUT]
+	Removes an element from the source list and pushes it to the destination list. Blocks until an element is available or TIMEOUT expires.`, []string{}, 6, 1, 2, 1)
 	RegisterCommand("RPOP", RPop, `RPOP [KEY] [COUNT]
 	Removes and returns the last element(s) of the list stored at key.`, []string{}, -2, 0, 0, 0)
 	RegisterCommand("RPUSH", RPush, `RPUSH [KEY] [VALUE] [VALUE ...]

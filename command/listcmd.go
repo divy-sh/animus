@@ -8,6 +8,24 @@ import (
 	"github.com/divy-sh/animus/types/lists"
 )
 
+func BLMove(args []resp.Value) resp.Value {
+	if len(args) != 5 {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}
+	}
+	timeout, err := strconv.ParseFloat(args[4].Bulk, 64)
+	if err != nil {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_INVALID_TIME_SECONDS}
+	}
+	val, moved, err := lists.BLmove(args[0].Bulk, args[1].Bulk, args[2].Bulk, args[3].Bulk, timeout)
+	if err != nil {
+		return resp.Value{Typ: common.ERROR_TYPE, Str: err.Error()}
+	}
+	if !moved {
+		return resp.Value{Typ: common.NULL_TYPE}
+	}
+	return resp.Value{Typ: common.BULK_TYPE, Bulk: val}
+}
+
 func LIndex(args []resp.Value) resp.Value {
 	if len(args) != 2 {
 		return resp.Value{Typ: common.ERROR_TYPE, Str: common.ERR_WRONG_ARGUMENT_COUNT}

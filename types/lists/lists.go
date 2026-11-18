@@ -2,7 +2,10 @@ package lists
 
 import (
 	"errors"
+	"math"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/divy-sh/animus/common"
 	"github.com/divy-sh/animus/store"
@@ -15,6 +18,46 @@ func getOrCreate(key string) *Deque[string] {
 		store.Set(key, dq)
 	}
 	return dq
+}
+
+func BLmove(source, destination, sourceDirection, destinationDirection string, timeoutInSeconds float64) (string, bool, error) {
+	sourceDirection = strings.ToUpper(sourceDirection)
+	destinationDirection = strings.ToUpper(destinationDirection)
+	if (sourceDirection != "LEFT" && sourceDirection != "RIGHT") ||
+		(destinationDirection != "LEFT" && destinationDirection != "RIGHT") {
+		return "", false, errors.New("ERR direction must be LEFT or RIGHT")
+	}
+	if math.IsNaN(timeoutInSeconds) || math.IsInf(timeoutInSeconds, 0) || timeoutInSeconds < 0 {
+		return "", false, errors.New(common.ERR_INVALID_TIME_SECONDS)
+	}
+
+	if timeoutInSeconds >= float64(time.Duration(1<<63-1))/float64(time.Second) {
+		return "", false, errors.New(common.ERR_OUT_OF_RANGE)
+	}
+	timeout := time.Duration(timeoutInSeconds * float64(time.Second))
+	if timeoutInSeconds > 0 && timeout == 0 {
+		timeout = time.Nanosecond
+	}
+
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	var timeoutC <-chan time.Time
+	if timeout > 0 {
+		timer := time.NewTimer(timeout)
+		defer timer.Stop()
+		timeoutC = timer.C
+	}
+
+	for {
+		if val, err := moveLists(source, destination, sourceDirection, destinationDirection); err == nil {
+			return val, true, nil
+		}
+		select {
+		case <-timeoutC:
+			return "", false, nil
+		case <-ticker.C:
+		}
+	}
 }
 
 func get(key string) (*Deque[string], error) {
@@ -90,38 +133,14 @@ func LLen(key string) (int64, error) {
 }
 
 func Lmove(source, destination, direction string) (string, error) {
-	store.LockKeys(source, destination)
-	defer store.UnlockKeys(source, destination)
-
-	src, err := get(source)
-	if err != nil || src.Len() == 0 {
-		return "", errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
-	}
-
-	var val string
-	var ok bool
-
-	switch direction {
-	case "RIGHT":
-		val, ok = src.PopBack()
-	case "LEFT":
-		val, ok = src.PopFront()
-	default:
+	if direction != "LEFT" && direction != "RIGHT" {
 		return "", errors.New(common.ERR_WRONG_ARGUMENT_COUNT)
 	}
-	if !ok {
-		return "", errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
-	}
-
-	dest := getOrCreate(destination)
-
+	destinationDirection := "RIGHT"
 	if direction == "RIGHT" {
-		dest.PushFront(val)
-	} else {
-		dest.PushBack(val)
+		destinationDirection = "LEFT"
 	}
-
-	return val, nil
+	return moveLists(source, destination, direction, destinationDirection)
 }
 
 func Lmpop(source string, destinations []string, direction string) (map[string]string, error) {
@@ -432,4 +451,33 @@ func RPushx(key string, values *[]string) error {
 		dq.PushBack(v)
 	}
 	return nil
+}
+
+func moveLists(source, destination, sourceDirection, destinationDirection string) (string, error) {
+	keys := []string{source}
+	if destination != source {
+		keys = append(keys, destination)
+	}
+	store.LockKeys(keys...)
+	defer store.UnlockKeys(keys...)
+
+	src, err := get(source)
+	if err != nil || src.Len() == 0 {
+		return "", errors.New(common.ERR_SOURCE_KEY_NOT_FOUND)
+	}
+
+	var val string
+	if sourceDirection == "RIGHT" {
+		val, _ = src.PopBack()
+	} else {
+		val, _ = src.PopFront()
+	}
+
+	dest := getOrCreate(destination)
+	if destinationDirection == "LEFT" {
+		dest.PushFront(val)
+	} else {
+		dest.PushBack(val)
+	}
+	return val, nil
 }
